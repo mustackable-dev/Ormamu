@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <RootNamespace>OrmamuTests</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="dbup-mysql" Version="6.0.4" />
+        <PackageReference Include="dbup-postgresql" Version="6.0.3" />
+        <PackageReference Include="dbup-sqlserver" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+        <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.11" />
+        <PackageReference Include="xunit.v3" Version="1.1.0" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Xunit"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="Data\TestData.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\src\Ormamu\Ormamu.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.Data.Sqlite">
+        <HintPath>..\..\..\..\.nuget\packages\microsoft.data.sqlite.core\9.0.0\lib\net8.0\Microsoft.Data.Sqlite.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+
+</Project>

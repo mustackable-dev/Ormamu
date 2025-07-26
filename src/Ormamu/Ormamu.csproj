@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>0.8.3</Version>
+        <Authors>Vasil Kotsev (mustackable.dev)</Authors>
+        <Description>A lightweight ORM that hits the sweet spot between the convenience of EF and the minimal setup and performance of Dapper.</Description>
+        <Copyright>Copyright (c) Mustackable 2025</Copyright>
+        <PackageProjectUrl>https://github.com/mustackable-dev/Ormamu</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>readme.md</PackageReadmeFile>
+        <RepositoryUrl>https://github.com/mustackable-dev/Ormamu</RepositoryUrl>
+        <RepositoryType>public</RepositoryType>
+        <PackageTags>orm, crud, sql, ef, database, db, bulk</PackageTags>
+        <PackageIcon>mustackable_logo.png</PackageIcon>
+        <EnablePackageValidation>true</EnablePackageValidation>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <RootNamespace>Ormamu</RootNamespace>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Dapper.Transaction" Version="[2.1.35, 3.0.0)" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\..\assets\mustackable_logo.png">
+            <Pack>True</Pack>
+            <PackagePath />
+            <Link>mustackable_logo.png</Link>
+        </None>
+        <None Include="..\..\docs\readme.md">
+            <Pack>True</Pack>
+            <PackagePath />
+            <Link>readme.md</Link>
+        </None>
+    </ItemGroup>
+
+</Project>
