@@ -49,6 +49,30 @@ internal static class Cache
                 properties.Add(mapping);
             }
             
+            CompositeKeyAttribute? compositeKeyAttribute = type.GetCustomAttribute<CompositeKeyAttribute>();
+            
+            if (compositeKeyAttribute is not null)
+            {
+                PropertyInfo[] compositeKeyProperties = compositeKeyAttribute.KeyType.GetProperties(options.PropertyBindingFlags);
+                keyProperties = keyProperties.Select(x =>
+                {
+                    PropertyInfo? property = compositeKeyProperties.FirstOrDefault(y => x.AssemblyName == y.Name);
+                    if (property is null)
+                        throw new CacheBuilderException(
+                            CacheBuilderExceptionType.CompositeKeyMissingProperty,
+                            compositeKeyAttribute.KeyType.Name,
+                            type.Name,
+                            x.AssemblyName);
+                    return x with
+                    {
+                        CompositeKeyGetter = GenerateGetter(
+                            compositeKeyAttribute.KeyType,
+                            property
+                        )
+                    };
+                }).ToList();
+            }
+            
             if (keyProperties.Count == 0) continue;
             
             string paddingSymbol = options.Dialect switch

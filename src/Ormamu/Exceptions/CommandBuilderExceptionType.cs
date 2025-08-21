@@ -8,5 +8,9 @@ public enum CommandBuilderExceptionType
     /// <summary>
     /// Class has not been flagged for queries
     /// </summary>
-    MissingClass
+    MissingClass,
+    /// <summary>
+    /// A composite key type has not been registered for an entity
+    /// </summary>
+    CompositeKeyTypeNotRegistered,
 }

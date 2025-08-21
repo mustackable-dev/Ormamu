@@ -6,6 +6,7 @@ namespace OrmamuTests.Entities;
 
 public record struct ThrongletKey(int Id, string Name);
 
+[CompositeKey(typeof(ThrongletKey))]
 [Table(TestsConfig.CompositeKeyTestsTableName, Schema = TestsConfig.SchemaName)]
 [ConfigId(TestsConfig.DbVariant)]
 public class Thronglet

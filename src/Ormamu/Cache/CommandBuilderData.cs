@@ -10,7 +10,5 @@ internal sealed record PropertyMapping(
     string AssemblyName,
     bool IsKey,
     bool IsDbGenerated,
-    Func<object, object> Getter);
-
-internal sealed record CompositeKeyData(
-    PropertyMapping[] Properties);
+    Func<object, object> Getter,
+    Func<object, object>? CompositeKeyGetter = null);

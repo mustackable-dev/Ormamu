@@ -352,29 +352,29 @@ public static class CreateCommands
                 if (returning)
                 {
                     builder.Append(";SELECT ");
-                    if (data.KeyProperties[0].IsDbGenerated)
+                    if (data.KeyProperties.Length == 1)
                     {
-                        builder.Append("LAST_INSERT_ID()");
-                    }
-                    else
-                    {
-                        if (data.KeyProperties.Length == 1)
+                        if (data.KeyProperties[0].IsDbGenerated)
                         {
-                            builder.Append('@').Append(data.KeyProperties[0].AssemblyName);
+                            builder.Append("LAST_INSERT_ID()");
                         }
                         else
                         {
-                            for (int i = 0; i < data.KeyProperties.Length; i++)
+                            builder.Append('@').Append(data.KeyProperties[0].AssemblyName);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < data.KeyProperties.Length; i++)
+                        {
+                            builder
+                                .Append("@")
+                                .Append(data.KeyProperties[i].AssemblyName)
+                                .Append(" as ")
+                                .Append(data.KeyProperties[i].DbName);
+                            if (i < data.KeyProperties.Length - 1)
                             {
-                                builder
-                                    .Append("@")
-                                    .Append(data.KeyProperties[i].AssemblyName)
-                                    .Append(" as ")
-                                    .Append(data.KeyProperties[i].DbName);
-                                if (i < data.KeyProperties.Length - 1)
-                                {
-                                    builder.Append(",");
-                                }
+                                builder.Append(",");
                             }
                         }
                     }
@@ -389,29 +389,29 @@ public static class CreateCommands
                 if (returning)
                 {
                     builder.Append(";SELECT ");
-                    if (data.KeyProperties[0].IsDbGenerated)
+                    if (data.KeyProperties.Length == 1)
                     {
-                        builder.Append("LAST_INSERT_ROWID()");
-                    }
-                    else
-                    {
-                        if (data.KeyProperties.Length == 1)
+                        if (data.KeyProperties[0].IsDbGenerated)
                         {
-                            builder.Append('@').Append(data.KeyProperties[0].AssemblyName);
+                            builder.Append("LAST_INSERT_ROWID()");
                         }
                         else
                         {
-                            for (int i = 0; i < data.KeyProperties.Length; i++)
+                            builder.Append('@').Append(data.KeyProperties[0].AssemblyName);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < data.KeyProperties.Length; i++)
+                        {
+                            builder
+                                .Append("@")
+                                .Append(data.KeyProperties[i].AssemblyName)
+                                .Append(" as ")
+                                .Append(data.KeyProperties[i].DbName);
+                            if (i < data.KeyProperties.Length - 1)
                             {
-                                builder
-                                    .Append("@")
-                                    .Append(data.KeyProperties[i].AssemblyName)
-                                    .Append(" as ")
-                                    .Append(data.KeyProperties[i].DbName);
-                                if (i < data.KeyProperties.Length - 1)
-                                {
-                                    builder.Append(",");
-                                }
+                                builder.Append(",");
                             }
                         }
                     }
@@ -429,16 +429,15 @@ public static class CreateCommands
         int index,
         TValue entity)
     {
-        for (var i = 0; i < builderData.Properties.Length; i++)
+        bool firstSkipPending = true;
+        foreach (var property in builderData.Properties.Where(p => !p.IsDbGenerated))
         {
-            var property = builderData.Properties[i];
-            if (property.IsDbGenerated) continue;
-
             string key = string.Concat("@", property.AssemblyName, index);
-            sb.AppendWithSeparator(key, ',', i == 0);
-
+            sb.AppendWithSeparator(key, ',', firstSkipPending);
+            firstSkipPending = false;
             parameters.Add(key, property.Getter(entity!));
         }
+
         return sb;
     }
     

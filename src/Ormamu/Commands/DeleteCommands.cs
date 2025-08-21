@@ -2,6 +2,7 @@ using System.Data;
 using System.Text;
 using Dapper;
 using Dapper.Transaction;
+using Ormamu.Exceptions;
 
 namespace Ormamu;
 
@@ -398,6 +399,11 @@ public static class DeleteCommands
         };
         
         bool hasCompositeKey = data.KeyProperties.Length >1;
+
+        if (hasCompositeKey && data.KeyProperties.Any(x => x.CompositeKeyGetter is null))
+        {
+            throw new CommandBuilderException(CommandBuilderExceptionType.CompositeKeyTypeNotRegistered, typeof(TKey).Name);
+        }
         
         StringBuilder commandBuilder = new("DELETE FROM ");
         commandBuilder.AppendWithWrapper(data.DbIdentifier).Append(" WHERE ");
@@ -429,7 +435,7 @@ public static class DeleteCommands
                     PropertyMapping property = data.KeyProperties[j];
                     string key = string.Concat("@", property.AssemblyName, i);
                     commandBuilder.AppendEquality(property, true, propertyWrapper, i);
-                    values.Add(key, property.Getter(keys[i]!));
+                    values.Add(key, property.CompositeKeyGetter(keys[i]!));
 
                     if (j < data.KeyProperties.Length - 1)
                     {
