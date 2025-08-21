@@ -271,16 +271,16 @@ public static class ReadCommands
         if (keyLookup)
         {
             sb.Append(" WHERE ");
-            if (data.CompositeKeyData is null)
+            if (data.KeyProperties.Length == 1)
             {
-                sb.AppendEquality(data.PrimaryKey, propertyWrapper: propertyWrapper);
+                sb.AppendEquality(data.KeyProperties[0], propertyWrapper: propertyWrapper);
             }
             else
             {
-                for (int i = 0; i < data.CompositeKeyData.Properties.Length; i++)
+                for (int i = 0; i < data.KeyProperties.Length; i++)
                 {
-                    sb.AppendEquality(data.CompositeKeyData.Properties[i], true, propertyWrapper);
-                    if (i < data.CompositeKeyData.Properties.Length - 1)
+                    sb.AppendEquality(data.KeyProperties[i], true, propertyWrapper);
+                    if (i < data.KeyProperties.Length - 1)
                     {
                         sb.Append(" AND ");
                     }
@@ -317,6 +317,6 @@ public static class ReadCommands
             }
         }
 
-        return new(sb.ToString(), data.CompositeKeyData is not null);
+        return new(sb.ToString(), data.KeyProperties.Length > 1);
     }
 }

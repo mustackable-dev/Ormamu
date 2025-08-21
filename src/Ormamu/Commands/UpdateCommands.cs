@@ -199,16 +199,16 @@ public static class UpdateCommands
             .Append(" SET ").AppendProperties(data.Properties, AppendType.Equality, propertyWrapper, true)
             .Append(" WHERE ");
         
-        if (data.CompositeKeyData is null)
+        if (data.KeyProperties.Length == 1)
         {
-            commandBuilder.AppendEquality(data.PrimaryKey, true, propertyWrapper);
+            commandBuilder.AppendEquality(data.KeyProperties[0], true, propertyWrapper);
         }
         else
         {
-            for (int i = 0; i < data.CompositeKeyData.Properties.Length; i++)
+            for (int i = 0; i < data.KeyProperties.Length; i++)
             {
-                commandBuilder.AppendEquality(data.CompositeKeyData.Properties[i], true, propertyWrapper);
-                if (i < data.CompositeKeyData.Properties.Length - 1)
+                commandBuilder.AppendEquality(data.KeyProperties[i], true, propertyWrapper);
+                if (i < data.KeyProperties.Length - 1)
                 {
                     commandBuilder.Append(" AND ");
                 }
@@ -249,16 +249,16 @@ public static class UpdateCommands
             commandBuilder
                 .Append(" WHERE ");
         
-            if (data.CompositeKeyData is null)
+            if (data.KeyProperties.Length == 1)
             {
-                commandBuilder.AppendEquality(data.PrimaryKey, true, propertyWrapper, i);
+                commandBuilder.AppendEquality(data.KeyProperties[0], true, propertyWrapper, i);
             }
             else
             {
-                for (int j = 0; j < data.CompositeKeyData.Properties.Length; j++)
+                for (int j = 0; j < data.KeyProperties.Length; j++)
                 {
-                    commandBuilder.AppendEquality(data.CompositeKeyData.Properties[j], true, propertyWrapper, i);
-                    if (j < data.CompositeKeyData.Properties.Length - 1)
+                    commandBuilder.AppendEquality(data.KeyProperties[j], true, propertyWrapper, i);
+                    if (j < data.KeyProperties.Length - 1)
                     {
                         commandBuilder.Append(" AND ");
                     }

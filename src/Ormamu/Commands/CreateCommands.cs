@@ -300,16 +300,16 @@ public static class CreateCommands
                 if (returning)
                 {
                     builder.Append(" RETURNING ");
-                    if (data.CompositeKeyData is null)
+                    if (data.KeyProperties.Length == 1)
                     {
-                        builder.Append(string.Concat('"', data.PrimaryKey.DbName, '"'));
+                        builder.Append(string.Concat('"', data.KeyProperties[0].DbName, '"'));
                     }
                     else
                     {
-                        for (int i = 0; i < data.CompositeKeyData.Properties.Length; i++)
+                        for (int i = 0; i < data.KeyProperties.Length; i++)
                         {
-                            builder.Append(string.Concat('"', data.CompositeKeyData.Properties[i].DbName, '"'));
-                            if (i < data.CompositeKeyData.Properties.Length - 1)
+                            builder.Append(string.Concat('"', data.KeyProperties[i].DbName, '"'));
+                            if (i < data.KeyProperties.Length - 1)
                             {
                                 builder.Append(",");
                             }
@@ -323,16 +323,16 @@ public static class CreateCommands
                 {
                     builder.Append(" OUTPUT ");
                     
-                    if (data.CompositeKeyData is null)
+                    if (data.KeyProperties.Length == 1)
                     {
-                        builder.Append("INSERTED.").Append(data.PrimaryKey.DbName);
+                        builder.Append("INSERTED.").Append(data.KeyProperties[0].DbName);
                     }
                     else
                     {
-                        for (int i = 0; i < data.CompositeKeyData.Properties.Length; i++)
+                        for (int i = 0; i < data.KeyProperties.Length; i++)
                         {
-                            builder.Append("INSERTED.").Append(data.CompositeKeyData.Properties[i].DbName);
-                            if (i < data.CompositeKeyData.Properties.Length - 1)
+                            builder.Append("INSERTED.").Append(data.KeyProperties[i].DbName);
+                            if (i < data.KeyProperties.Length - 1)
                             {
                                 builder.Append(",");
                             }
@@ -352,26 +352,26 @@ public static class CreateCommands
                 if (returning)
                 {
                     builder.Append(";SELECT ");
-                    if (data.PrimaryKey.IsDbGenerated)
+                    if (data.KeyProperties[0].IsDbGenerated)
                     {
                         builder.Append("LAST_INSERT_ID()");
                     }
                     else
                     {
-                        if (data.CompositeKeyData is null)
+                        if (data.KeyProperties.Length == 1)
                         {
-                            builder.Append('@').Append(data.PrimaryKey.AssemblyName);
+                            builder.Append('@').Append(data.KeyProperties[0].AssemblyName);
                         }
                         else
                         {
-                            for (int i = 0; i < data.CompositeKeyData.Properties.Length; i++)
+                            for (int i = 0; i < data.KeyProperties.Length; i++)
                             {
                                 builder
                                     .Append("@")
-                                    .Append(data.CompositeKeyData.Properties[i].AssemblyName)
+                                    .Append(data.KeyProperties[i].AssemblyName)
                                     .Append(" as ")
-                                    .Append(data.CompositeKeyData.Properties[i].DbName);
-                                if (i < data.CompositeKeyData.Properties.Length - 1)
+                                    .Append(data.KeyProperties[i].DbName);
+                                if (i < data.KeyProperties.Length - 1)
                                 {
                                     builder.Append(",");
                                 }
@@ -389,26 +389,26 @@ public static class CreateCommands
                 if (returning)
                 {
                     builder.Append(";SELECT ");
-                    if (data.PrimaryKey.IsDbGenerated)
+                    if (data.KeyProperties[0].IsDbGenerated)
                     {
                         builder.Append("LAST_INSERT_ROWID()");
                     }
                     else
                     {
-                        if (data.CompositeKeyData is null)
+                        if (data.KeyProperties.Length == 1)
                         {
-                            builder.Append('@').Append(data.PrimaryKey.AssemblyName);
+                            builder.Append('@').Append(data.KeyProperties[0].AssemblyName);
                         }
                         else
                         {
-                            for (int i = 0; i < data.CompositeKeyData.Properties.Length; i++)
+                            for (int i = 0; i < data.KeyProperties.Length; i++)
                             {
                                 builder
                                     .Append("@")
-                                    .Append(data.CompositeKeyData.Properties[i].AssemblyName)
+                                    .Append(data.KeyProperties[i].AssemblyName)
                                     .Append(" as ")
-                                    .Append(data.CompositeKeyData.Properties[i].DbName);
-                                if (i < data.CompositeKeyData.Properties.Length - 1)
+                                    .Append(data.KeyProperties[i].DbName);
+                                if (i < data.KeyProperties.Length - 1)
                                 {
                                     builder.Append(",");
                                 }

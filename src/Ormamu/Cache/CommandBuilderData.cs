@@ -3,9 +3,8 @@ internal sealed record CommandBuilderData(
     OrmamuBaseOptions Options,
     string DbIdentifier,
     string ColumnsString,
-    PropertyMapping PrimaryKey,
-    PropertyMapping[] Properties,
-    CompositeKeyData? CompositeKeyData = null);
+    PropertyMapping[] KeyProperties,
+    PropertyMapping[] Properties);
 internal sealed record PropertyMapping(
     string DbName,
     string AssemblyName,
@@ -14,5 +13,4 @@ internal sealed record PropertyMapping(
     Func<object, object> Getter);
 
 internal sealed record CompositeKeyData(
-    Type KeyType,
     PropertyMapping[] Properties);

@@ -21,8 +21,6 @@ internal static class Cache
             TableAttribute? tableAttribute = type.GetCustomAttribute<TableAttribute>();
             if(tableAttribute is null) continue;
             
-            PropertyMapping? key = null;
-            
             ConfigIdAttribute? configAttribute = type.GetCustomAttribute<ConfigIdAttribute>();
             OrmamuOptions options =
                 (configAttribute is null ?
@@ -30,6 +28,8 @@ internal static class Cache
                     buildOptions.FirstOrDefault(x => Equals(x.ConfigId, configAttribute.ConfigId))) ?? buildOptions[0];
             
             List<PropertyMapping> properties = new();
+            List<PropertyMapping> keyProperties = new();
+            
             Dictionary<string, string> customPropertyNameDictionary = new();
             foreach (var property in type.GetProperties(options.PropertyBindingFlags))
             {
@@ -45,27 +45,11 @@ internal static class Cache
                     data.IsDbGenerated,
                     GenerateGetter(type, property));
                 
-                if (data.IsKey) key = mapping;
+                if (data.IsKey) keyProperties.Add(mapping);
                 properties.Add(mapping);
             }
             
-            CompositeKeyAttribute? compositeKeyAttribute = type.GetCustomAttribute<CompositeKeyAttribute>();
-            CompositeKeyData? compositeKeyData = null;
-            
-            if (compositeKeyAttribute is not null)
-            {
-                PropertyInfo[] keyProperties = compositeKeyAttribute.KeyType.GetProperties(options.PropertyBindingFlags);
-                compositeKeyData = new(
-                    compositeKeyAttribute.KeyType,
-                    keyProperties.Select(x =>
-                    {
-                        PropertyMapping mapping = properties.First(y => y.AssemblyName == x.Name);
-                        return mapping with { Getter = GenerateGetter(compositeKeyAttribute.KeyType, x) };
-                    }).ToArray());
-                key = compositeKeyData.Properties[0];
-            }
-            
-            if (key is null && compositeKeyAttribute is null) continue;
+            if (keyProperties.Count == 0) continue;
             
             string paddingSymbol = options.Dialect switch
             {
@@ -83,9 +67,8 @@ internal static class Cache
                     options,
                     tableAttribute.GetDbObjectIdentifier(options),
                     columnsString,
-                    key!,
-                    properties.ToArray(),
-                    compositeKeyData
+                    keyProperties.ToArray(),
+                    properties.ToArray()
                 )
             );
             

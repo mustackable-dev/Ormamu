@@ -364,23 +364,23 @@ public static class DeleteCommands
         
         StringBuilder commandBuilder = new StringBuilder("DELETE FROM ").Append(data.DbIdentifier).Append(" WHERE ");
         
-        if (data.CompositeKeyData is null)
+        if (data.KeyProperties.Length == 1)
         {
-            commandBuilder.AppendEquality(data.PrimaryKey, propertyWrapper: propertyWrapper);
+            commandBuilder.AppendEquality(data.KeyProperties[0], propertyWrapper: propertyWrapper);
         }
         else
         {
-            for (int i = 0; i < data.CompositeKeyData.Properties.Length; i++)
+            for (int i = 0; i < data.KeyProperties.Length; i++)
             {
-                commandBuilder.AppendEquality(data.CompositeKeyData.Properties[i], true, propertyWrapper);
-                if (i < data.CompositeKeyData.Properties.Length - 1)
+                commandBuilder.AppendEquality(data.KeyProperties[i], true, propertyWrapper);
+                if (i < data.KeyProperties.Length - 1)
                 {
                     commandBuilder.Append(" AND ");
                 }
             }
         }
 
-        return new(commandBuilder.ToString(), data.CompositeKeyData is not null);
+        return new(commandBuilder.ToString(), data.KeyProperties.Length >1);
     }
     
     private sealed record BulkDeleteComponents(string Command, DynamicParameters Parameters);
@@ -397,7 +397,7 @@ public static class DeleteCommands
             _=> '\0'
         };
         
-        bool hasCompositeKey = data.CompositeKeyData is not null;
+        bool hasCompositeKey = data.KeyProperties.Length >1;
         
         StringBuilder commandBuilder = new("DELETE FROM ");
         commandBuilder.AppendWithWrapper(data.DbIdentifier).Append(" WHERE ");
@@ -406,12 +406,12 @@ public static class DeleteCommands
 
         if (!hasCompositeKey)
         {
-            commandBuilder.AppendWithWrapper(data.PrimaryKey.DbName, propertyWrapper);
+            commandBuilder.AppendWithWrapper(data.KeyProperties[0].DbName, propertyWrapper);
             commandBuilder.Append(" IN (");
 
             for (int i = 0; i < keys.Length; i++)
             {
-                string key = string.Concat("@", data.PrimaryKey.AssemblyName, i);
+                string key = string.Concat("@", data.KeyProperties[0].AssemblyName, i);
                 commandBuilder.AppendWithSeparator(key, ',', i==0);
                 values.Add(key, keys[i]);
                 
@@ -424,14 +424,14 @@ public static class DeleteCommands
             for (int i = 0; i < keys.Length; i++)
             {
                 commandBuilder.AppendWithSeparator("(", " OR ", i == 0);
-                for (int j = 0; j < data.CompositeKeyData!.Properties.Length; j++)
+                for (int j = 0; j < data.KeyProperties.Length; j++)
                 {
-                    PropertyMapping property = data.CompositeKeyData.Properties[j];
+                    PropertyMapping property = data.KeyProperties[j];
                     string key = string.Concat("@", property.AssemblyName, i);
                     commandBuilder.AppendEquality(property, true, propertyWrapper, i);
                     values.Add(key, property.Getter(keys[i]!));
 
-                    if (j < data.CompositeKeyData.Properties.Length - 1)
+                    if (j < data.KeyProperties.Length - 1)
                     {
                         commandBuilder.Append(" AND ");
                     }
