@@ -486,9 +486,8 @@ public class CreateTests(DbFixture fixture)
                 Name = "Lemonadesther",
                 Personality = Personality.Assertive
             };
-        
-        ThrongletKey insertedKey = await connection.InsertAsync<ThrongletKey, Thronglet>(thronglet);
         //Act
+        ThrongletKey insertedKey = await connection.InsertAsync<ThrongletKey, Thronglet>(thronglet);
         ThrongletKey key = new(Id: 18, Name: "Lemonadesther");
         Thronglet? thronglet2 = await connection.GetAsync<ThrongletKey, Thronglet>(key);
         //Assert
@@ -512,9 +511,8 @@ public class CreateTests(DbFixture fixture)
                 Name = "Lemonadesther",
                 Personality = Personality.Assertive
             };
-        
-        ThrongletKey insertedKey = await transaction.InsertAsync<ThrongletKey, Thronglet>(thronglet);
         //Act
+        ThrongletKey insertedKey = await transaction.InsertAsync<ThrongletKey, Thronglet>(thronglet);
         ThrongletKey key = new(Id: 17, Name: "Lemonadesther");
         Thronglet? thronglet2 = await transaction.GetAsync<ThrongletKey, Thronglet>(key);
         transaction.Commit();
@@ -537,9 +535,8 @@ public class CreateTests(DbFixture fixture)
                 Name = "Lemonadesther",
                 Personality = Personality.Assertive
             };
-        
-        ThrongletKey insertedKey = connection.Insert<ThrongletKey, Thronglet>(thronglet);
         //Act
+        ThrongletKey insertedKey = connection.Insert<ThrongletKey, Thronglet>(thronglet);
         ThrongletKey key = new(Id: 20, Name: "Lemonadesther");
         Thronglet? thronglet2 = connection.Get<ThrongletKey, Thronglet>(key);
         //Assert
@@ -564,8 +561,8 @@ public class CreateTests(DbFixture fixture)
                 Personality = Personality.Assertive
             };
         
-        ThrongletKey insertedKey = transaction.Insert<ThrongletKey, Thronglet>(thronglet);
         //Act
+        ThrongletKey insertedKey = transaction.Insert<ThrongletKey, Thronglet>(thronglet);
         ThrongletKey key = new(Id: 19, Name: "Lemonadesther");
         Thronglet? thronglet2 = transaction.Get<ThrongletKey, Thronglet>(key);
         transaction.Commit();
@@ -573,5 +570,46 @@ public class CreateTests(DbFixture fixture)
         Assert.True(insertedKey == key);
         Assert.NotNull(thronglet2);
         Assert.True(JsonSerializer.Serialize(thronglet2) == JsonSerializer.Serialize(thronglet));
+    }
+    
+    [Fact]
+    public void Insert_WithConnectionWithAutoincrementingCompositeKey_ShouldFindEntry()
+    {
+        //Arrange
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Gremlin gremlin =
+            new()
+            {
+                Id = 20,
+                Name = "Strawberryvonne",
+                Personality = Personality.Assertive
+            };
+        //Act
+        GremlinKey insertedKey = connection.Insert<GremlinKey, Gremlin>(gremlin);
+        //Assert
+        Assert.True(insertedKey.Id != 20);
+    }
+    
+    [Fact]
+    public void Insert_WithTransactionWithAutoincrementingCompositeKey_ShouldFindEntry()
+    {
+        //Arrange
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Gremlin gremlin =
+            new()
+            {
+                Id = 11,
+                Name = "Apricotom",
+                Personality = Personality.Assertive
+            };
+        //Act
+        GremlinKey insertedKey = transaction.Insert<GremlinKey, Gremlin>(gremlin);
+        transaction.Commit();
+        //Assert
+        Assert.True(insertedKey.Id != 11);
     }
 }

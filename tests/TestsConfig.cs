@@ -6,7 +6,7 @@ using Ormamu;
 namespace OrmamuTests;
 public static class TestsConfig
 {
-    public const SqlDialect DbVariant = SqlDialect.Sqlite;
+    public const SqlDialect DbVariant = SqlDialect.MySql;
     public const string SchemaName = "Tests";
     public const string SecondarySchemaName = "MulticonfigTests";
     public const string ReadTestsTableName = "Goblins";
@@ -14,6 +14,7 @@ public static class TestsConfig
     public const string UpdateTestsTableName = "Gnomes";
     public const string DeleteTestsTableName = "Pixies";
     public const string CompositeKeyTestsTableName = "Thronglets";
+    public const string AutoincrementingCompositeKeyTestsTableName = "Gremlins";
     public const string MulticonfigTestsTableName = "Imps";
     public const string CustomColumnName = "ImeNaImp";
 

@@ -25,6 +25,8 @@ public class SqlServerDbProvider: IDbProvider
         DeleteTestsTableName = TestsConfig.DeleteTestsTableName;
         
         CompositeKeyTestsTableName = TestsConfig.CompositeKeyTestsTableName;
+        
+        AutoincrementingCompositeKeyTestsTableName = TestsConfig.AutoincrementingCompositeKeyTestsTableName;
     }
     
     private const string ConnectionString =
@@ -42,6 +44,7 @@ public class SqlServerDbProvider: IDbProvider
     private string UpdateTestsTableName { get; }
     private string DeleteTestsTableName { get; }
     private string CompositeKeyTestsTableName { get; }
+    private string AutoincrementingCompositeKeyTestsTableName { get; }
 
     public void DeployTestData()
     {
@@ -80,7 +83,8 @@ public class SqlServerDbProvider: IDbProvider
             CreateTestsTableName,
             UpdateTestsTableName,
             DeleteTestsTableName,
-            CompositeKeyTestsTableName
+            CompositeKeyTestsTableName,
+            AutoincrementingCompositeKeyTestsTableName,
         ];
 
         UpgradeEngine engine =
@@ -231,6 +235,12 @@ public class SqlServerDbProvider: IDbProvider
           "Name" nvarchar(100) NOT NULL,
           "Personality" smallint NOT NULL,
           CONSTRAINT "PK_{5}" PRIMARY KEY ("Id", "Name")
+        );
+        CREATE TABLE "{0}"."{6}" (
+          "Id" bigint IDENTITY(1,1) NOT NULL,
+          "Name" nvarchar(100) NOT NULL,
+          "Personality" smallint NOT NULL,
+          CONSTRAINT "PK_{6}" PRIMARY KEY ("Id", "Name")
         );
         """;
 }

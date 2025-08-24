@@ -367,11 +367,21 @@ public static class CreateCommands
                     {
                         for (int i = 0; i < data.KeyProperties.Length; i++)
                         {
+                            if (data.KeyProperties[i].IsDbGenerated)
+                            {
+                                builder.Append("LAST_INSERT_ID()");
+                            }
+                            else
+                            {
+                                builder
+                                    .Append("@")
+                                    .Append(data.KeyProperties[i].AssemblyName);
+                            }
+                            
                             builder
-                                .Append("@")
-                                .Append(data.KeyProperties[i].AssemblyName)
                                 .Append(" as ")
                                 .Append(data.KeyProperties[i].DbName);
+                            
                             if (i < data.KeyProperties.Length - 1)
                             {
                                 builder.Append(",");
@@ -404,11 +414,21 @@ public static class CreateCommands
                     {
                         for (int i = 0; i < data.KeyProperties.Length; i++)
                         {
+                            if (data.KeyProperties[i].IsDbGenerated)
+                            {
+                                builder.Append("LAST_INSERT_ROWID()");
+                            }
+                            else
+                            {
+                                builder
+                                    .Append("@")
+                                    .Append(data.KeyProperties[i].AssemblyName);
+                            }
+                            
                             builder
-                                .Append("@")
-                                .Append(data.KeyProperties[i].AssemblyName)
                                 .Append(" as ")
                                 .Append(data.KeyProperties[i].DbName);
+                            
                             if (i < data.KeyProperties.Length - 1)
                             {
                                 builder.Append(",");
