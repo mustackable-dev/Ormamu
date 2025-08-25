@@ -302,11 +302,13 @@ Then you will need to supply a value for the key during Create/Insert operations
 
 ### Composite Keys
 
-Ormamu supports composite keys for entities. For each entity that uses a composite key, you must define a dedicated type (class, record, or struct) that represents the structure of the composite key.
+Ormamu supports composite keys for entities. You just need to decorate all the components of your composite key with the `[Key]` attribute (just like you would normally do for traditional primary keys).
+
+For each entity that uses a composite key, it is generally a good idea to define a dedicated type (class, record, or struct) that represents the structure of the composite key. _**Note: This is actually mandatory, if you plan to do BulkDelete with an array of composite key entries.**_
 
 This type should have properties whose names map one-to-one with the entity property names that comprise the composite key.
 
-Finally, decorate your entity model with the `[CompositeKey]` attribute to indicate that it uses a composite key.
+Finally, decorate your model with the `[CompositeKey]` attribute to bind your composite key type to your entity.
 
 For example:
 
@@ -323,7 +325,12 @@ public record struct ThrongletKey(int Id, string Name);
 [Table("Thronglets", Schema = "MythicalCreatures")]
 public class Thronglet
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public int Id { get; set; }
+    
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public string Name { get; set; } = null!;
     public Personality Personality { get; set; }
 }
