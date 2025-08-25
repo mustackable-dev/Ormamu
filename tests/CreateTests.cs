@@ -573,7 +573,7 @@ public class CreateTests(DbFixture fixture)
     }
     
     [Fact]
-    public void Insert_WithConnectionWithAutoincrementingCompositeKey_ShouldFindEntry()
+    public void Insert_WithConnectionWithCompositeKeyWithAutoincrementingComponent_ShouldFindEntry()
     {
         //Arrange
         using IDbConnection connection = fixture.DbProvider.GetConnection();
@@ -592,7 +592,7 @@ public class CreateTests(DbFixture fixture)
     }
     
     [Fact]
-    public void Insert_WithTransactionWithAutoincrementingCompositeKey_ShouldFindEntry()
+    public void Insert_WithTransactionWithCompositeKeyWithAutoincrementingComponent_ShouldFindEntry()
     {
         //Arrange
         using IDbConnection connection = fixture.DbProvider.GetConnection();
