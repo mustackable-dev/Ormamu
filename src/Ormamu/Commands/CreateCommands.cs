@@ -300,16 +300,16 @@ public static class CreateCommands
                 if (returning)
                 {
                     builder.Append(" RETURNING ");
-                    if (data.CompositeKeyData is null)
+                    if (data.KeyProperties.Length == 1)
                     {
-                        builder.Append(string.Concat('"', data.PrimaryKey.DbName, '"'));
+                        builder.Append(string.Concat('"', data.KeyProperties[0].DbName, '"'));
                     }
                     else
                     {
-                        for (int i = 0; i < data.CompositeKeyData.Properties.Length; i++)
+                        for (int i = 0; i < data.KeyProperties.Length; i++)
                         {
-                            builder.Append(string.Concat('"', data.CompositeKeyData.Properties[i].DbName, '"'));
-                            if (i < data.CompositeKeyData.Properties.Length - 1)
+                            builder.Append(string.Concat('"', data.KeyProperties[i].DbName, '"'));
+                            if (i < data.KeyProperties.Length - 1)
                             {
                                 builder.Append(",");
                             }
@@ -323,16 +323,16 @@ public static class CreateCommands
                 {
                     builder.Append(" OUTPUT ");
                     
-                    if (data.CompositeKeyData is null)
+                    if (data.KeyProperties.Length == 1)
                     {
-                        builder.Append("INSERTED.").Append(data.PrimaryKey.DbName);
+                        builder.Append("INSERTED.").Append(data.KeyProperties[0].DbName);
                     }
                     else
                     {
-                        for (int i = 0; i < data.CompositeKeyData.Properties.Length; i++)
+                        for (int i = 0; i < data.KeyProperties.Length; i++)
                         {
-                            builder.Append("INSERTED.").Append(data.CompositeKeyData.Properties[i].DbName);
-                            if (i < data.CompositeKeyData.Properties.Length - 1)
+                            builder.Append("INSERTED.").Append(data.KeyProperties[i].DbName);
+                            if (i < data.KeyProperties.Length - 1)
                             {
                                 builder.Append(",");
                             }
@@ -352,29 +352,39 @@ public static class CreateCommands
                 if (returning)
                 {
                     builder.Append(";SELECT ");
-                    if (data.PrimaryKey.IsDbGenerated)
+                    if (data.KeyProperties.Length == 1)
                     {
-                        builder.Append("LAST_INSERT_ID()");
-                    }
-                    else
-                    {
-                        if (data.CompositeKeyData is null)
+                        if (data.KeyProperties[0].IsDbGenerated)
                         {
-                            builder.Append('@').Append(data.PrimaryKey.AssemblyName);
+                            builder.Append("LAST_INSERT_ID()");
                         }
                         else
                         {
-                            for (int i = 0; i < data.CompositeKeyData.Properties.Length; i++)
+                            builder.Append('@').Append(data.KeyProperties[0].AssemblyName);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < data.KeyProperties.Length; i++)
+                        {
+                            if (data.KeyProperties[i].IsDbGenerated)
+                            {
+                                builder.Append("LAST_INSERT_ID()");
+                            }
+                            else
                             {
                                 builder
                                     .Append("@")
-                                    .Append(data.CompositeKeyData.Properties[i].AssemblyName)
-                                    .Append(" as ")
-                                    .Append(data.CompositeKeyData.Properties[i].DbName);
-                                if (i < data.CompositeKeyData.Properties.Length - 1)
-                                {
-                                    builder.Append(",");
-                                }
+                                    .Append(data.KeyProperties[i].AssemblyName);
+                            }
+                            
+                            builder
+                                .Append(" as ")
+                                .Append(data.KeyProperties[i].DbName);
+                            
+                            if (i < data.KeyProperties.Length - 1)
+                            {
+                                builder.Append(",");
                             }
                         }
                     }
@@ -389,29 +399,39 @@ public static class CreateCommands
                 if (returning)
                 {
                     builder.Append(";SELECT ");
-                    if (data.PrimaryKey.IsDbGenerated)
+                    if (data.KeyProperties.Length == 1)
                     {
-                        builder.Append("LAST_INSERT_ROWID()");
-                    }
-                    else
-                    {
-                        if (data.CompositeKeyData is null)
+                        if (data.KeyProperties[0].IsDbGenerated)
                         {
-                            builder.Append('@').Append(data.PrimaryKey.AssemblyName);
+                            builder.Append("LAST_INSERT_ROWID()");
                         }
                         else
                         {
-                            for (int i = 0; i < data.CompositeKeyData.Properties.Length; i++)
+                            builder.Append('@').Append(data.KeyProperties[0].AssemblyName);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < data.KeyProperties.Length; i++)
+                        {
+                            if (data.KeyProperties[i].IsDbGenerated)
+                            {
+                                builder.Append("LAST_INSERT_ROWID()");
+                            }
+                            else
                             {
                                 builder
                                     .Append("@")
-                                    .Append(data.CompositeKeyData.Properties[i].AssemblyName)
-                                    .Append(" as ")
-                                    .Append(data.CompositeKeyData.Properties[i].DbName);
-                                if (i < data.CompositeKeyData.Properties.Length - 1)
-                                {
-                                    builder.Append(",");
-                                }
+                                    .Append(data.KeyProperties[i].AssemblyName);
+                            }
+                            
+                            builder
+                                .Append(" as ")
+                                .Append(data.KeyProperties[i].DbName);
+                            
+                            if (i < data.KeyProperties.Length - 1)
+                            {
+                                builder.Append(",");
                             }
                         }
                     }
@@ -429,16 +449,15 @@ public static class CreateCommands
         int index,
         TValue entity)
     {
-        for (var i = 0; i < builderData.Properties.Length; i++)
+        bool firstSkipPending = true;
+        foreach (var property in builderData.Properties.Where(p => !p.IsDbGenerated))
         {
-            var property = builderData.Properties[i];
-            if (property.IsDbGenerated) continue;
-
             string key = string.Concat("@", property.AssemblyName, index);
-            sb.AppendWithSeparator(key, ',', i == 0);
-
+            sb.AppendWithSeparator(key, ',', firstSkipPending);
+            firstSkipPending = false;
             parameters.Add(key, property.Getter(entity!));
         }
+
         return sb;
     }
     

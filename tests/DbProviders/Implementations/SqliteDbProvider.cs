@@ -22,6 +22,8 @@ public class SqliteDbProvider: IDbProvider
         DeleteTestsTableName = TestsConfig.DeleteTestsTableName;
         
         CompositeKeyTestsTableName = TestsConfig.CompositeKeyTestsTableName;
+        
+        AutoincrementingCompositeKeyTestsTableName = TestsConfig.AutoincrementingCompositeKeyTestsTableName;
     }
 
     private const string ConnectionString =
@@ -36,6 +38,7 @@ public class SqliteDbProvider: IDbProvider
     private string UpdateTestsTableName { get; }
     private string DeleteTestsTableName { get; }
     private string CompositeKeyTestsTableName { get; }
+    private string AutoincrementingCompositeKeyTestsTableName { get; }
 
     public void DeployTestData()
     {
@@ -71,7 +74,8 @@ public class SqliteDbProvider: IDbProvider
             CreateTestsTableName,
             UpdateTestsTableName,
             DeleteTestsTableName,
-            CompositeKeyTestsTableName
+            CompositeKeyTestsTableName,
+            AutoincrementingCompositeKeyTestsTableName,
         ];
         
         string deployScript = string.Format(_deployScript, scriptPayload);
@@ -127,6 +131,12 @@ public class SqliteDbProvider: IDbProvider
           Name TEXT NOT NULL,
           Personality INTEGER NOT NULL,
           PRIMARY KEY (Id, Name)
+        );
+        CREATE TABLE {5} (
+          Id INTEGER PRIMARY KEY AUTOINCREMENT,
+          Name TEXT NOT NULL,
+          Personality INTEGER NOT NULL,
+          UNIQUE (Id, Name)
         );
         """;
 }

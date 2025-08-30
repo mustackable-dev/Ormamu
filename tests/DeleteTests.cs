@@ -93,7 +93,7 @@ public class DeleteTests(DbFixture fixture)
             MagicPower = 10,
             DateOfBirth = new DateTime(1985, 1, 1),
         };
-        int pixieId = await transaction.InsertAsync<Pixie>(pixie);
+        int pixieId = await transaction.InsertAsync(pixie);
         
         //Act
         await transaction.DeleteAsync<Pixie>(pixieId);

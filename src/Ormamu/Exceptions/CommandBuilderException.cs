@@ -1,7 +1,7 @@
 namespace Ormamu.Exceptions;
 
 /// <summary>
-/// A class for all exceptions thrown during the query build phase
+/// A class for all exceptions thrown during the command build phase
 /// </summary>
 public class CommandBuilderException: Exception
 {
@@ -16,6 +16,11 @@ public class CommandBuilderException: Exception
             CommandBuilderExceptionType.MissingClass, "The class specified for this operation was not flagged for " +
                                                     "querying. Please make sure the class is decorated with the " +
                                                     "[Table] attribute and has a [Key] attribute on a property."
+        },
+        {
+            CommandBuilderExceptionType.CompositeKeyTypeNotRegistered, "The composite key type \"{0}\" used for this " +
+                                                                      "operation was not registered with the " +
+                                                                      "[CompositeKey] attribute for this entity"
         }
     };
     
