@@ -25,6 +25,8 @@ public class MariaDbProvider: IDbProvider
         DeleteTestsTableName = TestsConfig.DeleteTestsTableName;
         
         CompositeKeyTestsTableName = TestsConfig.CompositeKeyTestsTableName;
+        
+        AutoincrementingCompositeKeyTestsTableName = TestsConfig.AutoincrementingCompositeKeyTestsTableName;
     }
     
     private string _connectionString =
@@ -41,6 +43,7 @@ public class MariaDbProvider: IDbProvider
     private string UpdateTestsTableName { get; }
     private string DeleteTestsTableName { get; }
     private string CompositeKeyTestsTableName { get; }
+    private string AutoincrementingCompositeKeyTestsTableName { get; }
 
     public void DeployTestData()
     {
@@ -79,7 +82,8 @@ public class MariaDbProvider: IDbProvider
             CreateTestsTableName,
             UpdateTestsTableName,
             DeleteTestsTableName,
-            CompositeKeyTestsTableName
+            CompositeKeyTestsTableName,
+            AutoincrementingCompositeKeyTestsTableName,
         ];
 
         UpgradeEngine engine =
@@ -158,6 +162,13 @@ public class MariaDbProvider: IDbProvider
         
         CREATE TABLE `{5}` (
           `ID` INT NOT NULL,
+          `NAME` VARCHAR(200) NOT NULL,
+          `PERSONALITY` SMALLINT NOT NULL,
+          PRIMARY KEY (`ID`, `NAME`)
+        );
+        
+        CREATE TABLE `{6}` (
+          `ID` BIGINT NOT NULL AUTO_INCREMENT,
           `NAME` VARCHAR(200) NOT NULL,
           `PERSONALITY` SMALLINT NOT NULL,
           PRIMARY KEY (`ID`, `NAME`)

@@ -1,4 +1,5 @@
 using System.Data;
+using System.Text.Json;
 using Ormamu;
 using OrmamuTests.Entities;
 using OrmamuTests.Fixtures;
@@ -582,5 +583,215 @@ public class ReadTests(DbFixture fixture)
         //Assert
         Assert.NotNull(thronglet);
         Assert.True(key.Equals(new ThrongletKey(Id: thronglet.Id, Name: thronglet.Name)));
+    }
+    
+    [Fact]
+    public void Get_MultipleWithIntKeyArrayWithConnection_ShouldReturnCorrectCountAndIds()
+    {
+        //Arrange
+        int[] queryKeys = [20, 30];
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        
+        //Act
+        IEnumerable<Goblin> goblins = connection.Get<Goblin>(queryKeys);
+            
+        //Assert
+        Assert.True(goblins.Count() == 2);;
+        Assert.DoesNotContain(goblins.Select(x => x.Id), y =>!queryKeys.Contains(y));
+    }
+    
+    [Fact]
+    public void Get_MultipleWithIntKeyArrayWithTransaction_ShouldReturnCorrectCountAndIds()
+    {
+        //Arrange
+        int[] queryKeys = [22, 17, 20];
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+        
+        //Act
+        IEnumerable<Goblin> goblins = transaction.Get<Goblin>(queryKeys);
+        
+        transaction.Commit();
+            
+        //Assert
+        Assert.True(goblins.Count() == 3);
+        Assert.DoesNotContain(goblins.Select(x => x.Id), y =>!queryKeys.Contains(y));
+    }
+    
+    [Fact]
+    public async Task GetAsync_MultipleWithIntKeyArrayWithConnection_ShouldReturnCorrectCountAndIds()
+    {
+        //Arrange
+        int[] queryKeys = [18, 28];
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        
+        //Act
+        IEnumerable<Goblin> goblins = await connection.GetAsync<Goblin>(queryKeys);
+            
+        //Assert
+        Assert.True(goblins.Count() == 2);;
+        Assert.DoesNotContain(goblins.Select(x => x.Id), y =>!queryKeys.Contains(y));
+    }
+    
+    [Fact]
+    public async Task GetAsync_MultipleWithIntKeyArrayWithTransaction_ShouldReturnCorrectCountAndIds()
+    {
+        //Arrange
+        int[] queryKeys = [22, 23, 20];
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+        
+        //Act
+        IEnumerable<Goblin> goblins = await transaction.GetAsync<Goblin>(queryKeys);
+        
+        transaction.Commit();
+            
+        //Assert
+        Assert.True(goblins.Count() == 3);
+        Assert.DoesNotContain(goblins.Select(x => x.Id), y =>!queryKeys.Contains(y));
+    }
+    
+    [Fact]
+    public void Get_MultipleWithTypedKeyArrayWithConnection_ShouldReturnCorrectCountAndIds()
+    {
+        //Arrange
+        int[] queryKeys = [20, 30];
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        
+        //Act
+        IEnumerable<Goblin> goblins = connection.Get<int, Goblin>(queryKeys);
+            
+        //Assert
+        Assert.True(goblins.Count() == 2);;
+        Assert.DoesNotContain(goblins.Select(x => x.Id), y =>!queryKeys.Contains(y));
+    }
+    
+    [Fact]
+    public void Get_MultipleWithTypedKeyArrayWithTransaction_ShouldReturnCorrectCountAndIds()
+    {
+        //Arrange
+        int[] queryKeys = [22, 17, 20];
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+        
+        //Act
+        IEnumerable<Goblin> goblins = transaction.Get<int, Goblin>(queryKeys);
+        
+        transaction.Commit();
+            
+        //Assert
+        Assert.True(goblins.Count() == 3);
+        Assert.DoesNotContain(goblins.Select(x => x.Id), y =>!queryKeys.Contains(y));
+    }
+    
+    [Fact]
+    public async Task GetAsync_MultipleWithTypedKeyArrayWithConnection_ShouldReturnCorrectCountAndIds()
+    {
+        //Arrange
+        int[] queryKeys = [18, 28];
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        
+        //Act
+        IEnumerable<Goblin> goblins = await connection.GetAsync<int, Goblin>(queryKeys);
+            
+        //Assert
+        Assert.True(goblins.Count() == 2);;
+        Assert.DoesNotContain(goblins.Select(x => x.Id), y =>!queryKeys.Contains(y));
+    }
+    
+    [Fact]
+    public async Task GetAsync_MultipleWithTypedKeyArrayWithTransaction_ShouldReturnCorrectCountAndIds()
+    {
+        //Arrange
+        int[] queryKeys = [22, 23, 20];
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+        
+        //Act
+        IEnumerable<Goblin> goblins = await transaction.GetAsync<int, Goblin>(queryKeys);
+        
+        transaction.Commit();
+            
+        //Assert
+        Assert.True(goblins.Count() == 3);
+        Assert.DoesNotContain(goblins.Select(x => x.Id), y =>!queryKeys.Contains(y));
+    }
+    
+    [Fact]
+    public void Get_MultipleWithCompositeKeyArrayWithConnection_ShouldReturnCorrectCountAndIds()
+    {
+        //Arrange
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        ThrongletKey[] queryKeys = [new(88, "Lemonadesther"), new(91, "Milkirk")];
+        Thronglet[] thronglets =
+        [
+            new()
+            {
+                Id = 88,
+                Name = "Lemonadesther",
+                Personality = Personality.Assertive
+            },
+            new()
+            {
+                Id = 89,
+                Name = "Palmolivia",
+                Personality = Personality.Reflective
+            },
+            new()
+            {
+                Id = 91,
+                Name = "Milkirk",
+                Personality = Personality.Driven
+            }
+        ];
+        connection.BulkInsert(thronglets);
+        //Act
+        IEnumerable<Thronglet> throngletsQuery = connection.Get<ThrongletKey, Thronglet>(queryKeys);
+        //Assert;
+        Assert.True(throngletsQuery.Count() == 2);
+        Assert.DoesNotContain(throngletsQuery.Select(x => new ThrongletKey(x.Id, x.Name)), y =>!queryKeys.Contains(y));
+    }
+    
+    [Fact]
+    public void Get_MultipleWithCompositeKeyArrayWithTransaction_ShouldReturnCorrectCountAndIds()
+    {
+        //Arrange
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+        
+        ThrongletKey[] queryKeys = [new(110, "Breadaniel"), new(93, "Plumartin")];
+        Thronglet[] thronglets =
+        [
+            new()
+            {
+                Id = 93,
+                Name = "Plumartin",
+                Personality = Personality.Assertive
+            },
+            new()
+            {
+                Id = 92,
+                Name = "Barichard",
+                Personality = Personality.Reflective
+            },
+            new()
+            {
+                Id = 110,
+                Name = "Breadaniel",
+                Personality = Personality.Driven
+            }
+        ];
+        transaction.BulkInsert(thronglets);
+        //Act
+        IEnumerable<Thronglet> throngletsQuery = transaction.Get<ThrongletKey, Thronglet>(queryKeys);
+        transaction.Commit();
+        //Assert;
+        Assert.True(throngletsQuery.Count() == 2);
+        Assert.DoesNotContain(throngletsQuery.Select(x => new ThrongletKey(x.Id, x.Name)), y =>!queryKeys.Contains(y));
     }
 }

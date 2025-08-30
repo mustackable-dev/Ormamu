@@ -25,6 +25,8 @@ public class MySqlDbProvider: IDbProvider
         DeleteTestsTableName = TestsConfig.DeleteTestsTableName;
         
         CompositeKeyTestsTableName = TestsConfig.CompositeKeyTestsTableName;
+        
+        AutoincrementingCompositeKeyTestsTableName = TestsConfig.AutoincrementingCompositeKeyTestsTableName;
     }
     
     private string _connectionString =
@@ -41,6 +43,7 @@ public class MySqlDbProvider: IDbProvider
     private string UpdateTestsTableName { get; }
     private string DeleteTestsTableName { get; }
     private string CompositeKeyTestsTableName { get; }
+    private string AutoincrementingCompositeKeyTestsTableName { get; }
 
     public void DeployTestData()
     {
@@ -79,7 +82,8 @@ public class MySqlDbProvider: IDbProvider
             CreateTestsTableName,
             UpdateTestsTableName,
             DeleteTestsTableName,
-            CompositeKeyTestsTableName
+            CompositeKeyTestsTableName,
+            AutoincrementingCompositeKeyTestsTableName,
         ];
 
         UpgradeEngine engine =
@@ -158,6 +162,13 @@ public class MySqlDbProvider: IDbProvider
         
         CREATE TABLE `{5}` (
           `id` INT NOT NULL,
+          `name` VARCHAR(100) NOT NULL,
+          `personality` SMALLINT NOT NULL,
+          PRIMARY KEY (`id`, `name`)
+        );
+        
+        CREATE TABLE `{6}` (
+          `id` BIGINT NOT NULL AUTO_INCREMENT,
           `name` VARCHAR(100) NOT NULL,
           `personality` SMALLINT NOT NULL,
           PRIMARY KEY (`id`, `name`)
