@@ -35,7 +35,7 @@ Ormamu hits the sweet spot between the convenience of Entity Framework and the m
 ## Features
 
 - Support for MSSQL, PostgreSQL, MySQL, MariaDB, and SQLite
-- Support for Multiple SQL dialects and naming conventions in the same project
+- Support for multiple SQL dialects and naming conventions in the same project
 - Flexible primary key handling (custom names, types, and composite keys)
 - Minimal setup via standard `DataAnnotations`
 - High-performance query generation via structure data caching (no runtime reflection)
@@ -128,11 +128,12 @@ You can find more examples in [the tests suite](https://github.com/mustackable-d
 
 ### Read Operations
 
-| Operation                          | Method (Sync / Async)                          | Contexts                          | Description                                                                 |
-|------------------------------------|------------------------------------------------|-----------------------------------|-----------------------------------------------------------------------------|
-| Get by `int` key                   | `Get<T>(int)` / `GetAsync<T>(int)`            | `IDbConnection`, `IDbTransaction` | Retrieves an entity by integer key.                                         |
-| Get by custom or composite key     | `Get<TKey, T>(TKey)` / `GetAsync<TKey, T>(TKey)` | `IDbConnection`, `IDbTransaction` | Retrieves an entity by any key type (supports composite keys).              |
-| Bulk fetch with filters/pagination | `Get<T>(...)` / `GetAsync<T>(...)`            | `IDbConnection`, `IDbTransaction` | Retrieves a list of entities with optional `WHERE`, `ORDER BY`, pagination. |
+| Operation                                     | Method (Sync / Async)                          | Contexts                          | Description                                                                                           |
+|-----------------------------------------------|------------------------------------------------|-----------------------------------|-------------------------------------------------------------------------------------------------------|
+| Get by `int` key                              | `Get<T>(int)` / `GetAsync<T>(int)`            | `IDbConnection`, `IDbTransaction` | Retrieves an entity by integer key.                                                                   |
+| Get by custom or composite key                | `Get<TKey, T>(TKey)` / `GetAsync<TKey, T>(TKey)` | `IDbConnection`, `IDbTransaction` | Retrieves an entity by any key type (supports composite keys).                                        |
+| Bulk fetch on key value array with pagination | `Get<T>(...)` / `GetAsync<T>(...)`            | `IDbConnection`, `IDbTransaction` | Retrieves a list of entities based on an array of key values with optional `ORDER BY` and pagination. |
+| Bulk fetch with custom filters and pagination | `Get<T>(...)` / `GetAsync<T>(...)`            | `IDbConnection`, `IDbTransaction` | Retrieves a list of entities with optional `WHERE`, `ORDER BY` and pagination.                        |
 
 ---
 
@@ -304,7 +305,7 @@ Then you will need to supply a value for the key during Create/Insert operations
 
 Ormamu supports composite keys for entities. You just need to decorate all the components of your composite key with the `[Key]` attribute (just like you would normally do for traditional primary keys).
 
-For each entity that uses a composite key, it is generally a good idea to define a dedicated type (class, record, or struct) that represents the structure of the composite key. _**Note: This is actually mandatory, if you plan to do BulkDelete with an array of composite key entries.**_
+For each entity that uses a composite key, it is generally a good idea to define a dedicated type (class, record, or struct) that represents the structure of the composite key. _**Note: This is mandatory, if you plan to use `Get` or `BulkDelete` with an array of composite key entries.**_
 
 This type should have properties whose names map one-to-one with the entity property names that comprise the composite key.
 
@@ -364,6 +365,7 @@ Thronglet? thronglet3 = await transaction.GetAsync<ThrongletKey, Thronglet>(inse
 
 transaction.Commit();
 ```
+Ormamu also supports composite keys, where one component is an autoincrementing value. As mentioned in [Autoincrementing](#autoincrementing), if an entity property is marked with the `[Key]` property, Ormamu will assume it is autoincrementing, unless you tag it with `[DatabaseGenerated(DatabaseGeneratedOption.None)]` property as well.
 
 ## Excluding Properties
 
