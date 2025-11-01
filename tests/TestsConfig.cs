@@ -6,7 +6,7 @@ using Ormamu;
 namespace OrmamuTests;
 public static class TestsConfig
 {
-    public const SqlDialect DbVariant = SqlDialect.PostgreSql;
+    public const SqlDialect DbVariant = SqlDialect.SqlServer;
     public const string SchemaName = "Tests";
     public const string SecondarySchemaName = "MulticonfigTests";
     public const string ReadTestsTableName = "Goblins";
@@ -14,16 +14,15 @@ public static class TestsConfig
     public const string UpdateTestsTableName = "Gnomes";
     public const string DeleteTestsTableName = "Pixies";
     public const string CompositeKeyTestsTableName = "Thronglets";
-    public const string AutoincrementingCompositeKeyTestsTableName = "Gremlins";
-    public const string MulticonfigTestsTableName = "Imps";
+    public const string AutoIncrementingCompositeKeyTestsTableName = "Gremlins";
+    public const string MultiConfigTestsTableName = "Imps";
     public const string CustomColumnName = "ImeNaImp";
 
-    public static Dictionary<SqlDialect, OrmamuOptions> DbOptions { get; } = new()
+    public static Dictionary<object, OrmamuOptions> DbOptions { get; } = new()
     {
         {
             SqlDialect.PostgreSql, new()
             {
-                ConfigId = SqlDialect.PostgreSql,
                 Dialect = SqlDialect.PostgreSql,
                 NameConverter = NameConverters.ToSnakeCase,
             }
@@ -31,14 +30,12 @@ public static class TestsConfig
         {
             SqlDialect.SqlServer, new()
             {
-                ConfigId = SqlDialect.SqlServer,
                 Dialect = SqlDialect.SqlServer,
             }
         },
         {
             SqlDialect.MySql, new()
             {
-                ConfigId = SqlDialect.MySql,
                 Dialect = SqlDialect.MySql,
                 NameConverter = NameConverters.ToLowerCase,
             }
@@ -46,7 +43,6 @@ public static class TestsConfig
         {
             SqlDialect.MariaDb, new()
             {
-                ConfigId = SqlDialect.MariaDb,
                 Dialect = SqlDialect.MariaDb,
                 NameConverter = NameConverters.ToUpperCase,
             }
@@ -54,16 +50,15 @@ public static class TestsConfig
         {
             SqlDialect.Sqlite, new()
             {
-                ConfigId = SqlDialect.Sqlite,
                 Dialect = SqlDialect.Sqlite,
             }
+        },
+        {
+            MultiConfigTestsTableName, new()
+            {
+                Dialect = SqlDialect.PostgreSql,
+                NameConverter = NameConverters.ToKebabCase,
+            }
         }
-    };
-
-    public static OrmamuOptions MulticonfigOptions { get; } = new()
-    {
-        ConfigId = MulticonfigTestsTableName,
-        Dialect = SqlDialect.PostgreSql,
-        NameConverter = NameConverters.ToKebabCase,
     };
 }

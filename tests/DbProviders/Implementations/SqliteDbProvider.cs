@@ -23,7 +23,7 @@ public class SqliteDbProvider: IDbProvider
         
         CompositeKeyTestsTableName = TestsConfig.CompositeKeyTestsTableName;
         
-        AutoincrementingCompositeKeyTestsTableName = TestsConfig.AutoincrementingCompositeKeyTestsTableName;
+        AutoincrementingCompositeKeyTestsTableName = TestsConfig.AutoIncrementingCompositeKeyTestsTableName;
     }
 
     private const string ConnectionString =

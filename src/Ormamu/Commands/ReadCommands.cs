@@ -6,6 +6,9 @@ using Ormamu.Exceptions;
 
 namespace Ormamu;
 
+/// <summary>
+/// A collection of utility methods for reading entities from the database
+/// </summary>
 public static class ReadCommands
 {
     #region Regular

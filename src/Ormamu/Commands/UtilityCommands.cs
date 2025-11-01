@@ -7,6 +7,9 @@ using Dapper.Transaction;
 
 namespace Ormamu;
 
+/// <summary>
+/// A collection of utility methods for common aggregations over entities in the database
+/// </summary>
 public static class UtilityCommands
 {
     /// <summary>

@@ -5,18 +5,8 @@ namespace Ormamu;
 /// </summary>
 public static class Configuration
 {
-    /// <summary>
-    /// <para>
-    /// Configures Ormamu using a default <see cref="OrmamuOptions"/> instance. This default instance uses
-    /// the <see cref="SqlDialect.SqlServer"/> dialect and does not apply any custom mapping between entity property
-    /// names and SQL column names.
-    /// </para>
-    /// <para>
-    /// This configuration will be applied globally to all entities.
-    /// </para>
-    /// </summary>
-    public static void Apply()
-        =>InitiateOrmamu([new()]);
+    internal static void Apply()
+        =>InitiateOrmamu(new (){ {true, new()} });
     
     /// <summary>
     /// <para>
@@ -28,7 +18,7 @@ public static class Configuration
     /// </summary>
     /// <param name="options">The OrmamuOptions instance used for configuration.</param>
     public static void Apply(OrmamuOptions options)
-        =>InitiateOrmamu([options]);
+        =>InitiateOrmamu(new (){ {true, options} });
     
     
     /// <summary>
@@ -44,10 +34,10 @@ public static class Configuration
     /// <param name="configs">
     /// An array of <see cref="OrmamuOptions"/> instances, each representing a different configuration context.
     /// </param>
-    public static void Apply(OrmamuOptions[] configs)
+    public static void Apply(Dictionary<object, OrmamuOptions> configs)
         =>InitiateOrmamu(configs);
 
-    private static void InitiateOrmamu(OrmamuOptions[] configs)
+    private static void InitiateOrmamu(Dictionary<object, OrmamuOptions> configs)
     {
         Cache.GenerateCache(configs);
     }

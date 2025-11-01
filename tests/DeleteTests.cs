@@ -10,6 +10,102 @@ public class DeleteTests(DbFixture fixture)
     private readonly string _idColumn = fixture.DbProvider.Options.NameConverter("Id");
     
     [Fact]
+    public void Delete_WithConnectionWithEntity_ShouldNotFindEntry()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Pixie pixie = new()
+        {
+            MagicPower = 10,
+            DateOfBirth = new DateTime(1985, 1, 1),
+        };
+        int pixieId = connection.Insert(pixie);
+        
+        //Act
+        connection.Delete(pixie with { Id = pixieId });
+        Pixie? pixie2 = connection.Get<Pixie>(pixieId);
+        
+        //Assert
+        Assert.True(pixie2 is null);
+    }
+    
+    [Fact]
+    public void Delete_WithTransactionWithEntity_ShouldNotFindEntry()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Pixie pixie = new()
+        {
+            MagicPower = 10,
+            DateOfBirth = new DateTime(1985, 1, 1),
+        };
+        int pixieId = transaction.Insert(pixie);
+        
+        //Act
+        transaction.Delete(pixie with { Id = pixieId });
+        Pixie? pixie2 = transaction.Get<Pixie>(pixieId);
+        
+        transaction.Commit();
+        
+        //Assert
+        Assert.True(pixie2 is null);
+    }
+    
+    [Fact]
+    public async Task DeleteAsync_WithConnectionWithEntity_ShouldNotFindEntry()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Pixie pixie = new()
+        {
+            MagicPower = 10,
+            DateOfBirth = new DateTime(1985, 1, 1),
+        };
+        int pixieId = await connection.InsertAsync(pixie);
+        
+        //Act
+        await connection.DeleteAsync(pixie with { Id = pixieId });
+        Pixie? pixie2 = await connection.GetAsync<Pixie>(pixieId);
+        
+        //Assert
+        Assert.True(pixie2 is null);
+    }
+    
+    [Fact]
+    public async Task DeleteAsync_WithTransactionWithEntity_ShouldNotFindEntry()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Pixie pixie = new()
+        {
+            MagicPower = 10,
+            DateOfBirth = new DateTime(1985, 1, 1),
+        };
+        int pixieId = await transaction.InsertAsync(pixie);
+        
+        //Act
+        await transaction.DeleteAsync(pixie with { Id = pixieId });
+        Pixie? pixie2 = await transaction.GetAsync<Pixie>(pixieId);
+        
+        transaction.Commit();
+        
+        //Assert
+        Assert.True(pixie2 is null);
+    }
+    
+    [Fact]
     public void Delete_WithConnectionWithIntKey_ShouldNotFindEntry()
     {
         //Arrange
@@ -202,6 +298,84 @@ public class DeleteTests(DbFixture fixture)
     }
     
     [Fact]
+    public void BulkDelete_WithConnectionWithEntity_ShouldNotFindEntries()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Pixie[] pixies = [
+            new()
+            {
+                MagicPower = 10,
+                DateOfBirth = new DateTime(1985, 1, 1),
+            },
+            new()
+            {
+                MagicPower = 30,
+                DateOfBirth = new DateTime(1990, 1, 1),
+            }
+        ];
+        
+        foreach (Pixie pixie in pixies)
+        {
+            pixie.Id = connection.Insert(pixie);
+        }
+        
+        
+        //Act
+        int deletedRecords = connection.BulkDelete(pixies);
+        
+        //Assert
+        Assert.True(deletedRecords == 2);
+        foreach (Pixie pixie in pixies)
+        {
+            Assert.True(connection.Get<Pixie>((int)pixie.Id) is null);   
+        }
+    }
+    
+    [Fact]
+    public void BulkDelete_WithTransactionWithEntity_ShouldNotFindEntries()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Pixie[] pixies = [
+            new()
+            {
+                MagicPower = 10,
+                DateOfBirth = new DateTime(1985, 1, 1),
+            },
+            new()
+            {
+                MagicPower = 30,
+                DateOfBirth = new DateTime(1990, 1, 1),
+            }
+        ];
+        
+        foreach (Pixie pixie in pixies)
+        {
+            pixie.Id = transaction.Insert(pixie);
+        }
+        
+        
+        //Act
+        int deletedRecords = transaction.BulkDelete(pixies);
+        transaction.Commit();
+        
+        //Assert
+        Assert.True(deletedRecords == 2);
+        foreach (Pixie pixie in pixies)
+        {
+            Assert.True(connection.Get<Pixie>((int)pixie.Id) is null);
+        }
+    }
+    
+    
+    [Fact]
     public void BulkDelete_WithConnectionWithIntKey_ShouldNotFindEntries()
     {
         //Arrange
@@ -352,6 +526,83 @@ public class DeleteTests(DbFixture fixture)
         foreach (Pixie pixie in pixies)
         {
             Assert.True(connection.Get<long, Pixie>(pixie.Id) is null);
+        }
+    }
+    
+    [Fact]
+    public async Task BulkDeleteAsync_WithConnectionWithEntity_ShouldNotFindEntries()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Pixie[] pixies = [
+            new()
+            {
+                MagicPower = 10,
+                DateOfBirth = new DateTime(1985, 1, 1),
+            },
+            new()
+            {
+                MagicPower = 30,
+                DateOfBirth = new DateTime(1990, 1, 1),
+            }
+        ];
+        
+        foreach (Pixie pixie in pixies)
+        {
+            pixie.Id = await connection.InsertAsync(pixie);
+        }
+        
+        
+        //Act
+        int deletedRecords = await connection.BulkDeleteAsync(pixies);
+        
+        //Assert
+        Assert.True(deletedRecords == 2);
+        foreach (Pixie pixie in pixies)
+        {
+            Assert.True(await connection.GetAsync<Pixie>((int)pixie.Id) is null);
+        }
+    }
+    
+    [Fact]
+    public async Task BulkDeleteAsync_WithTransactionWithEntity_ShouldNotFindEntries()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Pixie[] pixies = [
+            new()
+            {
+                MagicPower = 10,
+                DateOfBirth = new DateTime(1985, 1, 1),
+            },
+            new()
+            {
+                MagicPower = 30,
+                DateOfBirth = new DateTime(1990, 1, 1),
+            }
+        ];
+        
+        foreach (Pixie pixie in pixies)
+        {
+            pixie.Id = await transaction.InsertAsync(pixie);
+        }
+        
+        
+        //Act
+        int deletedRecords = await transaction.BulkDeleteAsync<Pixie>(pixies);
+        transaction.Commit();
+        
+        //Assert
+        Assert.True(deletedRecords == 2);
+        foreach (Pixie pixie in pixies)
+        {
+            Assert.True(await connection.GetAsync<Pixie>((int)pixie.Id) is null);
         }
     }
     

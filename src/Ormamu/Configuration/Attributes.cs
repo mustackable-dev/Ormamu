@@ -1,15 +1,31 @@
+using Ormamu.Exceptions;
+
 namespace Ormamu;
+
 
 /// <summary>
 /// Apply this attribute to an entity definition to designate which <see cref="OrmamuOptions"/> configuration
-/// should be used.
+/// should be used. Only ValueTypes and strings are allowed as config ids!
 /// </summary>
-/// <param name="configId">The <see cref="OrmamuOptions.ConfigId"/> of the <see cref="OrmamuOptions"/>
-/// to apply</param>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-public class ConfigIdAttribute(object configId) : Attribute
+public class ConfigIdAttribute : Attribute
 {
-    internal object ConfigId { get; private set; } = configId;
+    internal object ConfigId { get; private set; }
+
+    /// <summary>
+    /// Apply this attribute to an entity definition to designate which <see cref="OrmamuOptions"/> configuration
+    /// should be used. Only ValueTypes and strings are allowed as config ids!
+    /// </summary>
+    /// <param name="configId">The <see cref="OrmamuOptions.ConfigId"/> of the <see cref="OrmamuOptions"/>
+    /// to apply</param>
+    public ConfigIdAttribute(object configId)
+    {
+        Type idType = configId.GetType();
+        if(!idType.IsValueType && idType != typeof(string))
+            throw new CacheBuilderException(CacheBuilderExceptionType.InvalidConfigIdType, configId, idType.Name);
+        
+        ConfigId = configId;
+    }
 }
 
 /// <summary>

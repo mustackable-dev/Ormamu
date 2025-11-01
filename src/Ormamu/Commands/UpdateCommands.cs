@@ -5,6 +5,9 @@ using Dapper.Transaction;
 
 namespace Ormamu;
 
+/// <summary>
+/// A collection of utility methods for updating entities in the database
+/// </summary>
 public static class UpdateCommands
 {
     
@@ -18,7 +21,10 @@ public static class UpdateCommands
     /// <param name="entity">The entity with updated values.</param>
     /// <returns>The number of affected rows (typically 1).</returns>
     public static int Update<TValue>(this IDbConnection connection, TValue entity)
-        => connection.Execute(GenerateUpdateSql<TValue>(), entity);
+    {
+        CommandComponents components = GenerateUpdateSql([entity], Cache.ResolveCommandBuilderData(typeof(TValue)));
+        return connection.Execute(components.Command, components.Parameters);
+    }
 
     /// <summary>
     /// Updates an existing entity of type <typeparamref name="TValue"/> using an <see cref="IDbTransaction"/>.
@@ -28,7 +34,10 @@ public static class UpdateCommands
     /// <param name="entity">The entity with updated values.</param>
     /// <returns>The number of affected rows (typically 1).</returns>
     public static int Update<TValue>(this IDbTransaction transaction, TValue entity)
-        => transaction.Execute(GenerateUpdateSql<TValue>(), entity);
+    {
+        CommandComponents components = GenerateUpdateSql([entity], Cache.ResolveCommandBuilderData(typeof(TValue)));
+        return transaction.Execute(components.Command, components.Parameters);
+    }
 
     /// <summary>
     /// Updates multiple entities of type <typeparamref name="TValue"/> in batches using an <see cref="IDbConnection"/>.
@@ -43,23 +52,9 @@ public static class UpdateCommands
         TValue[] entities,
         int batchSize = 100)
     {
-        int updatedEntries = 0;
-        CommandBuilderData data = Cache.ResolveCommandBuilderData(typeof(TValue));
-        
-        int remaining = entities.Length;
-        while (remaining>0)
-        {
-            int currentBatchSize = Math.Min(batchSize, remaining);
-            BulkUpdateComponents components =
-                GenerateBulkUpdateSql(
-                    entities.AsSpan(updatedEntries, currentBatchSize),
-                    data);
-            updatedEntries += connection.Execute(components.Command, components.Parameters);
-            
-            remaining -= currentBatchSize;
-        }
-        
-        return updatedEntries;
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TValue));
+        return connection.ExecuteBulk(
+            (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end), entities, batchSize);
     }
 
     /// <summary>
@@ -75,23 +70,9 @@ public static class UpdateCommands
         TValue[] entities,
         int batchSize = 100)
     {
-        int updatedEntries = 0;
-        CommandBuilderData data = Cache.ResolveCommandBuilderData(typeof(TValue));
-        
-        int remaining = entities.Length;
-        while (remaining>0)
-        {
-            int currentBatchSize = Math.Min(batchSize, remaining);
-            BulkUpdateComponents components =
-                GenerateBulkUpdateSql(
-                    entities.AsSpan(updatedEntries, currentBatchSize),
-                    data);
-            updatedEntries += transaction.Execute(components.Command, components.Parameters);
-            
-            remaining -= currentBatchSize;
-        }
-        
-        return updatedEntries;
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TValue));
+        return transaction.ExecuteBulk(
+            (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end), entities, batchSize);
     }
      
     #endregion
@@ -106,7 +87,10 @@ public static class UpdateCommands
     /// <param name="entity">The entity with updated values.</param>
     /// <returns>The number of affected rows (typically 1).</returns>
     public static Task<int> UpdateAsync<TValue>(this IDbConnection connection, TValue entity)
-        => connection.ExecuteAsync(GenerateUpdateSql<TValue>(), entity);
+    {
+        CommandComponents components = GenerateUpdateSql([entity], Cache.ResolveCommandBuilderData(typeof(TValue)));
+        return connection.ExecuteAsync(components.Command, components.Parameters);
+    }
 
     /// <summary>
     /// Updates an existing entity of type <typeparamref name="TValue"/> using an <see cref="IDbTransaction"/>.
@@ -116,7 +100,10 @@ public static class UpdateCommands
     /// <param name="entity">The entity with updated values.</param>
     /// <returns>The number of affected rows (typically 1).</returns>
     public static Task<int> UpdateAsync<TValue>(this IDbTransaction transaction, TValue entity)
-        => transaction.ExecuteAsync(GenerateUpdateSql<TValue>(), entity);
+    {
+        CommandComponents components = GenerateUpdateSql([entity], Cache.ResolveCommandBuilderData(typeof(TValue)));
+        return transaction.ExecuteAsync(components.Command, components.Parameters);
+    }
 
     /// <summary>
     /// Updates multiple entities of type <typeparamref name="TValue"/> in batches using an <see cref="IDbConnection"/>.
@@ -126,28 +113,14 @@ public static class UpdateCommands
     /// <param name="entities">The array of entities with updated values.</param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
     /// <returns>The total number of affected rows.</returns>
-    public static async Task<int> BulkUpdateAsync<TValue>(
+    public static Task<int> BulkUpdateAsync<TValue>(
         this IDbConnection connection,
         TValue[] entities,
         int batchSize = 100)
     {
-        int updatedEntries = 0;
-        CommandBuilderData data = Cache.ResolveCommandBuilderData(typeof(TValue));
-        
-        int remaining = entities.Length;
-        while (remaining>0)
-        {
-            int currentBatchSize = Math.Min(batchSize, remaining);
-            BulkUpdateComponents components =
-                GenerateBulkUpdateSql(
-                    entities.AsSpan(updatedEntries, currentBatchSize),
-                    data);
-            updatedEntries += await connection.ExecuteAsync(components.Command, components.Parameters);
-            
-            remaining -= currentBatchSize;
-        }
-        
-        return updatedEntries;
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TValue));
+        return connection.ExecuteBulkAsync(
+            (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end), entities, batchSize);
     }
 
     /// <summary>
@@ -158,71 +131,22 @@ public static class UpdateCommands
     /// <param name="entities">The array of entities with updated values.</param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
     /// <returns>The total number of affected rows.</returns>
-    public static async Task<int> BulkUpdateAsync<TValue>(
+    public static Task<int> BulkUpdateAsync<TValue>(
         this IDbTransaction transaction,
         TValue[] entities,
         int batchSize = 100)
     {
-        int updatedEntries = 0;
-        CommandBuilderData data = Cache.ResolveCommandBuilderData(typeof(TValue));
-        
-        int remaining = entities.Length;
-        while (remaining>0)
-        {
-            int currentBatchSize = Math.Min(batchSize, remaining);
-            BulkUpdateComponents components =
-                GenerateBulkUpdateSql(
-                    entities.AsSpan(updatedEntries, currentBatchSize),
-                    data);
-            updatedEntries += await transaction.ExecuteAsync(components.Command, components.Parameters);
-            
-            remaining -= currentBatchSize;
-        }
-        
-        return updatedEntries;
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TValue));
+        return transaction.ExecuteBulkAsync(
+            (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end), entities, batchSize);
     }
      
     #endregion
-    
-    private static string GenerateUpdateSql<TValue>()
-    {
-        CommandBuilderData data = Cache.ResolveCommandBuilderData(typeof(TValue));
-        
-        char propertyWrapper = data.Options.Dialect switch
-        {
-            SqlDialect.PostgreSql => '"',
-            SqlDialect.MySql or SqlDialect.MariaDb => '`',
-            _=> '\0'
-        };
-
-        StringBuilder commandBuilder = new StringBuilder("UPDATE ").Append(data.DbIdentifier)
-            .Append(" SET ").AppendProperties(data.Properties, AppendType.Equality, propertyWrapper, true)
-            .Append(" WHERE ");
-        
-        if (data.KeyProperties.Length == 1)
-        {
-            commandBuilder.AppendEquality(data.KeyProperties[0], true, propertyWrapper);
-        }
-        else
-        {
-            for (int i = 0; i < data.KeyProperties.Length; i++)
-            {
-                commandBuilder.AppendEquality(data.KeyProperties[i], true, propertyWrapper);
-                if (i < data.KeyProperties.Length - 1)
-                {
-                    commandBuilder.Append(" AND ");
-                }
-            }
-        }
-        
-        return commandBuilder.ToString();
-    }
-    
-    private sealed record BulkUpdateComponents(string Command, DynamicParameters Parameters);
-    
-    private static BulkUpdateComponents GenerateBulkUpdateSql<TValue>(
-        Span<TValue> entities,
-        CommandBuilderData data)
+    private static CommandComponents GenerateUpdateSql<TValue>(
+        TValue[] entities,
+        CommandBuilderData data,
+        int enumerationStartIndex = 0,
+        int enumerationEnd = 1)
     {
         StringBuilder commandBuilder = new();
         
@@ -235,7 +159,7 @@ public static class UpdateCommands
             _=> '\0'
         };
         
-        for(int i=0; i<entities.Length; i++)
+        for(int i=enumerationStartIndex; i<enumerationEnd; i++)
         {
             commandBuilder.Append("UPDATE ").Append(data.DbIdentifier).Append(" SET ");
             

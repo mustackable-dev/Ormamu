@@ -6,14 +6,16 @@ using System.Reflection;
 using System.Text;
 using Dapper;
 using Ormamu.Exceptions;
+using System.Threading;
 
 namespace Ormamu;
 
 internal static class Cache
 {
-    private static FrozenDictionary<Type, CommandBuilderData> BuilderDataCache { get; set; } = null!;
+    private static readonly object ConfigLock = new();
+    private static FrozenDictionary<Type, CommandBuilderData>? BuilderDataCache { get; set; }
 
-    internal static void GenerateCache(OrmamuOptions[] buildOptions)
+    internal static void GenerateCache(Dictionary<object, OrmamuOptions> buildOptions)
     {
         Dictionary<Type, CommandBuilderData> cache = new();
         foreach (var type in AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes()))
@@ -22,10 +24,11 @@ internal static class Cache
             if(tableAttribute is null) continue;
             
             ConfigIdAttribute? configAttribute = type.GetCustomAttribute<ConfigIdAttribute>();
-            OrmamuOptions options =
-                (configAttribute is null ?
-                    null :
-                    buildOptions.FirstOrDefault(x => Equals(x.ConfigId, configAttribute.ConfigId))) ?? buildOptions[0];
+            OrmamuOptions options = buildOptions.First().Value;
+            if (configAttribute is not null && !buildOptions.TryGetValue(configAttribute.ConfigId, out options))
+            {
+                throw new CacheBuilderException(CacheBuilderExceptionType.ConfigNotFound, configAttribute.ConfigId, type.Name);
+            }
             
             List<PropertyMapping> properties = new();
             List<PropertyMapping> keyProperties = new();
@@ -177,7 +180,16 @@ internal static class Cache
 
     internal static CommandBuilderData ResolveCommandBuilderData(Type identifier)
     {
-        if (BuilderDataCache.TryGetValue(identifier, out CommandBuilderData? entry))
+        if (BuilderDataCache is null)
+        {
+            lock(ConfigLock)
+            {
+                if(BuilderDataCache is null)
+                    Configuration.Apply();
+            }
+        }
+        
+        if (BuilderDataCache!.TryGetValue(identifier, out CommandBuilderData? entry))
         {
             return entry;
         }

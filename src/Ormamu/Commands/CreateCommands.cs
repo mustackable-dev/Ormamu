@@ -6,7 +6,7 @@ using Dapper.Transaction;
 namespace Ormamu;
 
 /// <summary>
-/// This is the main class for Ormamu. All extensions for IDbConnection and IDbTransaction are housed here.
+/// A collection of utility methods for creating entities in the database
 /// </summary>
 public static class CreateCommands
 {
@@ -20,7 +20,13 @@ public static class CreateCommands
     /// <param name="entity">The entity to insert.</param>
     /// <returns>The key (of type <see cref="int"/>) of the inserted entity.</returns>
     public static int Insert<TValue>(this IDbConnection connection, TValue entity)
-        => connection.QuerySingle<int>(GenerateInsertSql<TValue>(), entity);
+    {
+        CommandComponents components = GenerateInsertSql(
+            [entity],
+            Cache.ResolveCommandBuilderData(typeof(TValue)));
+        
+        return connection.QuerySingle<int>(components.Command, components.Parameters);
+    }
     
     /// <summary>
     /// Inserts an entity with a key of type <see cref="int"/> via an <see cref="IDbTransaction"/>.
@@ -30,7 +36,13 @@ public static class CreateCommands
     /// <param name="entity">The entity to insert.</param>
     /// <returns>The key (of type <see cref="int"/>) of the inserted entity.</returns>
     public static int Insert<TValue>(this IDbTransaction transaction, TValue entity)
-        => transaction.QuerySingle<int>(GenerateInsertSql<TValue>(), entity);
+    {
+        CommandComponents components = GenerateInsertSql(
+            [entity],
+            Cache.ResolveCommandBuilderData(typeof(TValue)));
+        
+        return transaction.QuerySingle<int>(components.Command, components.Parameters);
+    }
     
     /// <summary>
     /// Inserts an entity with a generic key of type <typeparamref name="TKey"/> via an <see cref="IDbConnection"/>.
@@ -41,7 +53,13 @@ public static class CreateCommands
     /// <param name="entity">The entity to insert.</param>
     /// <returns>The inserted entity's key of type <typeparamref name="TKey"/>.</returns>
     public static TKey Insert<TKey, TValue>(this IDbConnection connection, TValue entity)
-        => connection.QuerySingle<TKey>(GenerateInsertSql<TValue>(), entity)!;
+    {
+        CommandComponents components = GenerateInsertSql(
+            [entity],
+            Cache.ResolveCommandBuilderData(typeof(TValue)));
+        
+        return connection.QuerySingle<TKey>(components.Command, components.Parameters);
+    }
     
     /// <summary>
     /// Inserts an entity with a generic key of type <typeparamref name="TKey"/> via an <see cref="IDbTransaction"/>.
@@ -54,7 +72,13 @@ public static class CreateCommands
     public static TKey Insert<TKey, TValue>(
         this IDbTransaction transaction,
         TValue entity)
-        => transaction.QuerySingle<TKey>(GenerateInsertSql<TValue>(), entity)!;
+    {
+        CommandComponents components = GenerateInsertSql(
+            [entity],
+            Cache.ResolveCommandBuilderData(typeof(TValue)));
+        
+        return transaction.QuerySingle<TKey>(components.Command, components.Parameters);
+    }
     
     /// <summary>
     /// Inserts an array of entities via an <see cref="IDbConnection"/>.
@@ -69,23 +93,9 @@ public static class CreateCommands
         TValue[] entities,
         int batchSize = 100)
     {
-        int createdEntries = 0;
-        CommandBuilderData data = Cache.ResolveCommandBuilderData(typeof(TValue));
-        
-        int remaining = entities.Length;
-        while (remaining>0)
-        {
-            int currentBatchSize = Math.Min(batchSize, remaining);
-            BulkInsertComponents components =
-                GenerateBulkInsertSql(
-                    entities.AsSpan(createdEntries, currentBatchSize),
-                    data);
-            createdEntries += connection.Execute(components.Command, components.Parameters);
-            
-            remaining -= currentBatchSize;
-        }
-        
-        return createdEntries;
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TValue));
+        return connection.ExecuteBulk(
+            (entries, start, end) => GenerateInsertSql(entries, builderData, start, end, false), entities, batchSize);
     }
     
     /// <summary>
@@ -101,23 +111,9 @@ public static class CreateCommands
         TValue[] entities,
         int batchSize = 100)
     {
-        int createdEntries = 0;
-        CommandBuilderData data = Cache.ResolveCommandBuilderData(typeof(TValue));
-        
-        int remaining = entities.Length;
-        while (remaining>0)
-        {
-            int currentBatchSize = Math.Min(batchSize, remaining);
-            BulkInsertComponents components =
-                GenerateBulkInsertSql(
-                    entities.AsSpan(createdEntries, currentBatchSize),
-                    data);
-            createdEntries += transaction.Execute(components.Command, components.Parameters);
-            
-            remaining -= currentBatchSize;
-        }
-        
-        return createdEntries;
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TValue));
+        return transaction.ExecuteBulk(
+            (entries, start, end) => GenerateInsertSql(entries, builderData, start, end, false), entities, batchSize);
     }
     
     #endregion
@@ -134,7 +130,13 @@ public static class CreateCommands
     public static Task<int> InsertAsync<TValue>(
         this IDbConnection connection,
         TValue entity)
-        => connection.QuerySingleAsync<int>(GenerateInsertSql<TValue>(), entity);
+    {
+        CommandComponents components = GenerateInsertSql(
+            [entity],
+            Cache.ResolveCommandBuilderData(typeof(TValue)));
+        
+        return connection.QuerySingleAsync<int>(components.Command, components.Parameters);
+    }
     
     /// <summary>
     /// Inserts an entity with a key of type <see cref="int"/> via an <see cref="IDbTransaction"/>.
@@ -146,7 +148,13 @@ public static class CreateCommands
     public static Task<int> InsertAsync<TValue>(
         this IDbTransaction transaction,
         TValue entity)
-        => transaction.QuerySingleAsync<int>(GenerateInsertSql<TValue>(), entity)!;
+    {
+        CommandComponents components = GenerateInsertSql(
+            [entity],
+            Cache.ResolveCommandBuilderData(typeof(TValue)));
+        
+        return transaction.QuerySingleAsync<int>(components.Command, components.Parameters);
+    }
     
     /// <summary>
     /// Inserts an entity with a generic key of type <typeparamref name="TKey"/> via an <see cref="IDbConnection"/>.
@@ -159,7 +167,13 @@ public static class CreateCommands
     public static Task<TKey> InsertAsync<TKey, TValue>(
         this IDbConnection connection,
         TValue entity)
-        => connection.QuerySingleAsync<TKey>(GenerateInsertSql<TValue>(), entity);
+    {
+        CommandComponents components = GenerateInsertSql(
+            [entity],
+            Cache.ResolveCommandBuilderData(typeof(TValue)));
+        
+        return connection.QuerySingleAsync<TKey>(components.Command, components.Parameters);
+    }
     
     /// <summary>
     /// Inserts an entity with a generic key of type <typeparamref name="TKey"/> via an <see cref="IDbTransaction"/>.
@@ -172,7 +186,13 @@ public static class CreateCommands
     public static Task<TKey> InsertAsync<TKey, TValue>(
         this IDbTransaction transaction,
         TValue entity)
-        => transaction.QuerySingleAsync<TKey>(GenerateInsertSql<TValue>(), entity)!;
+    {
+        CommandComponents components = GenerateInsertSql(
+            [entity],
+            Cache.ResolveCommandBuilderData(typeof(TValue)));
+        
+        return transaction.QuerySingleAsync<TKey>(components.Command, components.Parameters);
+    }
     
     /// <summary>
     /// Inserts an array of entities via an <see cref="IDbConnection"/>.
@@ -182,28 +202,14 @@ public static class CreateCommands
     /// <param name="entities">An array of entities to insert.</param>
     /// <param name="batchSize">The batch size for bulk insertion.</param>
     /// <returns>The number of inserted entries.</returns>
-    public static async Task<int> BulkInsertAsync<TValue>(
+    public static Task<int> BulkInsertAsync<TValue>(
         this IDbConnection connection,
         TValue[] entities,
         int batchSize = 100)
     {
-        int createdEntries = 0;
-        CommandBuilderData data = Cache.ResolveCommandBuilderData(typeof(TValue));
-        
-        int remaining = entities.Length;
-        while (remaining>0)
-        {
-            int currentBatchSize = Math.Min(batchSize, remaining);
-            BulkInsertComponents components =
-                GenerateBulkInsertSql(
-                    entities.AsSpan(createdEntries, currentBatchSize),
-                    data);
-            createdEntries += await connection.ExecuteAsync(components.Command, components.Parameters);
-            
-            remaining -= currentBatchSize;
-        }
-        
-        return createdEntries;
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TValue));
+        return connection.ExecuteBulkAsync(
+            (entries, start, end) => GenerateInsertSql(entries, builderData, start, end, false), entities, batchSize);
     }
     
     /// <summary>
@@ -214,52 +220,28 @@ public static class CreateCommands
     /// <param name="entities">An array of entities to insert.</param>
     /// <param name="batchSize">The batch size for bulk insertion.</param>
     /// <returns>The number of inserted entries.</returns>
-    public static async Task<int> BulkInsertAsync<TValue>(
+    public static Task<int> BulkInsertAsync<TValue>(
         this IDbTransaction transaction,
         TValue[] entities,
         int batchSize = 100)
     {
-        int createdEntries = 0;
-        CommandBuilderData data = Cache.ResolveCommandBuilderData(typeof(TValue));
-        
-        int remaining = entities.Length;
-        while (remaining>0)
-        {
-            int currentBatchSize = Math.Min(batchSize, remaining);
-            BulkInsertComponents components =
-                GenerateBulkInsertSql(
-                    entities.AsSpan(createdEntries, currentBatchSize),
-                    data);
-            createdEntries += await transaction.ExecuteAsync(components.Command, components.Parameters);
-            
-            remaining -= currentBatchSize;
-        }
-        
-        return createdEntries;
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TValue));
+        return transaction.ExecuteBulkAsync(
+            (entries, start, end) => GenerateInsertSql(entries, builderData, start, end, false), entities, batchSize);
     }
     
     #endregion
-    
-    private static string GenerateInsertSql<TValue>()
-    {
-        StringBuilder valuesBuilder = new();
-        CommandBuilderData data = Cache.ResolveCommandBuilderData(typeof(TValue));
-        
-        valuesBuilder.Append("(").AppendProperties(data.Properties, AppendType.Assembly).Append(")");
-
-        return BuildInsertCommand(valuesBuilder, data, true);
-    }
-    
-
-    private sealed record BulkInsertComponents(string Command, DynamicParameters Parameters);
-    private static BulkInsertComponents GenerateBulkInsertSql<TValue>(
-        Span<TValue> entities,
-        CommandBuilderData data)
+    private static CommandComponents GenerateInsertSql<TValue>(
+        TValue[] entities,
+        CommandBuilderData data,
+        int enumerationStartIndex = 0,
+        int enumerationEnd = 1,
+        bool returningKey = true)
     {
         StringBuilder valuesBuilder = new();
         DynamicParameters values = new();
         
-        for(int i=0; i<entities.Length; i++)
+        for(int i=enumerationStartIndex; i<enumerationEnd; i++)
         {
             TValue entity = entities[i];
 
@@ -273,7 +255,7 @@ public static class CreateCommands
                 .Append(")");
         }
         
-        string generatedQuery = BuildInsertCommand(valuesBuilder, data, false);
+        string generatedQuery = BuildInsertCommand(valuesBuilder, data, returningKey);
     
         return new(generatedQuery, values);
     }
@@ -360,7 +342,11 @@ public static class CreateCommands
                         }
                         else
                         {
-                            builder.Append('@').Append(data.KeyProperties[0].AssemblyName);
+                            builder
+                                .Append('@')
+                                .Append(data.KeyProperties[0].AssemblyName)
+                                //Added this line since switching to common insert SQL statement builder
+                                .Append(0);
                         }
                     }
                     else
@@ -375,7 +361,9 @@ public static class CreateCommands
                             {
                                 builder
                                     .Append("@")
-                                    .Append(data.KeyProperties[i].AssemblyName);
+                                    .Append(data.KeyProperties[i].AssemblyName)
+                                    //Added this line since switching to common insert SQL statement builder
+                                    .Append(0);
                             }
                             
                             builder
@@ -407,7 +395,11 @@ public static class CreateCommands
                         }
                         else
                         {
-                            builder.Append('@').Append(data.KeyProperties[0].AssemblyName);
+                            builder
+                                .Append('@')
+                                .Append(data.KeyProperties[0].AssemblyName)
+                                //Added this line since switching to common insert SQL statement builder
+                                .Append(0);
                         }
                     }
                     else
@@ -422,7 +414,9 @@ public static class CreateCommands
                             {
                                 builder
                                     .Append("@")
-                                    .Append(data.KeyProperties[i].AssemblyName);
+                                    .Append(data.KeyProperties[i].AssemblyName)
+                                    //Added this line since switching to common insert SQL statement builder
+                                    .Append(0);
                             }
                             
                             builder

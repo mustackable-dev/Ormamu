@@ -4,7 +4,7 @@ using Ormamu;
 namespace OrmamuTests.Entities;
 
 [ConfigId(TestsConfig.DbVariant)]
-public abstract class EntityBase<T>
+public abstract record EntityBase<T>
 {
     [Key]
     public T Id { get; set; }

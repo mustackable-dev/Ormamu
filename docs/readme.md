@@ -88,8 +88,13 @@ builder.Services
     .AddWorker()
     .AddControllers();
 
-// Uses default settings (SQL Server dialect, direct name mapping)
-Ormamu.Configuration.Apply(); 
+// You only need to add this line, if you are not using the 
+// default settings (SQL Server dialect, direct name mapping)
+
+Ormamu.Configuration.Apply(new OrmamuOptions
+{
+    Dialect = SqlDialect.PostgreSql
+});
 
 var app = builder.Build();
 ```
@@ -160,8 +165,10 @@ You can find more examples in [the tests suite](https://github.com/mustackable-d
 
 | Operation                         | Method (Sync / Async)                                               | Contexts                          | Description                                                                                    |
 |-----------------------------------|--------------------------------------------------------------------|-----------------------------------|------------------------------------------------------------------------------------------------|
+| Delete by entity                  | `Delete<TEntity>(TEntity entity)` / `DeleteAsync<TEntity>(TEntity entity)` | `IDbConnection`, `IDbTransaction` | Deletes a single entity instance by extracting its key automatically, returns affected rows.   |
 | Delete by `int` key               | `Delete<TValue>(int key)` / `DeleteAsync<TValue>(int key)`         | `IDbConnection`, `IDbTransaction` | Deletes a single entity by `int` key, returns number of affected rows (typically 1).           |
 | Delete by custom or composite key | `Delete<TKey, TValue>(TKey key)` / `DeleteAsync<TKey, TValue>(TKey key)` | `IDbConnection`, `IDbTransaction` | Deletes a single entity by a custom key (also supports composite keys), returns affected rows. |
+| Bulk delete by entities           | `BulkDelete<TEntity>(TEntity[] entities, int batchSize = 100)` / `BulkDeleteAsync<TEntity>(TEntity[] entities, int batchSize = 100)` | `IDbConnection`, `IDbTransaction` | Deletes multiple entities by extracting their keys automatically in batches, returns total deleted count. |
 | Bulk delete by `int` keys         | `BulkDelete<TValue>(int[] keys, int batchSize = 100)` / `BulkDeleteAsync<TValue>(int[] keys, int batchSize = 100)` | `IDbConnection`, `IDbTransaction` | Deletes multiple entities by array of `int` keys in batches, returns total deleted count.      |
 | Bulk delete by custom keys        | `BulkDelete<TKey, TValue>(TKey[] keys, int batchSize = 100)` / `BulkDeleteAsync<TKey, TValue>(TKey[] keys, int batchSize = 100)` | `IDbConnection`, `IDbTransaction` | Deletes multiple entities by array of custom keys in batches, returns total deleted count.     |
 
@@ -185,26 +192,25 @@ Each of the Utility operations (except for `Count`) requires an Expression param
 
 ## Configuration
 
-Ormamu offers flexible configuration options to suit different project needs, including support for multiple databases with varying SQL dialects and naming conventions.
+Ormamu provides a flexible configuration system designed to support multiple databases, SQL dialects, and naming conventions — allowing you to tailor its behavior to your application’s data model.
 
-### Basic Configuration
+Ormamu can be configured via the `Ormamu.Configuration.Apply` method.
 
-You can configure Ormamu globally using default settings. By default, it uses the **SQL Server** dialect and assumes no custom mapping between entity property names and database column names.
+### Default
 
-```csharp
-Ormamu.Configuration.Apply();
-```
+If `Ormamu.Configuration.Apply` is not explicitly called, Ormamu will lazily apply a default configuration (SQL Server dialect, no custom name mapping) the first time any database operation is executed. This default configuration is initialized only once.
 
-This applies the configuration to all entities in your application.
+Configuration can be safely reapplied at any time using `Ormamu.Configuration.Apply` — if a configuration already exists, it will be replaced with the new one.
 
-### Custom Configuration
+This allows recovery from accidental default initialization or dynamic reconfiguration in testing environments.
 
-To customize the behavior, create an instance of `OrmamuOptions` where you can specify:
+### Single Database
 
-- **Dialect** — The SQL dialect for your database (e.g., SQL Server, MySQL, PostgreSQL).
+You can pass an instance of `OrmamuOptions` to the `Ormamu.Configuration.Apply` to specify the following parameters:
+
+- **Dialect** — The SQL dialect of your database (e.g., SQL Server, MySQL, PostgreSQL).
 - **NameConverter** — A function to convert entity property names to database column names (e.g., snake_case, kebab-case).
 - **PropertyBindingFlags** — Reflection flags for selecting entity properties (default is `Public | Instance`).
-- **ConfigId** — An optional identifier to differentiate configurations when working with multiple databases.
 
 **Example:**
 
@@ -220,29 +226,30 @@ Ormamu.Configuration.Apply(options);
 
 ### Multiple Database Configurations
 
-If your project connects to multiple databases with different naming conventions or dialects, you can configure multiple `OrmamuOptions` instances and assign each entity a configuration ID using the `[ConfigId]` attribute.
+If your project connects to multiple databases with different naming conventions or dialects, you can configure multiple `OrmamuOptions` instances and assign each entity definition a configuration ID using the `[ConfigId]` attribute.
 
 ```csharp
-OrmamuOptions[] configs = new[]
+Dictionary<object, OrmamuOptions> configs = new()
 {
-    new OrmamuOptions
     {
-        ConfigId = "MainDb",
-        Dialect = SqlDialect.SqlServer,
-        NameConverter = NameConverters.ToUpperCase
+        "MainDb", new OrmamuOptions {
+            Dialect = SqlDialect.SqlServer,
+            NameConverter = NameConverters.ToUpperCase
+        }
     },
-    new OrmamuOptions
     {
-        ConfigId = "AnalyticsDb",
-        Dialect = SqlDialect.PostgreSql,
-        NameConverter = NameConverters.ToSnakeCase
+        "AnalyticsDb", new OrmamuOptions
+        {
+            Dialect = SqlDialect.PostgreSql,
+            NameConverter = NameConverters.ToSnakeCase
+        }
     }
 };
 
 Ormamu.Configuration.Apply(configs);
 ```
 
-Then mark your entity classes with the corresponding configuration ID:
+Then mark your entity classes with the corresponding configuration ID attributes:
 
 ```csharp
 [ConfigId("MainDb")]
@@ -263,6 +270,9 @@ public class EventLog
     public string EventName { get; set; }
 }
 ```
+**IMPORTANT!**
+
+Only ValueType (such as `int`, `bool`, `double`, `char`, `enum`, etc.) and `string` objects can be used as configuration IDs.
 
 ## Built-in Name Converters
 

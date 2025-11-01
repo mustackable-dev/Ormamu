@@ -26,7 +26,7 @@ public class MySqlDbProvider: IDbProvider
         
         CompositeKeyTestsTableName = TestsConfig.CompositeKeyTestsTableName;
         
-        AutoincrementingCompositeKeyTestsTableName = TestsConfig.AutoincrementingCompositeKeyTestsTableName;
+        AutoincrementingCompositeKeyTestsTableName = TestsConfig.AutoIncrementingCompositeKeyTestsTableName;
     }
     
     private string _connectionString =

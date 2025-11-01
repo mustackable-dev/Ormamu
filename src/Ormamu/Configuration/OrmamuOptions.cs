@@ -10,12 +10,6 @@ namespace Ormamu;
 public record OrmamuOptions: OrmamuBaseOptions
 {
     /// <summary>
-    /// An identifier for your <see cref="OrmamuOptions"/> configuration. Entities marked with a
-    /// <see cref="ConfigIdAttribute"/> that has a matching ConfigId, will use this configuration.
-    /// </summary>
-    public object? ConfigId { get; set; }
-    
-    /// <summary>
     /// Determines the property binding flags used for extracting properties from entities.
     /// </summary>
     public BindingFlags PropertyBindingFlags { get; set; } = BindingFlags.Public | BindingFlags.Instance;
