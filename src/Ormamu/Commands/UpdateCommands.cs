@@ -14,63 +14,63 @@ public static class UpdateCommands
     #region Regular
 
     /// <summary>
-    /// Updates an existing entity of type <typeparamref name="TValue"/> using an <see cref="IDbConnection"/>.
+    /// Updates an existing entity of type <typeparamref name="TEntity"/> using an <see cref="IDbConnection"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entity to update.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="entity">The entity with updated values.</param>
     /// <returns>The number of affected rows (typically 1).</returns>
-    public static int Update<TValue>(this IDbConnection connection, TValue entity)
+    public static int Update<TEntity>(this IDbConnection connection, TEntity entity)
     {
-        CommandComponents components = GenerateUpdateSql([entity], Cache.ResolveCommandBuilderData(typeof(TValue)));
+        CommandComponents components = GenerateUpdateSql([entity], Cache.ResolveCommandBuilderData(typeof(TEntity)));
         return connection.Execute(components.Command, components.Parameters);
     }
 
     /// <summary>
-    /// Updates an existing entity of type <typeparamref name="TValue"/> using an <see cref="IDbTransaction"/>.
+    /// Updates an existing entity of type <typeparamref name="TEntity"/> using an <see cref="IDbTransaction"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entity to update.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="entity">The entity with updated values.</param>
     /// <returns>The number of affected rows (typically 1).</returns>
-    public static int Update<TValue>(this IDbTransaction transaction, TValue entity)
+    public static int Update<TEntity>(this IDbTransaction transaction, TEntity entity)
     {
-        CommandComponents components = GenerateUpdateSql([entity], Cache.ResolveCommandBuilderData(typeof(TValue)));
+        CommandComponents components = GenerateUpdateSql([entity], Cache.ResolveCommandBuilderData(typeof(TEntity)));
         return transaction.Execute(components.Command, components.Parameters);
     }
 
     /// <summary>
-    /// Updates multiple entities of type <typeparamref name="TValue"/> in batches using an <see cref="IDbConnection"/>.
+    /// Updates multiple entities of type <typeparamref name="TEntity"/> in batches using an <see cref="IDbConnection"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entities to update.</typeparam>
+    /// <typeparam name="TEntity">The type of the entities to update.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="entities">The array of entities with updated values.</param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
     /// <returns>The total number of affected rows.</returns>
-    public static int BulkUpdate<TValue>(
+    public static int BulkUpdate<TEntity>(
         this IDbConnection connection,
-        TValue[] entities,
+        TEntity[] entities,
         int batchSize = 100)
     {
-        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TValue));
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
         return connection.ExecuteBulk(
             (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end), entities, batchSize);
     }
 
     /// <summary>
-    /// Updates multiple entities of type <typeparamref name="TValue"/> in batches using an <see cref="IDbTransaction"/>.
+    /// Updates multiple entities of type <typeparamref name="TEntity"/> in batches using an <see cref="IDbTransaction"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entities to update.</typeparam>
+    /// <typeparam name="TEntity">The type of the entities to update.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="entities">The array of entities with updated values.</param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
     /// <returns>The total number of affected rows.</returns>
-    public static int BulkUpdate<TValue>(
+    public static int BulkUpdate<TEntity>(
         this IDbTransaction transaction,
-        TValue[] entities,
+        TEntity[] entities,
         int batchSize = 100)
     {
-        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TValue));
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
         return transaction.ExecuteBulk(
             (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end), entities, batchSize);
     }
@@ -80,70 +80,70 @@ public static class UpdateCommands
     #region Async
 
     /// <summary>
-    /// Updates an existing entity of type <typeparamref name="TValue"/> using an <see cref="IDbConnection"/>.
+    /// Updates an existing entity of type <typeparamref name="TEntity"/> using an <see cref="IDbConnection"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entity to update.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="entity">The entity with updated values.</param>
     /// <returns>The number of affected rows (typically 1).</returns>
-    public static Task<int> UpdateAsync<TValue>(this IDbConnection connection, TValue entity)
+    public static Task<int> UpdateAsync<TEntity>(this IDbConnection connection, TEntity entity)
     {
-        CommandComponents components = GenerateUpdateSql([entity], Cache.ResolveCommandBuilderData(typeof(TValue)));
+        CommandComponents components = GenerateUpdateSql([entity], Cache.ResolveCommandBuilderData(typeof(TEntity)));
         return connection.ExecuteAsync(components.Command, components.Parameters);
     }
 
     /// <summary>
-    /// Updates an existing entity of type <typeparamref name="TValue"/> using an <see cref="IDbTransaction"/>.
+    /// Updates an existing entity of type <typeparamref name="TEntity"/> using an <see cref="IDbTransaction"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entity to update.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="entity">The entity with updated values.</param>
     /// <returns>The number of affected rows (typically 1).</returns>
-    public static Task<int> UpdateAsync<TValue>(this IDbTransaction transaction, TValue entity)
+    public static Task<int> UpdateAsync<TEntity>(this IDbTransaction transaction, TEntity entity)
     {
-        CommandComponents components = GenerateUpdateSql([entity], Cache.ResolveCommandBuilderData(typeof(TValue)));
+        CommandComponents components = GenerateUpdateSql([entity], Cache.ResolveCommandBuilderData(typeof(TEntity)));
         return transaction.ExecuteAsync(components.Command, components.Parameters);
     }
 
     /// <summary>
-    /// Updates multiple entities of type <typeparamref name="TValue"/> in batches using an <see cref="IDbConnection"/>.
+    /// Updates multiple entities of type <typeparamref name="TEntity"/> in batches using an <see cref="IDbConnection"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entities to update.</typeparam>
+    /// <typeparam name="TEntity">The type of the entities to update.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="entities">The array of entities with updated values.</param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
     /// <returns>The total number of affected rows.</returns>
-    public static Task<int> BulkUpdateAsync<TValue>(
+    public static Task<int> BulkUpdateAsync<TEntity>(
         this IDbConnection connection,
-        TValue[] entities,
+        TEntity[] entities,
         int batchSize = 100)
     {
-        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TValue));
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
         return connection.ExecuteBulkAsync(
             (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end), entities, batchSize);
     }
 
     /// <summary>
-    /// Updates multiple entities of type <typeparamref name="TValue"/> in batches using an <see cref="IDbTransaction"/>.
+    /// Updates multiple entities of type <typeparamref name="TEntity"/> in batches using an <see cref="IDbTransaction"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entities to update.</typeparam>
+    /// <typeparam name="TEntity">The type of the entities to update.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="entities">The array of entities with updated values.</param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
     /// <returns>The total number of affected rows.</returns>
-    public static Task<int> BulkUpdateAsync<TValue>(
+    public static Task<int> BulkUpdateAsync<TEntity>(
         this IDbTransaction transaction,
-        TValue[] entities,
+        TEntity[] entities,
         int batchSize = 100)
     {
-        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TValue));
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
         return transaction.ExecuteBulkAsync(
             (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end), entities, batchSize);
     }
      
     #endregion
-    private static CommandComponents GenerateUpdateSql<TValue>(
-        TValue[] entities,
+    private static CommandComponents GenerateUpdateSql<TEntity>(
+        TEntity[] entities,
         CommandBuilderData data,
         int enumerationStartIndex = 0,
         int enumerationEnd = 1)
@@ -195,12 +195,12 @@ public static class UpdateCommands
         return new(commandBuilder.ToString(), values);
     }
     
-    private static void AppendUpdateParameters<TValue>(
+    private static void AppendUpdateParameters<TEntity>(
         this StringBuilder sb,
         PropertyMapping[] properties,
         ref DynamicParameters parameters,
         int index,
-        TValue entity,
+        TEntity entity,
         char propertyWrapper = '\0')
     {
         bool skipFirst = true;

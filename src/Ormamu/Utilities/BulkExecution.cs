@@ -4,7 +4,7 @@ using Dapper.Transaction;
 
 namespace Ormamu;
 
-internal static class CommandUtilities
+internal static class BulkExecution
 {
     internal static int ExecuteBulk<TValue>(
         this IDbConnection connection,

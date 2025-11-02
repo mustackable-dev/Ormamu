@@ -163,14 +163,14 @@ You can find more examples in [the tests suite](https://github.com/mustackable-d
 
 ### Delete Operations
 
-| Operation                         | Method (Sync / Async)                                               | Contexts                          | Description                                                                                    |
-|-----------------------------------|--------------------------------------------------------------------|-----------------------------------|------------------------------------------------------------------------------------------------|
-| Delete by entity                  | `Delete<TEntity>(TEntity entity)` / `DeleteAsync<TEntity>(TEntity entity)` | `IDbConnection`, `IDbTransaction` | Deletes a single entity instance by extracting its key automatically, returns affected rows.   |
-| Delete by `int` key               | `Delete<TValue>(int key)` / `DeleteAsync<TValue>(int key)`         | `IDbConnection`, `IDbTransaction` | Deletes a single entity by `int` key, returns number of affected rows (typically 1).           |
-| Delete by custom or composite key | `Delete<TKey, TValue>(TKey key)` / `DeleteAsync<TKey, TValue>(TKey key)` | `IDbConnection`, `IDbTransaction` | Deletes a single entity by a custom key (also supports composite keys), returns affected rows. |
+| Operation                         | Method (Sync / Async)                                                                                                                | Contexts                          | Description                                                                                    |
+|-----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------|------------------------------------------------------------------------------------------------|
+| Delete by entity                  | `Delete<TEntity>(TEntity entity)` / `DeleteAsync<TEntity>(TEntity entity)`                                                           | `IDbConnection`, `IDbTransaction` | Deletes a single entity instance by extracting its key automatically, returns affected rows.   |
+| Delete by `int` key               | `Delete<TEntity>(int key)` / `DeleteAsync<TEntity>(int key)`                                                                         | `IDbConnection`, `IDbTransaction` | Deletes a single entity by `int` key, returns number of affected rows (typically 1).           |
+| Delete by custom or composite key | `Delete<TKey, TEntity>(TKey key)` / `DeleteAsync<TKey, TEntity>(TKey key)`                                                             | `IDbConnection`, `IDbTransaction` | Deletes a single entity by a custom key (also supports composite keys), returns affected rows. |
 | Bulk delete by entities           | `BulkDelete<TEntity>(TEntity[] entities, int batchSize = 100)` / `BulkDeleteAsync<TEntity>(TEntity[] entities, int batchSize = 100)` | `IDbConnection`, `IDbTransaction` | Deletes multiple entities by extracting their keys automatically in batches, returns total deleted count. |
-| Bulk delete by `int` keys         | `BulkDelete<TValue>(int[] keys, int batchSize = 100)` / `BulkDeleteAsync<TValue>(int[] keys, int batchSize = 100)` | `IDbConnection`, `IDbTransaction` | Deletes multiple entities by array of `int` keys in batches, returns total deleted count.      |
-| Bulk delete by custom keys        | `BulkDelete<TKey, TValue>(TKey[] keys, int batchSize = 100)` / `BulkDeleteAsync<TKey, TValue>(TKey[] keys, int batchSize = 100)` | `IDbConnection`, `IDbTransaction` | Deletes multiple entities by array of custom keys in batches, returns total deleted count.     |
+| Bulk delete by `int` keys         | `BulkDelete<TEntity>(int[] keys, int batchSize = 100)` / `BulkDeleteAsync<TEntity>(int[] keys, int batchSize = 100)`                   | `IDbConnection`, `IDbTransaction` | Deletes multiple entities by array of `int` keys in batches, returns total deleted count.      |
+| Bulk delete by custom keys        | `BulkDelete<TKey, TEntity>(TKey[] keys, int batchSize = 100)` / `BulkDeleteAsync<TKey, TEntity>(TKey[] keys, int batchSize = 100)`     | `IDbConnection`, `IDbTransaction` | Deletes multiple entities by array of custom keys in batches, returns total deleted count.     |
 
 ---
 
@@ -204,7 +204,7 @@ Configuration can be safely reapplied at any time using `Ormamu.Configuration.Ap
 
 This allows recovery from accidental default initialization or dynamic reconfiguration in testing environments.
 
-### Single Database
+### Single Database Configuration
 
 You can pass an instance of `OrmamuOptions` to the `Ormamu.Configuration.Apply` to specify the following parameters:
 

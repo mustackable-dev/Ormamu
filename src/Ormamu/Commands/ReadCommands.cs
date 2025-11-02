@@ -14,182 +14,182 @@ public static class ReadCommands
     #region Regular
 
     /// <summary>
-    /// Retrieves an entity of type <typeparamref name="TValue"/> by its key (of type <see cref="int"/>) via an
+    /// Retrieves an entity of type <typeparamref name="TEntity"/> by its key (of type <see cref="int"/>) via an
     /// <see cref="IDbConnection"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entity to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity to retrieve.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The matching entity, or <c>null</c> if not found.</returns>
-    public static TValue? Get<TValue>(this IDbConnection connection, int keyValue)
+    public static TEntity? Get<TEntity>(this IDbConnection connection, int keyValue)
     {
-        SelectComponents components = GenerateSelectCommand<int, TValue>([keyValue]);
-        return connection.QuerySingleOrDefault<TValue>(components.Command, components.Parameters);
+        SelectComponents components = GenerateSelectCommand<int, TEntity>([keyValue]);
+        return connection.QuerySingleOrDefault<TEntity>(components.Command, components.Parameters);
     }
 
     /// <summary>
-    /// Retrieves an entity of type <typeparamref name="TValue"/> by its key (of type <see cref="int"/>) via an
+    /// Retrieves an entity of type <typeparamref name="TEntity"/> by its key (of type <see cref="int"/>) via an
     /// <see cref="IDbTransaction"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entity to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity to retrieve.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The matching entity, or <c>null</c> if not found.</returns>
-    public static TValue? Get<TValue>(this IDbTransaction transaction, int keyValue)
+    public static TEntity? Get<TEntity>(this IDbTransaction transaction, int keyValue)
     {
-        SelectComponents components = GenerateSelectCommand<int, TValue>([keyValue]);
-        return transaction.QuerySingleOrDefault<TValue>(components.Command, components.Parameters);
+        SelectComponents components = GenerateSelectCommand<int, TEntity>([keyValue]);
+        return transaction.QuerySingleOrDefault<TEntity>(components.Command, components.Parameters);
     }
     
     /// <summary>
-    /// Retrieves an entity of type <typeparamref name="TValue"/> by its key of type <typeparamref name="TKey"/> via an
+    /// Retrieves an entity of type <typeparamref name="TEntity"/> by its key of type <typeparamref name="TKey"/> via an
     /// <see cref="IDbConnection"/>.
     /// </summary>
     /// <typeparam name="TKey">The type of the entity's key.</typeparam>
-    /// <typeparam name="TValue">The type of the entity to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity to retrieve.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The matching entity, or <c>null</c> if not found.</returns>
-    public static TValue? Get<TKey, TValue>(this IDbConnection connection, TKey keyValue)
+    public static TEntity? Get<TKey, TEntity>(this IDbConnection connection, TKey keyValue)
     {
-        SelectComponents components = GenerateSelectCommand<TKey, TValue>([keyValue]);
-        return connection.QuerySingleOrDefault<TValue>(components.Command,components.Parameters);
+        SelectComponents components = GenerateSelectCommand<TKey, TEntity>([keyValue]);
+        return connection.QuerySingleOrDefault<TEntity>(components.Command,components.Parameters);
     }
 
     /// <summary>
-    /// Retrieves an entity of type <typeparamref name="TValue"/> by its key of type <typeparamref name="TKey"/> via an
+    /// Retrieves an entity of type <typeparamref name="TEntity"/> by its key of type <typeparamref name="TKey"/> via an
     /// <see cref="IDbTransaction"/>.
     /// </summary>
     /// <typeparam name="TKey">The type of the entity's key.</typeparam>
-    /// <typeparam name="TValue">The type of the entity to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity to retrieve.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The matching entity, or <c>null</c> if not found.</returns>
-    public static TValue? Get<TKey, TValue>(this IDbTransaction transaction, TKey keyValue)
+    public static TEntity? Get<TKey, TEntity>(this IDbTransaction transaction, TKey keyValue)
     {
-        SelectComponents components = GenerateSelectCommand<TKey, TValue>([keyValue]);
-        return transaction.QuerySingleOrDefault<TValue>(components.Command, components.Parameters);
+        SelectComponents components = GenerateSelectCommand<TKey, TEntity>([keyValue]);
+        return transaction.QuerySingleOrDefault<TEntity>(components.Command, components.Parameters);
     }
     
     /// <summary>
-    /// Retrieves a list of entities of type <typeparamref name="TValue"/> from the database by primary key values,
+    /// Retrieves a list of entities of type <typeparamref name="TEntity"/> from the database by primary key values,
     /// with optional ordering and pagination, via an <see cref="IDbConnection"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entities to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entities to retrieve.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="keys">An array of integer primary key values to match.</param>
     /// <param name="orderByClause">An optional ORDER BY clause.</param>
     /// <param name="pageSize">The number of results per page (for pagination).</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination).</param>
     /// <returns>A collection of matching entities.</returns>
-    public static IEnumerable<TValue> Get<TValue>(
+    public static IEnumerable<TEntity> Get<TEntity>(
         this IDbConnection connection,
         int[] keys,
         string? orderByClause = null,
         int? pageSize = null,
         int? pageNumber = null)
     {
-        SelectComponents components = GenerateSelectCommand<int, TValue>(
+        SelectComponents components = GenerateSelectCommand<int, TEntity>(
             keys,
             null,
             orderByClause,
             pageSize,
             pageNumber
         );
-        return connection.Query<TValue>(components.Command, components.Parameters);
+        return connection.Query<TEntity>(components.Command, components.Parameters);
     }
 
     /// <summary>
-    /// Retrieves a list of entities of type <typeparamref name="TValue"/> from the database by primary key values,
+    /// Retrieves a list of entities of type <typeparamref name="TEntity"/> from the database by primary key values,
     /// with optional ordering and pagination, via an <see cref="IDbTransaction"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entities to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entities to retrieve.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="keys">An array of integer primary key values to match.</param>
     /// <param name="orderByClause">An optional ORDER BY clause.</param>
     /// <param name="pageSize">The number of results per page (for pagination).</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination).</param>
     /// <returns>A collection of matching entities.</returns>
-    public static IEnumerable<TValue> Get<TValue>(
+    public static IEnumerable<TEntity> Get<TEntity>(
         this IDbTransaction transaction,
         int[] keys,
         string? orderByClause = null,
         int? pageSize = null,
         int? pageNumber = null)
     {
-        SelectComponents components = GenerateSelectCommand<int, TValue>(
+        SelectComponents components = GenerateSelectCommand<int, TEntity>(
             keys,
             null,
             orderByClause,
             pageSize,
             pageNumber
         );
-        return transaction.Query<TValue>(components.Command, components.Parameters);
+        return transaction.Query<TEntity>(components.Command, components.Parameters);
     }
 
     /// <summary>
-    /// Retrieves a list of entities of type <typeparamref name="TValue"/> from the database by primary key values,
+    /// Retrieves a list of entities of type <typeparamref name="TEntity"/> from the database by primary key values,
     /// with optional ordering and pagination, via an <see cref="IDbConnection"/>.
     /// </summary>
     /// <typeparam name="TKey">The type of the primary key values.</typeparam>
-    /// <typeparam name="TValue">The type of the entities to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entities to retrieve.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="keys">An array of primary key values to match.</param>
     /// <param name="orderByClause">An optional ORDER BY clause.</param>
     /// <param name="pageSize">The number of results per page (for pagination).</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination).</param>
     /// <returns>A collection of matching entities.</returns>
-    public static IEnumerable<TValue> Get<TKey, TValue>(
+    public static IEnumerable<TEntity> Get<TKey, TEntity>(
         this IDbConnection connection,
         TKey[] keys,
         string? orderByClause = null,
         int? pageSize = null,
         int? pageNumber = null)
     {
-        SelectComponents components = GenerateSelectCommand<TKey, TValue>(
+        SelectComponents components = GenerateSelectCommand<TKey, TEntity>(
             keys,
             null,
             orderByClause,
             pageSize,
             pageNumber
         );
-        return connection.Query<TValue>(components.Command, components.Parameters);
+        return connection.Query<TEntity>(components.Command, components.Parameters);
     }
 
     /// <summary>
-    /// Retrieves a list of entities of type <typeparamref name="TValue"/> from the database by primary key values,
+    /// Retrieves a list of entities of type <typeparamref name="TEntity"/> from the database by primary key values,
     /// with optional ordering and pagination, via an <see cref="IDbTransaction"/>.
     /// </summary>
     /// <typeparam name="TKey">The type of the primary key values.</typeparam>
-    /// <typeparam name="TValue">The type of the entities to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entities to retrieve.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="keys">An array of primary key values to match.</param>
     /// <param name="orderByClause">An optional ORDER BY clause.</param>
     /// <param name="pageSize">The number of results per page (for pagination).</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination).</param>
     /// <returns>A collection of matching entities.</returns>
-    public static IEnumerable<TValue> Get<TKey, TValue>(
+    public static IEnumerable<TEntity> Get<TKey, TEntity>(
         this IDbTransaction transaction,
         TKey[] keys,
         string? orderByClause = null,
         int? pageSize = null,
         int? pageNumber = null)
     {
-        SelectComponents components = GenerateSelectCommand<TKey, TValue>(
+        SelectComponents components = GenerateSelectCommand<TKey, TEntity>(
             keys,
             null,
             orderByClause,
             pageSize,
             pageNumber
         );
-        return transaction.Query<TValue>(components.Command, components.Parameters);
+        return transaction.Query<TEntity>(components.Command, components.Parameters);
     }
 
     /// <summary>
-    /// Retrieves a list of entities of type <typeparamref name="TValue"/> from the database using optional filtering,
+    /// Retrieves a list of entities of type <typeparamref name="TEntity"/> from the database using optional filtering,
     /// ordering, and pagination via an <see cref="IDbConnection"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entities to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entities to retrieve.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="whereClause">An optional WHERE clause to filter the results.</param>
     /// <param name="orderByClause">An optional ORDER BY clause.</param>
@@ -197,7 +197,7 @@ public static class ReadCommands
     /// <param name="pageNumber">The page number to retrieve (for pagination).</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>A collection of matching entities.</returns>
-    public static IEnumerable<TValue> Get<TValue>(
+    public static IEnumerable<TEntity> Get<TEntity>(
         this IDbConnection connection,
         string? whereClause = null,
         string? orderByClause = null,
@@ -205,8 +205,8 @@ public static class ReadCommands
         int? pageNumber = null,
         object param = null!)
     
-        => connection.Query<TValue>(
-            GenerateSelectCommand<int, TValue>(
+        => connection.Query<TEntity>(
+            GenerateSelectCommand<int, TEntity>(
                 [],
                 whereClause,
                 orderByClause,
@@ -215,10 +215,10 @@ public static class ReadCommands
             ).Command, param);
 
     /// <summary>
-    /// Retrieves a list of entities of type <typeparamref name="TValue"/> from the database using optional filtering,
+    /// Retrieves a list of entities of type <typeparamref name="TEntity"/> from the database using optional filtering,
     /// ordering, and pagination via an <see cref="IDbTransaction"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entities to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entities to retrieve.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="whereClause">An optional WHERE clause to filter the results.</param>
     /// <param name="orderByClause">An optional ORDER BY clause.</param>
@@ -226,7 +226,7 @@ public static class ReadCommands
     /// <param name="pageNumber">The page number to retrieve (for pagination).</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>A collection of matching entities.</returns>
-    public static IEnumerable<TValue> Get<TValue>(
+    public static IEnumerable<TEntity> Get<TEntity>(
         this IDbTransaction transaction,
         string? whereClause = null,
         string? orderByClause = null,
@@ -234,8 +234,8 @@ public static class ReadCommands
         int? pageNumber = null,
         object param = null!)
     
-        => transaction.Query<TValue>(
-            GenerateSelectCommand<int, TValue>(
+        => transaction.Query<TEntity>(
+            GenerateSelectCommand<int, TEntity>(
                 [],
                 whereClause,
                 orderByClause,
@@ -248,182 +248,182 @@ public static class ReadCommands
     #region Async
 
     /// <summary>
-    /// Retrieves an entity of type <typeparamref name="TValue"/> by its key (of type <see cref="int"/>) via an
+    /// Retrieves an entity of type <typeparamref name="TEntity"/> by its key (of type <see cref="int"/>) via an
     /// <see cref="IDbConnection"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entity to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity to retrieve.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The matching entity, or <c>null</c> if not found.</returns>
-    public static Task<TValue?> GetAsync<TValue>(this IDbConnection connection, int keyValue)
+    public static Task<TEntity?> GetAsync<TEntity>(this IDbConnection connection, int keyValue)
     {
-        SelectComponents components = GenerateSelectCommand<int, TValue>([keyValue]);
-        return connection.QuerySingleOrDefaultAsync<TValue>(components.Command, components.Parameters);
+        SelectComponents components = GenerateSelectCommand<int, TEntity>([keyValue]);
+        return connection.QuerySingleOrDefaultAsync<TEntity>(components.Command, components.Parameters);
     }
 
     /// <summary>
-    /// Retrieves an entity of type <typeparamref name="TValue"/> by its key (of type <see cref="int"/>) via
+    /// Retrieves an entity of type <typeparamref name="TEntity"/> by its key (of type <see cref="int"/>) via
     /// an <see cref="IDbTransaction"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entity to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity to retrieve.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The matching entity, or <c>null</c> if not found.</returns>
-    public static Task<TValue?> GetAsync<TValue>(this IDbTransaction transaction, int keyValue)
+    public static Task<TEntity?> GetAsync<TEntity>(this IDbTransaction transaction, int keyValue)
     {
-        SelectComponents components = GenerateSelectCommand<int, TValue>([keyValue]);
-        return transaction.QuerySingleOrDefaultAsync<TValue?>(components.Command, components.Parameters);
+        SelectComponents components = GenerateSelectCommand<int, TEntity>([keyValue]);
+        return transaction.QuerySingleOrDefaultAsync<TEntity?>(components.Command, components.Parameters);
     }
     
     /// <summary>
-    /// Retrieves an entity of type <typeparamref name="TValue"/> by its key of type <typeparamref name="TKey"/> via
+    /// Retrieves an entity of type <typeparamref name="TEntity"/> by its key of type <typeparamref name="TKey"/> via
     /// an <see cref="IDbConnection"/>.
     /// </summary>
     /// <typeparam name="TKey">The type of the entity's key.</typeparam>
-    /// <typeparam name="TValue">The type of the entity to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity to retrieve.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The matching entity, or <c>null</c> if not found.</returns>
-    public static Task<TValue?> GetAsync<TKey, TValue>(this IDbConnection connection, TKey keyValue)
+    public static Task<TEntity?> GetAsync<TKey, TEntity>(this IDbConnection connection, TKey keyValue)
     {
-        SelectComponents components = GenerateSelectCommand<TKey, TValue>([keyValue]);
-        return connection.QuerySingleOrDefaultAsync<TValue>(components.Command,components.Parameters);
+        SelectComponents components = GenerateSelectCommand<TKey, TEntity>([keyValue]);
+        return connection.QuerySingleOrDefaultAsync<TEntity>(components.Command,components.Parameters);
     }
 
     /// <summary>
-    /// Retrieves an entity of type <typeparamref name="TValue"/> by its key of type <typeparamref name="TKey"/> via an
+    /// Retrieves an entity of type <typeparamref name="TEntity"/> by its key of type <typeparamref name="TKey"/> via an
     /// <see cref="IDbTransaction"/>.
     /// </summary>
     /// <typeparam name="TKey">The type of the entity's key.</typeparam>
-    /// <typeparam name="TValue">The type of the entity to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity to retrieve.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The matching entity, or <c>null</c> if not found.</returns>
-    public static Task<TValue?> GetAsync<TKey, TValue>(this IDbTransaction transaction, TKey keyValue)
+    public static Task<TEntity?> GetAsync<TKey, TEntity>(this IDbTransaction transaction, TKey keyValue)
     {
-        SelectComponents components = GenerateSelectCommand<TKey, TValue>([keyValue]);
-        return transaction.QuerySingleOrDefaultAsync<TValue?>(components.Command, components.Parameters);
+        SelectComponents components = GenerateSelectCommand<TKey, TEntity>([keyValue]);
+        return transaction.QuerySingleOrDefaultAsync<TEntity?>(components.Command, components.Parameters);
     }
     
     /// <summary>
-    /// Retrieves a list of entities of type <typeparamref name="TValue"/> from the database by primary key values,
+    /// Retrieves a list of entities of type <typeparamref name="TEntity"/> from the database by primary key values,
     /// with optional ordering and pagination, via an <see cref="IDbConnection"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entities to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entities to retrieve.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="keys">An array of integer primary key values to match.</param>
     /// <param name="orderByClause">An optional ORDER BY clause.</param>
     /// <param name="pageSize">The number of results per page (for pagination).</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination).</param>
     /// <returns>A collection of matching entities.</returns>
-    public static Task<IEnumerable<TValue>> GetAsync<TValue>(
+    public static Task<IEnumerable<TEntity>> GetAsync<TEntity>(
         this IDbConnection connection,
         int[] keys,
         string? orderByClause = null,
         int? pageSize = null,
         int? pageNumber = null)
     {
-        SelectComponents components = GenerateSelectCommand<int, TValue>(
+        SelectComponents components = GenerateSelectCommand<int, TEntity>(
             keys,
             null,
             orderByClause,
             pageSize,
             pageNumber
         );
-        return connection.QueryAsync<TValue>(components.Command, components.Parameters);
+        return connection.QueryAsync<TEntity>(components.Command, components.Parameters);
     }
 
     /// <summary>
-    /// Retrieves a list of entities of type <typeparamref name="TValue"/> from the database by primary key values,
+    /// Retrieves a list of entities of type <typeparamref name="TEntity"/> from the database by primary key values,
     /// with optional ordering and pagination, via an <see cref="IDbTransaction"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entities to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entities to retrieve.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="keys">An array of integer primary key values to match.</param>
     /// <param name="orderByClause">An optional ORDER BY clause.</param>
     /// <param name="pageSize">The number of results per page (for pagination).</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination).</param>
     /// <returns>A collection of matching entities.</returns>
-    public static Task<IEnumerable<TValue>> GetAsync<TValue>(
+    public static Task<IEnumerable<TEntity>> GetAsync<TEntity>(
         this IDbTransaction transaction,
         int[] keys,
         string? orderByClause = null,
         int? pageSize = null,
         int? pageNumber = null)
     {
-        SelectComponents components = GenerateSelectCommand<int, TValue>(
+        SelectComponents components = GenerateSelectCommand<int, TEntity>(
             keys,
             null,
             orderByClause,
             pageSize,
             pageNumber
         );
-        return transaction.QueryAsync<TValue>(components.Command, components.Parameters);
+        return transaction.QueryAsync<TEntity>(components.Command, components.Parameters);
     }
 
     /// <summary>
-    /// Retrieves a list of entities of type <typeparamref name="TValue"/> from the database by primary key values,
+    /// Retrieves a list of entities of type <typeparamref name="TEntity"/> from the database by primary key values,
     /// with optional ordering and pagination, via an <see cref="IDbConnection"/>.
     /// </summary>
     /// <typeparam name="TKey">The type of the primary key values.</typeparam>
-    /// <typeparam name="TValue">The type of the entities to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entities to retrieve.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="keys">An array of primary key values to match.</param>
     /// <param name="orderByClause">An optional ORDER BY clause.</param>
     /// <param name="pageSize">The number of results per page (for pagination).</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination).</param>
     /// <returns>A collection of matching entities.</returns>
-    public static Task<IEnumerable<TValue>> GetAsync<TKey, TValue>(
+    public static Task<IEnumerable<TEntity>> GetAsync<TKey, TEntity>(
         this IDbConnection connection,
         TKey[] keys,
         string? orderByClause = null,
         int? pageSize = null,
         int? pageNumber = null)
     {
-        SelectComponents components = GenerateSelectCommand<TKey, TValue>(
+        SelectComponents components = GenerateSelectCommand<TKey, TEntity>(
             keys,
             null,
             orderByClause,
             pageSize,
             pageNumber
         );
-        return connection.QueryAsync<TValue>(components.Command, components.Parameters);
+        return connection.QueryAsync<TEntity>(components.Command, components.Parameters);
     }
 
     /// <summary>
-    /// Retrieves a list of entities of type <typeparamref name="TValue"/> from the database by primary key values,
+    /// Retrieves a list of entities of type <typeparamref name="TEntity"/> from the database by primary key values,
     /// with optional ordering and pagination, via an <see cref="IDbTransaction"/>.
     /// </summary>
     /// <typeparam name="TKey">The type of the primary key values.</typeparam>
-    /// <typeparam name="TValue">The type of the entities to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entities to retrieve.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="keys">An array of primary key values to match.</param>
     /// <param name="orderByClause">An optional ORDER BY clause.</param>
     /// <param name="pageSize">The number of results per page (for pagination).</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination).</param>
     /// <returns>A collection of matching entities.</returns>
-    public static Task<IEnumerable<TValue>> GetAsync<TKey, TValue>(
+    public static Task<IEnumerable<TEntity>> GetAsync<TKey, TEntity>(
         this IDbTransaction transaction,
         TKey[] keys,
         string? orderByClause = null,
         int? pageSize = null,
         int? pageNumber = null)
     {
-        SelectComponents components = GenerateSelectCommand<TKey, TValue>(
+        SelectComponents components = GenerateSelectCommand<TKey, TEntity>(
             keys,
             null,
             orderByClause,
             pageSize,
             pageNumber
         );
-        return transaction.QueryAsync<TValue>(components.Command, components.Parameters);
+        return transaction.QueryAsync<TEntity>(components.Command, components.Parameters);
     }
 
     /// <summary>
-    /// Retrieves a list of entities of type <typeparamref name="TValue"/> from the database using optional filtering,
+    /// Retrieves a list of entities of type <typeparamref name="TEntity"/> from the database using optional filtering,
     /// ordering, and pagination via an <see cref="IDbConnection"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entities to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entities to retrieve.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="whereClause">An optional WHERE clause to filter the results.</param>
     /// <param name="orderByClause">An optional ORDER BY clause.</param>
@@ -431,7 +431,7 @@ public static class ReadCommands
     /// <param name="pageNumber">The page number to retrieve (for pagination).</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>A collection of matching entities.</returns>
-    public static Task<IEnumerable<TValue>> GetAsync<TValue>(
+    public static Task<IEnumerable<TEntity>> GetAsync<TEntity>(
         this IDbConnection connection,
         string? whereClause = null,
         string? orderByClause = null,
@@ -439,8 +439,8 @@ public static class ReadCommands
         int? pageNumber = null,
         object param = null!)
     
-        => connection.QueryAsync<TValue>(
-            GenerateSelectCommand<int, TValue>(
+        => connection.QueryAsync<TEntity>(
+            GenerateSelectCommand<int, TEntity>(
                 [],
                 whereClause,
                 orderByClause,
@@ -450,10 +450,10 @@ public static class ReadCommands
             param);
 
     /// <summary>
-    /// Retrieves a list of entities of type <typeparamref name="TValue"/> from the database using optional filtering,
+    /// Retrieves a list of entities of type <typeparamref name="TEntity"/> from the database using optional filtering,
     /// ordering, and pagination via an <see cref="IDbTransaction"/>.
     /// </summary>
-    /// <typeparam name="TValue">The type of the entities to retrieve.</typeparam>
+    /// <typeparam name="TEntity">The type of the entities to retrieve.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="whereClause">An optional WHERE clause to filter the results.</param>
     /// <param name="orderByClause">An optional ORDER BY clause.</param>
@@ -461,7 +461,7 @@ public static class ReadCommands
     /// <param name="pageNumber">The page number to retrieve (for pagination).</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>A collection of matching entities.</returns>
-    public static Task<IEnumerable<TValue>> GetAsync<TValue>(
+    public static Task<IEnumerable<TEntity>> GetAsync<TEntity>(
         this IDbTransaction transaction,
         string? whereClause = null,
         string? orderByClause = null,
@@ -469,8 +469,8 @@ public static class ReadCommands
         int? pageNumber = null,
         object param = null!)
         
-        => transaction.QueryAsync<TValue>(
-            GenerateSelectCommand<int, TValue>(
+        => transaction.QueryAsync<TEntity>(
+            GenerateSelectCommand<int, TEntity>(
                 [],
                 whereClause,
                 orderByClause,
