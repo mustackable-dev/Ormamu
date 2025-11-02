@@ -20,13 +20,7 @@ public static class CreateCommands
     /// <param name="entity">The entity to insert.</param>
     /// <returns>The key (of type <see cref="int"/>) of the inserted entity.</returns>
     public static int Insert<TEntity>(this IDbConnection connection, TEntity entity)
-    {
-        CommandComponents components = GenerateInsertSql(
-            [entity],
-            Cache.ResolveCommandBuilderData(typeof(TEntity)));
-        
-        return connection.QuerySingle<int>(components.Command, components.Parameters);
-    }
+        => connection.Insert<int, TEntity>(entity);
     
     /// <summary>
     /// Inserts an entity with a key of type <see cref="int"/> via an <see cref="IDbTransaction"/>.
@@ -36,13 +30,7 @@ public static class CreateCommands
     /// <param name="entity">The entity to insert.</param>
     /// <returns>The key (of type <see cref="int"/>) of the inserted entity.</returns>
     public static int Insert<TEntity>(this IDbTransaction transaction, TEntity entity)
-    {
-        CommandComponents components = GenerateInsertSql(
-            [entity],
-            Cache.ResolveCommandBuilderData(typeof(TEntity)));
-        
-        return transaction.QuerySingle<int>(components.Command, components.Parameters);
-    }
+        => transaction.Insert<int, TEntity>(entity);
     
     /// <summary>
     /// Inserts an entity with a generic key of type <typeparamref name="TKey"/> via an <see cref="IDbConnection"/>.
@@ -69,9 +57,7 @@ public static class CreateCommands
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="entity">The entity to insert.</param>
     /// <returns>The inserted entity's key of type <typeparamref name="TKey"/>.</returns>
-    public static TKey Insert<TKey, TEntity>(
-        this IDbTransaction transaction,
-        TEntity entity)
+    public static TKey Insert<TKey, TEntity>(this IDbTransaction transaction, TEntity entity)
     {
         CommandComponents components = GenerateInsertSql(
             [entity],
@@ -130,13 +116,7 @@ public static class CreateCommands
     public static Task<int> InsertAsync<TEntity>(
         this IDbConnection connection,
         TEntity entity)
-    {
-        CommandComponents components = GenerateInsertSql(
-            [entity],
-            Cache.ResolveCommandBuilderData(typeof(TEntity)));
-        
-        return connection.QuerySingleAsync<int>(components.Command, components.Parameters);
-    }
+        => connection.InsertAsync<int, TEntity>(entity);
     
     /// <summary>
     /// Inserts an entity with a key of type <see cref="int"/> via an <see cref="IDbTransaction"/>.
@@ -148,29 +128,23 @@ public static class CreateCommands
     public static Task<int> InsertAsync<TEntity>(
         this IDbTransaction transaction,
         TEntity entity)
-    {
-        CommandComponents components = GenerateInsertSql(
-            [entity],
-            Cache.ResolveCommandBuilderData(typeof(TEntity)));
-        
-        return transaction.QuerySingleAsync<int>(components.Command, components.Parameters);
-    }
+        => transaction.InsertAsync<int, TEntity>(entity);
     
     /// <summary>
     /// Inserts an entity with a generic key of type <typeparamref name="TKey"/> via an <see cref="IDbConnection"/>.
     /// </summary>
     /// <typeparam name="TKey">The type of the key.</typeparam>
-    /// <typeparam name="TValue">The type of the entity.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="entity">The entity to insert.</param>
     /// <returns>The inserted entity's key of type <typeparamref name="TKey"/>.</returns>
-    public static Task<TKey> InsertAsync<TKey, TValue>(
+    public static Task<TKey> InsertAsync<TKey, TEntity>(
         this IDbConnection connection,
-        TValue entity)
+        TEntity entity)
     {
         CommandComponents components = GenerateInsertSql(
             [entity],
-            Cache.ResolveCommandBuilderData(typeof(TValue)));
+            Cache.ResolveCommandBuilderData(typeof(TEntity)));
         
         return connection.QuerySingleAsync<TKey>(components.Command, components.Parameters);
     }
@@ -179,17 +153,17 @@ public static class CreateCommands
     /// Inserts an entity with a generic key of type <typeparamref name="TKey"/> via an <see cref="IDbTransaction"/>.
     /// </summary>
     /// <typeparam name="TKey">The type of the key.</typeparam>
-    /// <typeparam name="TValue">The type of the entity.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="entity">The entity to insert.</param>
     /// <returns>The inserted entity's key of type <typeparamref name="TKey"/>.</returns>
-    public static Task<TKey> InsertAsync<TKey, TValue>(
+    public static Task<TKey> InsertAsync<TKey, TEntity>(
         this IDbTransaction transaction,
-        TValue entity)
+        TEntity entity)
     {
         CommandComponents components = GenerateInsertSql(
             [entity],
-            Cache.ResolveCommandBuilderData(typeof(TValue)));
+            Cache.ResolveCommandBuilderData(typeof(TEntity)));
         
         return transaction.QuerySingleAsync<TKey>(components.Command, components.Parameters);
     }

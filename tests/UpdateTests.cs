@@ -1,4 +1,5 @@
 using System.Data;
+using System.Text.Json;
 using Ormamu;
 using OrmamuTests.Entities;
 using OrmamuTests.Fixtures;
@@ -790,7 +791,7 @@ public class UpdateTests(DbFixture fixture)
     }
     
     [Fact]
-    public void PartialUpdateWithEntity_WithConnection_ShouldHaveChangedValue()
+    public void PartialUpdate_WithConnectionWithEntity_ShouldHaveChangedValue()
     {
         //Arrange
         
@@ -804,16 +805,16 @@ public class UpdateTests(DbFixture fixture)
             IsActive = true,
             Strength = 50
         };
-        string gnomeId = connection.Insert<string, Gnome>(gnome);
         
         //Act
+        connection.Insert<string, Gnome>(gnome);
         int updatedRecords = connection.PartialUpdate(
             gnome with { Name = "The Mule", Height = 140, IsActive = false},
             x=>x
                 .CopyProperty(y=>y.Name)
                 .CopyProperty(y=>y.Height)
         );
-        Gnome? gnomeFromDb = connection.Get<string, Gnome>(gnomeId);
+        Gnome? gnomeFromDb = connection.Get<string, Gnome>(gnome.Id);
         
         //Assert
         Assert.True(gnomeFromDb is not null);
@@ -822,7 +823,7 @@ public class UpdateTests(DbFixture fixture)
     }
     
     [Fact]
-    public void PartialUpdateWithTypedKey_WithConnection_ShouldHaveChangedValue()
+    public void PartialUpdate_WithConnectionWithTypedKey_ShouldHaveChangedValue()
     {
         //Arrange
         
@@ -836,19 +837,101 @@ public class UpdateTests(DbFixture fixture)
             IsActive = true,
             Strength = 50
         };
-        string gnomeId = connection.Insert<string, Gnome>(gnome);
         
         //Act
+        connection.Insert<string, Gnome>(gnome);
         int updatedRecords = connection.PartialUpdate<string, Gnome>(
             gnome.Id,
             x=>x.SetProperty(y=>y.Name, "The Mule")
                 .SetProperty(y=>y.Height, 140)
         );
-        Gnome? gnomeFromDb = connection.Get<string, Gnome>(gnomeId);
+        Gnome? gnomeFromDb = connection.Get<string, Gnome>(gnome.Id);
         
         //Assert
         Assert.True(gnomeFromDb is not null);
         Assert.True(updatedRecords == 1);
         Assert.True(gnomeFromDb is { Name: "The Mule", Height: 140 });
+    }
+    
+    [Fact]
+    public void BulkPartialUpdate_WithConnectionWithEntities_ShouldHaveChangedValuse()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Gnome[] gnomes = [new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        }, new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Torord",
+            Height = 110,
+            IsActive = true,
+            Strength = 40
+        }];
+        
+        connection.BulkInsert(gnomes);
+        
+        gnomes = gnomes.Select(x=> x with { Name = "The Mule", Height = 140, IsActive = false}).ToArray();
+        
+        //Act
+        int updatedRecords = connection.BulkPartialUpdate(
+            gnomes,
+            x=>x
+                .CopyProperty(y=>y.IsActive)
+                .CopyProperty(y=>y.Height)
+        );
+        IEnumerable<Gnome> gnomesFromDb = connection.Get<string, Gnome>(gnomes.Select(x=>x.Id).ToArray());
+        
+        //Assert
+        Assert.True(gnomesFromDb.Count() == 2);
+        Assert.True(updatedRecords == 2);
+        Assert.True(gnomesFromDb.All(x => x.Name != "The Mule"));
+    }
+    
+    [Fact]
+    public void BulkPartialUpdate_WithConnectionWithTypedKeys_ShouldHaveChangedValues()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Gnome[] gnomes = [new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        }, new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Torord",
+            Height = 110,
+            IsActive = true,
+            Strength = 40
+        }];
+        
+        connection.BulkInsert(gnomes);
+        
+        //Act
+        int updatedRecords = connection.BulkPartialUpdate<string, Gnome>(
+            gnomes.Select(x=>x.Id).ToArray(),
+            x=>x
+                .SetProperty(y=>y.IsActive, false)
+                .SetProperty(y=>y.Height, 140)
+        );
+        IEnumerable<Gnome> gnomesFromDb = connection.Get<string, Gnome>(gnomes.Select(x=>x.Id).ToArray());
+        
+        //Assert
+        Assert.True(gnomesFromDb.Count() == 2);
+        Assert.True(updatedRecords == 2);
+        Assert.True(gnomesFromDb.All(x => x is { IsActive: false, Height: 140 }));
     }
 }

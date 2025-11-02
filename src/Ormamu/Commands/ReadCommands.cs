@@ -22,10 +22,7 @@ public static class ReadCommands
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The matching entity, or <c>null</c> if not found.</returns>
     public static TEntity? Get<TEntity>(this IDbConnection connection, int keyValue)
-    {
-        SelectComponents components = GenerateSelectCommand<int, TEntity>([keyValue]);
-        return connection.QuerySingleOrDefault<TEntity>(components.Command, components.Parameters);
-    }
+        => connection.Get<int, TEntity>(keyValue);
 
     /// <summary>
     /// Retrieves an entity of type <typeparamref name="TEntity"/> by its key (of type <see cref="int"/>) via an
@@ -36,10 +33,7 @@ public static class ReadCommands
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The matching entity, or <c>null</c> if not found.</returns>
     public static TEntity? Get<TEntity>(this IDbTransaction transaction, int keyValue)
-    {
-        SelectComponents components = GenerateSelectCommand<int, TEntity>([keyValue]);
-        return transaction.QuerySingleOrDefault<TEntity>(components.Command, components.Parameters);
-    }
+        => transaction.Get<int, TEntity>(keyValue);
     
     /// <summary>
     /// Retrieves an entity of type <typeparamref name="TEntity"/> by its key of type <typeparamref name="TKey"/> via an
@@ -88,16 +82,7 @@ public static class ReadCommands
         string? orderByClause = null,
         int? pageSize = null,
         int? pageNumber = null)
-    {
-        SelectComponents components = GenerateSelectCommand<int, TEntity>(
-            keys,
-            null,
-            orderByClause,
-            pageSize,
-            pageNumber
-        );
-        return connection.Query<TEntity>(components.Command, components.Parameters);
-    }
+        => connection.Get<int, TEntity>(keys, orderByClause, pageSize, pageNumber);
 
     /// <summary>
     /// Retrieves a list of entities of type <typeparamref name="TEntity"/> from the database by primary key values,
@@ -116,16 +101,7 @@ public static class ReadCommands
         string? orderByClause = null,
         int? pageSize = null,
         int? pageNumber = null)
-    {
-        SelectComponents components = GenerateSelectCommand<int, TEntity>(
-            keys,
-            null,
-            orderByClause,
-            pageSize,
-            pageNumber
-        );
-        return transaction.Query<TEntity>(components.Command, components.Parameters);
-    }
+        => transaction.Get<int, TEntity>(keys, orderByClause, pageSize, pageNumber);
 
     /// <summary>
     /// Retrieves a list of entities of type <typeparamref name="TEntity"/> from the database by primary key values,
@@ -256,10 +232,7 @@ public static class ReadCommands
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The matching entity, or <c>null</c> if not found.</returns>
     public static Task<TEntity?> GetAsync<TEntity>(this IDbConnection connection, int keyValue)
-    {
-        SelectComponents components = GenerateSelectCommand<int, TEntity>([keyValue]);
-        return connection.QuerySingleOrDefaultAsync<TEntity>(components.Command, components.Parameters);
-    }
+        => connection.GetAsync<int, TEntity>(keyValue);
 
     /// <summary>
     /// Retrieves an entity of type <typeparamref name="TEntity"/> by its key (of type <see cref="int"/>) via
@@ -270,10 +243,7 @@ public static class ReadCommands
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The matching entity, or <c>null</c> if not found.</returns>
     public static Task<TEntity?> GetAsync<TEntity>(this IDbTransaction transaction, int keyValue)
-    {
-        SelectComponents components = GenerateSelectCommand<int, TEntity>([keyValue]);
-        return transaction.QuerySingleOrDefaultAsync<TEntity?>(components.Command, components.Parameters);
-    }
+        => transaction.GetAsync<int, TEntity>(keyValue);
     
     /// <summary>
     /// Retrieves an entity of type <typeparamref name="TEntity"/> by its key of type <typeparamref name="TKey"/> via
@@ -322,16 +292,7 @@ public static class ReadCommands
         string? orderByClause = null,
         int? pageSize = null,
         int? pageNumber = null)
-    {
-        SelectComponents components = GenerateSelectCommand<int, TEntity>(
-            keys,
-            null,
-            orderByClause,
-            pageSize,
-            pageNumber
-        );
-        return connection.QueryAsync<TEntity>(components.Command, components.Parameters);
-    }
+        => connection.GetAsync<int, TEntity>(keys, orderByClause, pageSize, pageNumber);
 
     /// <summary>
     /// Retrieves a list of entities of type <typeparamref name="TEntity"/> from the database by primary key values,
@@ -350,16 +311,7 @@ public static class ReadCommands
         string? orderByClause = null,
         int? pageSize = null,
         int? pageNumber = null)
-    {
-        SelectComponents components = GenerateSelectCommand<int, TEntity>(
-            keys,
-            null,
-            orderByClause,
-            pageSize,
-            pageNumber
-        );
-        return transaction.QueryAsync<TEntity>(components.Command, components.Parameters);
-    }
+        => transaction.GetAsync<int, TEntity>(keys, orderByClause, pageSize, pageNumber);
 
     /// <summary>
     /// Retrieves a list of entities of type <typeparamref name="TEntity"/> from the database by primary key values,
@@ -482,14 +434,14 @@ public static class ReadCommands
     #endregion
 
     private sealed record SelectComponents(string Command, DynamicParameters Parameters);
-    private static SelectComponents GenerateSelectCommand<TKey, TValue>(
+    private static SelectComponents GenerateSelectCommand<TKey, TEntity>(
         TKey[] keys,
         string? whereClause = null,
         string? orderByClause = null,
         int? pageSize = null,
         int? pageNumber = null)
     {
-        CommandBuilderData data = Cache.ResolveCommandBuilderData(typeof(TValue));
+        CommandBuilderData data = Cache.ResolveCommandBuilderData(typeof(TEntity));
         char propertyWrapper = data.Options.Dialect switch
         {
             SqlDialect.PostgreSql => '"',

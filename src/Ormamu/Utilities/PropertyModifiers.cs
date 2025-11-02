@@ -11,6 +11,8 @@ public class PropertySetters<TEntity> : PropertyModifiers
         Setters.Add(new Setter(selector, value));
         return this;
     }
+    internal PartialUpdateComponents GetPartialUpdateComponents(CommandBuilderData builderData)
+        => GetPartialUpdateComponents(builderData, false);
 }
 
 public class PropertyCopiers<TEntity> : PropertyModifiers
@@ -21,6 +23,8 @@ public class PropertyCopiers<TEntity> : PropertyModifiers
         Setters.Add(new Setter(selector, null));
         return this;
     }
+    internal PartialUpdateComponents GetPartialUpdateComponents(CommandBuilderData builderData)
+        => GetPartialUpdateComponents(builderData, true);
 }
 public abstract class PropertyModifiers
 {
@@ -38,24 +42,18 @@ public abstract class PropertyModifiers
         return components.ToArray();
     }
 
-    internal PartialUpdateComponents GetPartialUpdateComponents<TKey>(
+    internal PartialUpdateComponents GetPartialUpdateComponents(
         CommandBuilderData builderData,
-        TKey? entityKey)
+        bool copy)
     {
         PartialUpdates[] keyUpdates = builderData.KeyProperties
-            .Select(x=>
-            {
-                object? value = entityKey;
-                if (value is not null)
-                {
-                    value = builderData.KeyProperties.Length > 1 ? x.CompositeKeyGetter!(entityKey!) : entityKey;
-                }
-                return new PartialUpdates(x, value);
-            }).ToArray();
-        return new(keyUpdates.Concat(GetPartialUpdates((builderData))).ToArray(), entityKey is null);
+            .Select(x=> new PartialUpdates(x, null, true))
+            .ToArray();
+        
+        return new(keyUpdates.Concat(GetPartialUpdates((builderData))).ToArray(), copy);
     }
     internal sealed record Setter(Expression Selector, object? Value);
 }
 
 internal sealed record PartialUpdateComponents(PartialUpdates[] Updates, bool Copy);
-internal sealed record PartialUpdates(PropertyMapping Property, object? Value);
+internal sealed record PartialUpdates(PropertyMapping Property, object? Value, bool KeySetter = false);

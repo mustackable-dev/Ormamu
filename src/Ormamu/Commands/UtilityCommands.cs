@@ -86,7 +86,7 @@ public static class UtilityCommands
     /// <param name="whereClause">Optional WHERE clause to filter records.</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>The sum of the selected property.</returns>
-    public static TValue Sum<TEntity, TValue, TProperty>(
+    public static TValue Sum<TEntity, TProperty, TValue>(
         this IDbConnection connection,
         Expression<Func<TEntity, TProperty>> propertySelector,
         string? whereClause = null,
@@ -129,7 +129,7 @@ public static class UtilityCommands
     /// <param name="whereClause">Optional SQL WHERE clause to filter records.</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>The sum of the selected property.</returns>
-    public static TValue Sum<TEntity, TValue, TProperty>(
+    public static TValue Sum<TEntity, TProperty, TValue>(
         this IDbTransaction transaction,
         Expression<Func<TEntity, TProperty>> propertySelector,
         string? whereClause = null,
@@ -172,7 +172,7 @@ public static class UtilityCommands
     /// <param name="whereClause">Optional WHERE clause to filter records.</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>The sum of the selected property.</returns>
-    public static Task<TValue> SumAsync<TEntity, TValue, TProperty>(
+    public static Task<TValue> SumAsync<TEntity, TProperty, TValue>(
         this IDbConnection connection,
         Expression<Func<TEntity, TProperty>> propertySelector,
         string? whereClause = null,
@@ -215,7 +215,7 @@ public static class UtilityCommands
     /// <param name="whereClause">Optional WHERE clause to filter records.</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>The sum of the selected property.</returns>
-    public static Task<TValue> SumAsync<TEntity, TValue, TProperty>(
+    public static Task<TValue> SumAsync<TEntity, TProperty, TValue>(
         this IDbTransaction transaction,
         Expression<Func<TEntity, TProperty>> propertySelector,
         string? whereClause = null,
@@ -258,7 +258,7 @@ public static class UtilityCommands
     /// <param name="whereClause">Optional WHERE clause to filter records.</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>The average value of the selected property.</returns>
-    public static TValue Average<TEntity, TValue, TProperty>(
+    public static TValue Average<TEntity, TProperty, TValue>(
         this IDbConnection connection,
         Expression<Func<TEntity, TProperty>> propertySelector,
         string? whereClause = null,
@@ -301,7 +301,7 @@ public static class UtilityCommands
     /// <param name="whereClause">Optional WHERE clause to filter records.</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>The average value of the selected property.</returns>
-    public static TValue Average<TEntity, TValue, TProperty>(
+    public static TValue Average<TEntity, TProperty, TValue>(
         this IDbTransaction transaction,
         Expression<Func<TEntity, TProperty>> propertySelector,
         string? whereClause = null,
@@ -344,7 +344,7 @@ public static class UtilityCommands
     /// <param name="whereClause">Optional WHERE clause to filter records.</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>The average value of the selected property.</returns>
-    public static Task<TValue> AverageAsync<TEntity, TValue, TProperty>(
+    public static Task<TValue> AverageAsync<TEntity, TProperty, TValue>(
         this IDbConnection connection,
         Expression<Func<TEntity, TProperty>> propertySelector,
         string? whereClause = null,
@@ -387,7 +387,7 @@ public static class UtilityCommands
     /// <param name="whereClause">Optional WHERE clause to filter records.</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>The average value of the selected property.</returns>
-    public static Task<TValue> AverageAsync<TEntity, TValue, TProperty>(
+    public static Task<TValue> AverageAsync<TEntity, TProperty, TValue>(
         this IDbTransaction transaction,
         Expression<Func<TEntity, TProperty>> propertySelector,
         string? whereClause = null,
@@ -430,7 +430,7 @@ public static class UtilityCommands
     /// <param name="whereClause">Optional WHERE clause to filter records.</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>The minimum value of the selected property.</returns>
-    public static TValue Min<TEntity, TValue, TProperty>(
+    public static TValue Min<TEntity, TProperty, TValue>(
         this IDbConnection connection,
         Expression<Func<TEntity, TProperty>> propertySelector,
         string? whereClause = null,
@@ -473,7 +473,7 @@ public static class UtilityCommands
     /// <param name="whereClause">Optional WHERE clause to filter records.</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>The minimum value of the selected property.</returns>
-    public static TValue Min<TEntity, TValue, TProperty>(
+    public static TValue Min<TEntity, TProperty, TValue>(
         this IDbTransaction transaction,
         Expression<Func<TEntity, TProperty>> propertySelector,
         string? whereClause = null,
@@ -516,7 +516,7 @@ public static class UtilityCommands
     /// <param name="whereClause">Optional WHERE clause to filter records.</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>The minimum value of the selected property.</returns>
-    public static Task<TValue> MinAsync<TEntity, TValue, TProperty>(
+    public static Task<TValue> MinAsync<TEntity, TProperty, TValue>(
         this IDbConnection connection,
         Expression<Func<TEntity, TProperty>> propertySelector,
         string? whereClause = null,
@@ -559,7 +559,7 @@ public static class UtilityCommands
     /// <param name="whereClause">Optional WHERE clause to filter records.</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>The minimum value of the selected property.</returns>
-    public static Task<TValue> MinAsync<TEntity, TValue, TProperty>(
+    public static Task<TValue> MinAsync<TEntity, TProperty, TValue>(
         this IDbTransaction transaction,
         Expression<Func<TEntity, TProperty>> propertySelector,
         string? whereClause = null,
@@ -602,7 +602,7 @@ public static class UtilityCommands
     /// <param name="whereClause">Optional WHERE clause to filter records.</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>The maximum value of the selected property.</returns>
-    public static TValue Max<TEntity, TValue, TProperty>(
+    public static TValue Max<TEntity, TProperty, TValue>(
         this IDbConnection connection,
         Expression<Func<TEntity, TProperty>> propertySelector,
         string? whereClause = null,
@@ -645,7 +645,7 @@ public static class UtilityCommands
     /// <param name="whereClause">Optional WHERE clause to filter records.</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>The maximum value of the selected property.</returns>
-    public static TValue Max<TEntity, TValue, TProperty>(
+    public static TValue Max<TEntity, TProperty, TValue>(
         this IDbTransaction transaction,
         Expression<Func<TEntity, TProperty>> propertySelector,
         string? whereClause = null,
@@ -688,7 +688,7 @@ public static class UtilityCommands
     /// <param name="whereClause">Optional WHERE clause to filter records.</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>The maximum value of the selected property.</returns>
-    public static Task<TValue> MaxAsync<TEntity, TValue, TProperty>(
+    public static Task<TValue> MaxAsync<TEntity, TProperty, TValue>(
         this IDbConnection connection,
         Expression<Func<TEntity, TProperty>> propertySelector,
         string? whereClause = null,
@@ -731,7 +731,7 @@ public static class UtilityCommands
     /// <param name="whereClause">Optional WHERE clause to filter records.</param>
     /// <param name="param">Parameters to use for the query.</param>
     /// <returns>The maximum value of the selected property.</returns>
-    public static Task<TValue> MaxAsync<TEntity, TValue, TProperty>(
+    public static Task<TValue> MaxAsync<TEntity, TProperty, TValue>(
         this IDbTransaction transaction,
         Expression<Func<TEntity, TProperty>> propertySelector,
         string? whereClause = null,

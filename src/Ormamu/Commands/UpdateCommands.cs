@@ -142,15 +142,314 @@ public static class UpdateCommands
     }
      
     #endregion
-    private static CommandComponents GenerateUpdateSql<TEntity>(
+    
+    #region PartialRegular
+    public static int PartialUpdate<TEntity>(
+        this IDbConnection connection,
+        TEntity entity,
+        Func<PropertyCopiers<TEntity>, PropertyCopiers<TEntity>> propertySettersFactory)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        CommandComponents components = GenerateUpdateSql(
+            [entity],
+            Cache.ResolveCommandBuilderData(typeof(TEntity)),
+            partials: partials);
+        
+        return connection.Execute(components.Command, components.Parameters);
+    }
+    
+    public static int PartialUpdate<TEntity>(
+        this IDbTransaction transaction,
+        TEntity entity,
+        Func<PropertyCopiers<TEntity>, PropertyCopiers<TEntity>> propertySettersFactory)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        CommandComponents components = GenerateUpdateSql(
+            [entity],
+            Cache.ResolveCommandBuilderData(typeof(TEntity)),
+            partials: partials);
+        
+        return transaction.Execute(components.Command, components.Parameters);
+    }
+    
+    public static int PartialUpdate<TEntity>(
+        this IDbConnection connection,
+        int entityKey,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
+        => connection.PartialUpdate<int, TEntity>(entityKey, propertySettersFactory);
+
+    public static int PartialUpdate<TEntity>(
+        this IDbTransaction transaction,
+        int entityKey,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
+        => transaction.PartialUpdate<int, TEntity>(entityKey, propertySettersFactory);
+    
+    public static int PartialUpdate<TKey, TEntity>(
+        this IDbConnection connection,
+        TKey entityKey,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        CommandComponents components = GenerateUpdateSql<TKey>(
+            [entityKey],
+            builderData,
+            partials: partials);
+        return connection.Execute(components.Command, components.Parameters);
+    }
+
+    public static int PartialUpdate<TKey, TEntity>(
+        this IDbTransaction transaction,
+        TKey entityKey,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        CommandComponents components = GenerateUpdateSql<TKey>(
+            [entityKey],
+            builderData,
+            partials: partials);
+        return transaction.Execute(components.Command, components.Parameters);
+    }
+    public static int BulkPartialUpdate<TEntity>(
+        this IDbConnection connection,
         TEntity[] entities,
+        Func<PropertyCopiers<TEntity>, PropertyCopiers<TEntity>> propertySettersFactory,
+        int batchSize = 100)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        return connection.ExecuteBulk(
+            (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end, partials), entities, batchSize);
+    }
+    
+    public static int BulkPartialUpdate<TEntity>(
+        this IDbTransaction transaction,
+        TEntity[] entities,
+        Func<PropertyCopiers<TEntity>, PropertyCopiers<TEntity>> propertySettersFactory,
+        int batchSize = 100)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        return transaction.ExecuteBulk(
+            (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end, partials), entities, batchSize);
+    }
+    
+    public static int BulkPartialUpdate<TEntity>(
+        this IDbConnection connection,
+        int[] keys,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
+        int batchSize = 100)
+        => connection.BulkPartialUpdate<int, TEntity>(keys, propertySettersFactory, batchSize);
+
+    public static int BulkPartialUpdate<TEntity>(
+        this IDbTransaction transaction,
+        int[] keys,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
+        int batchSize = 100)
+        => transaction.BulkPartialUpdate<int, TEntity>(keys, propertySettersFactory, batchSize);
+    
+    public static int BulkPartialUpdate<TKey, TEntity>(
+        this IDbConnection connection,
+        TKey[] keys,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
+        int batchSize = 100)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        return connection.ExecuteBulk(
+            (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end, partials), keys, batchSize);
+    }
+
+    public static int BulkPartialUpdate<TKey, TEntity>(
+        this IDbTransaction transaction,
+        TKey[] keys,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
+        int batchSize = 100)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        return transaction.ExecuteBulk(
+            (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end, partials), keys, batchSize);
+    }
+    
+    #endregion
+    
+    #region PartialAsync
+    public static Task<int> PartialUpdateAsync<TEntity>(
+        this IDbConnection connection,
+        TEntity entity,
+        Func<PropertyCopiers<TEntity>, PropertyCopiers<TEntity>> propertySettersFactory)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        CommandComponents components = GenerateUpdateSql(
+            [entity],
+            Cache.ResolveCommandBuilderData(typeof(TEntity)),
+            partials: partials);
+        
+        return connection.ExecuteAsync(components.Command, components.Parameters);
+    }
+    
+    public static Task<int> PartialUpdateAsync<TEntity>(
+        this IDbTransaction transaction,
+        TEntity entity,
+        Func<PropertyCopiers<TEntity>, PropertyCopiers<TEntity>> propertySettersFactory)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        CommandComponents components = GenerateUpdateSql(
+            [entity],
+            Cache.ResolveCommandBuilderData(typeof(TEntity)),
+            partials: partials);
+        
+        return transaction.ExecuteAsync(components.Command, components.Parameters);
+    }
+    
+    public static Task<int> PartialUpdateAsync<TEntity>(
+        this IDbConnection connection,
+        int entityKey,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
+        => connection.PartialUpdateAsync<int, TEntity>(entityKey, propertySettersFactory);
+
+    public static Task<int> PartialUpdateAsync<TEntity>(
+        this IDbTransaction transaction,
+        int entityKey,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
+        => transaction.PartialUpdateAsync<int, TEntity>(entityKey, propertySettersFactory);
+    
+    public static Task<int> PartialUpdateAsync<TKey, TEntity>(
+        this IDbConnection connection,
+        TKey entityKey,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        CommandComponents components = GenerateUpdateSql<TKey>(
+            [entityKey],
+            builderData,
+            partials: partials);
+        return connection.ExecuteAsync(components.Command, components.Parameters);
+    }
+
+    public static Task<int> PartialUpdateAsync<TKey, TEntity>(
+        this IDbTransaction transaction,
+        TKey entityKey,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        CommandComponents components = GenerateUpdateSql<TKey>(
+            [entityKey],
+            builderData,
+            partials: partials);
+        return transaction.ExecuteAsync(components.Command, components.Parameters);
+    }
+    public static Task<int> BulkPartialUpdateAsync<TEntity>(
+        this IDbConnection connection,
+        TEntity[] entities,
+        Func<PropertyCopiers<TEntity>, PropertyCopiers<TEntity>> propertySettersFactory,
+        int batchSize = 100)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        return connection.ExecuteBulkAsync(
+            (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end, partials), entities, batchSize);
+    }
+    
+    public static Task<int> BulkPartialUpdateAsync<TEntity>(
+        this IDbTransaction transaction,
+        TEntity[] entities,
+        Func<PropertyCopiers<TEntity>, PropertyCopiers<TEntity>> propertySettersFactory,
+        int batchSize = 100)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        return transaction.ExecuteBulkAsync(
+            (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end, partials), entities, batchSize);
+    }
+    
+    public static Task<int> BulkPartialUpdateAsync<TEntity>(
+        this IDbConnection connection,
+        int[] keys,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
+        int batchSize = 100)
+        => connection.BulkPartialUpdateAsync<int, TEntity>(keys, propertySettersFactory, batchSize);
+
+    public static Task<int> BulkPartialUpdateAsync<TEntity>(
+        this IDbTransaction transaction,
+        int[] keys,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
+        int batchSize = 100)
+        => transaction.BulkPartialUpdateAsync<int, TEntity>(keys, propertySettersFactory, batchSize);
+    
+    public static Task<int> BulkPartialUpdateAsync<TKey, TEntity>(
+        this IDbConnection connection,
+        TKey[] keys,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
+        int batchSize = 100)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        return connection.ExecuteBulkAsync(
+            (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end, partials), keys, batchSize);
+    }
+
+    public static Task<int> BulkPartialUpdateAsync<TKey, TEntity>(
+        this IDbTransaction transaction,
+        TKey[] keys,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
+        int batchSize = 100)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        return transaction.ExecuteBulkAsync(
+            (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end, partials), keys, batchSize);
+    }
+    #endregion
+    private static CommandComponents GenerateUpdateSql<TValue>(
+        TValue[] values,
         CommandBuilderData data,
         int enumerationStartIndex = 0,
         int enumerationEnd = 1,
         PartialUpdateComponents? partials = null)
     {
         StringBuilder commandBuilder = new();
-        DynamicParameters values = new(partials is null ? entities.Length : partials.Updates.Length);
+        DynamicParameters parameters = new(partials is null ? values.Length : partials.Updates.Length);
         
         char propertyWrapper = data.Options.Dialect switch
         {
@@ -167,9 +466,9 @@ public static class UpdateCommands
             {
                 commandBuilder.AppendUpdateParameters(
                     data.Properties,
-                    ref values,
+                    ref parameters,
                     i,
-                    entities[i],
+                    values[i],
                     propertyWrapper);
             }
             else
@@ -179,16 +478,17 @@ public static class UpdateCommands
                     
                     commandBuilder.AppendUpdateParameters(
                         partials.Updates.Select(x=>x.Property),
-                        ref values,
+                        ref parameters,
                         i,
-                        entities[i],
+                        values[i],
                         propertyWrapper);
                 }
                 else
                 {
                     commandBuilder.AppendUpdateParameters(
-                        ref values,
+                        ref parameters,
                         i,
+                        values[i],
                         partials.Updates,
                         propertyWrapper);
                 }
@@ -216,7 +516,7 @@ public static class UpdateCommands
             commandBuilder.Append(";");
         }
     
-        return new(commandBuilder.ToString(), values);
+        return new(commandBuilder.ToString(), parameters);
     }
     
     private static void AppendUpdateParameters<TEntity>(
@@ -243,19 +543,35 @@ public static class UpdateCommands
         }
     }
     
-    private static void AppendUpdateParameters(
+    private static void AppendUpdateParameters<TValue>(
         this StringBuilder sb,
         ref DynamicParameters parameters,
         int index,
+        TValue keyValue,
         PartialUpdates[] partials,
-        char propertyWrapper = '\0')
+        char propertyWrapper = '\0',
+        bool hasCompositeKey = false)
     {
         bool skipFirst = true;
         foreach (PartialUpdates update in partials)
         {
             string key = string.Concat("@", update.Property.AssemblyName, index);
-            
-            if(!update.Property.IsDbGenerated) parameters.Add(key, update.Value);
+
+            if (!update.Property.IsDbGenerated)
+            {
+                if (update.KeySetter)
+                {
+                    parameters.Add(
+                        key,
+                        hasCompositeKey && keyValue is not null ?
+                            update.Property.CompositeKeyGetter!(keyValue) :
+                            keyValue);
+                }
+                else
+                {
+                    parameters.Add(key, update.Value);
+                }
+            }
 
             if (!update.Property.IsKey)
             {
@@ -264,37 +580,5 @@ public static class UpdateCommands
                 skipFirst = false;
             }
         }
-    }
-
-    public static int PartialUpdate<TEntity>(
-        this IDbConnection connection,
-        TEntity entity,
-        Func<PropertyCopiers<TEntity>, PropertyCopiers<TEntity>> propertySettersFactory)
-    {
-        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
-        PartialUpdateComponents partials = propertySettersFactory(new())
-            .GetPartialUpdateComponents<object>(builderData, null);
-        
-        CommandComponents components = GenerateUpdateSql(
-            [entity],
-            Cache.ResolveCommandBuilderData(typeof(TEntity)),
-            partials: partials);
-        return connection.Execute(components.Command, components.Parameters);
-    }
-
-    public static int PartialUpdate<TKey, TEntity>(
-        this IDbConnection connection,
-        TKey entityKey,
-        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
-    {
-        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
-        PartialUpdateComponents partials = propertySettersFactory(new())
-            .GetPartialUpdateComponents(builderData, entityKey);
-        
-        CommandComponents components = GenerateUpdateSql<TEntity>(
-            [],
-            Cache.ResolveCommandBuilderData(typeof(TEntity)),
-            partials: partials);
-        return connection.Execute(components.Command, components.Parameters);
     }
 }
