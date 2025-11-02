@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Text;
 
 namespace Ormamu;
@@ -126,6 +127,14 @@ internal static class CompositionUtilities
             .Append(paramFromAssembly ? key.AssemblyName : "KeyValue");
         
         if(index != -1) sb.Append(index);
+    }
+    public static string ParsePropertyName(this Expression boxedLambdaExpression)
+    {
+        string rawExpression = ((LambdaExpression)boxedLambdaExpression).Body is UnaryExpression { Operand: MemberExpression propertyExpression } ? 
+            propertyExpression.ToString():
+            boxedLambdaExpression.ToString();
+        
+        return rawExpression[(rawExpression.IndexOf('.') + 1)..];
     }
 }
 

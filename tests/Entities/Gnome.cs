@@ -6,7 +6,7 @@ namespace OrmamuTests.Entities;
 
 [ConfigId(TestsConfig.DbVariant)]
 [Table(TestsConfig.UpdateTestsTableName, Schema = TestsConfig.SchemaName)]
-public class Gnome
+public record Gnome
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]

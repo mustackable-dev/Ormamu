@@ -146,11 +146,11 @@ public static class UpdateCommands
         TEntity[] entities,
         CommandBuilderData data,
         int enumerationStartIndex = 0,
-        int enumerationEnd = 1)
+        int enumerationEnd = 1,
+        PartialUpdateComponents? partials = null)
     {
         StringBuilder commandBuilder = new();
-        
-        DynamicParameters values = new(entities.Length);
+        DynamicParameters values = new(partials is null ? entities.Length : partials.Updates.Length);
         
         char propertyWrapper = data.Options.Dialect switch
         {
@@ -162,13 +162,37 @@ public static class UpdateCommands
         for(int i=enumerationStartIndex; i<enumerationEnd; i++)
         {
             commandBuilder.Append("UPDATE ").Append(data.DbIdentifier).Append(" SET ");
-            
-            commandBuilder.AppendUpdateParameters(
-                data.Properties,
-                ref values,
-                i,
-                entities[i],
-                propertyWrapper);
+
+            if (partials is null)
+            {
+                commandBuilder.AppendUpdateParameters(
+                    data.Properties,
+                    ref values,
+                    i,
+                    entities[i],
+                    propertyWrapper);
+            }
+            else
+            {
+                if (partials.Copy)
+                {
+                    
+                    commandBuilder.AppendUpdateParameters(
+                        partials.Updates.Select(x=>x.Property),
+                        ref values,
+                        i,
+                        entities[i],
+                        propertyWrapper);
+                }
+                else
+                {
+                    commandBuilder.AppendUpdateParameters(
+                        ref values,
+                        i,
+                        partials.Updates,
+                        propertyWrapper);
+                }
+            }
 
             commandBuilder
                 .Append(" WHERE ");
@@ -197,7 +221,7 @@ public static class UpdateCommands
     
     private static void AppendUpdateParameters<TEntity>(
         this StringBuilder sb,
-        PropertyMapping[] properties,
+        IEnumerable<PropertyMapping> properties,
         ref DynamicParameters parameters,
         int index,
         TEntity entity,
@@ -217,5 +241,60 @@ public static class UpdateCommands
                 skipFirst = false;
             }
         }
+    }
+    
+    private static void AppendUpdateParameters(
+        this StringBuilder sb,
+        ref DynamicParameters parameters,
+        int index,
+        PartialUpdates[] partials,
+        char propertyWrapper = '\0')
+    {
+        bool skipFirst = true;
+        foreach (PartialUpdates update in partials)
+        {
+            string key = string.Concat("@", update.Property.AssemblyName, index);
+            
+            if(!update.Property.IsDbGenerated) parameters.Add(key, update.Value);
+
+            if (!update.Property.IsKey)
+            {
+                sb.AppendWithSeparatorAndWrapper(update.Property.DbName, propertyWrapper, ',', skipFirst);
+                sb.Append("=").Append(key);
+                skipFirst = false;
+            }
+        }
+    }
+
+    public static int PartialUpdate<TEntity>(
+        this IDbConnection connection,
+        TEntity entity,
+        Func<PropertyCopiers<TEntity>, PropertyCopiers<TEntity>> propertySettersFactory)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents<object>(builderData, null);
+        
+        CommandComponents components = GenerateUpdateSql(
+            [entity],
+            Cache.ResolveCommandBuilderData(typeof(TEntity)),
+            partials: partials);
+        return connection.Execute(components.Command, components.Parameters);
+    }
+
+    public static int PartialUpdate<TKey, TEntity>(
+        this IDbConnection connection,
+        TKey entityKey,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData, entityKey);
+        
+        CommandComponents components = GenerateUpdateSql<TEntity>(
+            [],
+            Cache.ResolveCommandBuilderData(typeof(TEntity)),
+            partials: partials);
+        return connection.Execute(components.Command, components.Parameters);
     }
 }

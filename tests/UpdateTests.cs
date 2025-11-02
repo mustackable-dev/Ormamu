@@ -788,4 +788,67 @@ public class UpdateTests(DbFixture fixture)
         Assert.True(thronglets2.Select(x=>x.Id).SequenceEqual(thronglets3.Select(x=>x.Id)));
         Assert.False(thronglets2.Select(x=>x.Personality).SequenceEqual(thronglets3.Select(x=>x.Personality)));
     }
+    
+    [Fact]
+    public void PartialUpdateWithEntity_WithConnection_ShouldHaveChangedValue()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Gnome gnome = new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        };
+        string gnomeId = connection.Insert<string, Gnome>(gnome);
+        
+        //Act
+        int updatedRecords = connection.PartialUpdate(
+            gnome with { Name = "The Mule", Height = 140, IsActive = false},
+            x=>x
+                .CopyProperty(y=>y.Name)
+                .CopyProperty(y=>y.Height)
+        );
+        Gnome? gnomeFromDb = connection.Get<string, Gnome>(gnomeId);
+        
+        //Assert
+        Assert.True(gnomeFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(gnomeFromDb is { Name: "The Mule", Height: 140 });
+    }
+    
+    [Fact]
+    public void PartialUpdateWithTypedKey_WithConnection_ShouldHaveChangedValue()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Gnome gnome = new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        };
+        string gnomeId = connection.Insert<string, Gnome>(gnome);
+        
+        //Act
+        int updatedRecords = connection.PartialUpdate<string, Gnome>(
+            gnome.Id,
+            x=>x.SetProperty(y=>y.Name, "The Mule")
+                .SetProperty(y=>y.Height, 140)
+        );
+        Gnome? gnomeFromDb = connection.Get<string, Gnome>(gnomeId);
+        
+        //Assert
+        Assert.True(gnomeFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(gnomeFromDb is { Name: "The Mule", Height: 140 });
+    }
 }
