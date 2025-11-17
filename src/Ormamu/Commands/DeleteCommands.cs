@@ -58,7 +58,7 @@ public static class DeleteCommands
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The number of affected rows (typically 1 if deletion was successful).</returns>
     public static int Delete<TEntity>(this IDbConnection connection, int keyValue)
-        => connection.Delete<int, TEntity>(keyValue);
+        => connection.Delete<TEntity, int>(keyValue);
 
     /// <summary>
     /// Deletes an entity of type <typeparamref name="TEntity"/> by its key (of type <see cref="int"/>) via an
@@ -69,18 +69,18 @@ public static class DeleteCommands
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The number of affected rows (typically 1 if deletion was successful).</returns>
     public static int Delete<TEntity>(this IDbTransaction transaction, int keyValue)
-        => transaction.Delete<int, TEntity>(keyValue);
+        => transaction.Delete<TEntity, int>(keyValue);
 
     /// <summary>
     /// Deletes an entity of type <typeparamref name="TEntity"/> by its key of type <typeparamref name="TKey"/> via an
     /// <see cref="IDbConnection"/>.
     /// </summary>
-    /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <typeparam name="TEntity">The type of the entity to delete.</typeparam>
+    /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The number of affected rows (typically 1 if deletion was successful).</returns>
-    public static int Delete<TKey, TEntity>(this IDbConnection connection, TKey keyValue)
+    public static int Delete<TEntity, TKey>(this IDbConnection connection, TKey keyValue)
     {
         CommandComponents components = GenerateDeleteSql(
             [keyValue],
@@ -93,12 +93,12 @@ public static class DeleteCommands
     /// Deletes an entity of type <typeparamref name="TEntity"/> by its key of type <typeparamref name="TKey"/> via an
     /// <see cref="IDbTransaction"/>.
     /// </summary>
-    /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <typeparam name="TEntity">The type of the entity to delete.</typeparam>
+    /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The number of affected rows (typically 1 if deletion was successful).</returns>
-    public static int Delete<TKey, TEntity>(this IDbTransaction transaction, TKey keyValue)
+    public static int Delete<TEntity, TKey>(this IDbTransaction transaction, TKey keyValue)
     {
         CommandComponents components = GenerateDeleteSql(
             [keyValue],
@@ -162,7 +162,7 @@ public static class DeleteCommands
         this IDbConnection connection,
         int[] keys,
         int batchSize = 100)
-        => connection.BulkDelete<int, TEntity>(keys, batchSize);
+        => connection.BulkDelete<TEntity, int>(keys, batchSize);
     
     /// <summary>
     /// Deletes multiple entities of type <typeparamref name="TEntity"/> using an array of keys
@@ -177,19 +177,19 @@ public static class DeleteCommands
         this IDbTransaction transaction,
         int[] keys,
         int batchSize = 100)
-        => transaction.BulkDelete<int, TEntity>(keys, batchSize);
+        => transaction.BulkDelete<TEntity, int>(keys, batchSize);
     
     /// <summary>
     /// Deletes multiple entities of type <typeparamref name="TEntity"/> using an array of keys of type
     /// <typeparamref name="TKey"/> via an <see cref="IDbConnection"/>.
     /// </summary>
-    /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <typeparam name="TEntity">The type of the entities to delete.</typeparam>
+    /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="keys">An array of key values representing the entities to delete.</param>
     /// <param name="batchSize">The number of deletions to perform per batch.</param>
     /// <returns>The number of entities successfully deleted.</returns>
-    public static int BulkDelete<TKey, TEntity>(
+    public static int BulkDelete<TEntity, TKey>(
         this IDbConnection connection,
         TKey[] keys,
         int batchSize = 100)
@@ -205,13 +205,13 @@ public static class DeleteCommands
     /// Deletes multiple entities of type <typeparamref name="TEntity"/> using an array of keys of type
     /// <typeparamref name="TKey"/> via an <see cref="IDbTransaction"/>.
     /// </summary>
-    /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <typeparam name="TEntity">The type of the entities to delete.</typeparam>
+    /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="keys">An array of key values representing the entities to delete.</param>
     /// <param name="batchSize">The number of deletions to perform per batch.</param>
     /// <returns>The number of entities successfully deleted.</returns>
-    public static int BulkDelete<TKey, TEntity>(
+    public static int BulkDelete<TEntity, TKey>(
         this IDbTransaction transaction,
         TKey[] keys,
         int batchSize = 100)
@@ -278,7 +278,7 @@ public static class DeleteCommands
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The number of affected rows (typically 1 if deletion was successful).</returns>
     public static Task<int> DeleteAsync<TEntity>(this IDbConnection connection, int keyValue)
-        => connection.DeleteAsync<int, TEntity>(keyValue);
+        => connection.DeleteAsync<TEntity, int>(keyValue);
 
     /// <summary>
     /// Deletes an entity of type <typeparamref name="TEntity"/> by its key (of type <see cref="int"/>) via an
@@ -289,18 +289,18 @@ public static class DeleteCommands
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The number of affected rows (typically 1 if deletion was successful).</returns>
     public static Task<int> DeleteAsync<TEntity>(this IDbTransaction transaction, int keyValue)
-        => transaction.DeleteAsync<int, TEntity>(keyValue);
+        => transaction.DeleteAsync<TEntity, int>(keyValue);
 
     /// <summary>
     /// Deletes an entity of type <typeparamref name="TEntity"/> by its key of type <typeparamref name="TKey"/>
     /// via an <see cref="IDbConnection"/>.
     /// </summary>
-    /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <typeparam name="TEntity">The type of the entity to delete.</typeparam>
+    /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The number of affected rows (typically 1 if deletion was successful).</returns>
-    public static Task<int> DeleteAsync<TKey, TEntity>(this IDbConnection connection, TKey keyValue)
+    public static Task<int> DeleteAsync<TEntity, TKey>(this IDbConnection connection, TKey keyValue)
     {
         CommandComponents components = GenerateDeleteSql(
             [keyValue],
@@ -312,12 +312,12 @@ public static class DeleteCommands
     /// Deletes an entity of type <typeparamref name="TEntity"/> by its key of type <typeparamref name="TKey"/>
     /// via an <see cref="IDbTransaction"/>.
     /// </summary>
-    /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <typeparam name="TEntity">The type of the entity to delete.</typeparam>
+    /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="keyValue">The key value of the entity.</param>
     /// <returns>The number of affected rows (typically 1 if deletion was successful).</returns>
-    public static Task<int> DeleteAsync<TKey, TEntity>(this IDbTransaction transaction, TKey keyValue)
+    public static Task<int> DeleteAsync<TEntity, TKey>(this IDbTransaction transaction, TKey keyValue)
     {
         CommandComponents components = GenerateDeleteSql(
             [keyValue],
@@ -384,7 +384,7 @@ public static class DeleteCommands
         this IDbConnection connection,
         int[] keys,
         int batchSize = 100)
-        => connection.BulkDeleteAsync<int, TEntity>(keys, batchSize);
+        => connection.BulkDeleteAsync<TEntity, int>(keys, batchSize);
     
     /// <summary>
     /// Deletes multiple entities of type <typeparamref name="TEntity"/> using an array of keys
@@ -399,19 +399,19 @@ public static class DeleteCommands
         this IDbTransaction transaction,
         int[] keys,
         int batchSize = 100)
-        => transaction.BulkDeleteAsync<int, TEntity>(keys, batchSize);
+        => transaction.BulkDeleteAsync<TEntity, int>(keys, batchSize);
 
     /// <summary>
     /// Deletes multiple entities of type <typeparamref name="TEntity"/> using an array of keys of type
     /// <typeparamref name="TKey"/> via an <see cref="IDbConnection"/>.
     /// </summary>
-    /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <typeparam name="TEntity">The type of the entities to delete.</typeparam>
+    /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <param name="connection">A connection to the database.</param>
     /// <param name="keys">An array of key values representing the entities to delete.</param>
     /// <param name="batchSize">The number of deletions to perform per batch.</param>
     /// <returns>The number of entities successfully deleted.</returns>
-    public static Task<int> BulkDeleteAsync<TKey, TEntity>(
+    public static Task<int> BulkDeleteAsync<TEntity, TKey>(
         this IDbConnection connection,
         TKey[] keys,
         int batchSize = 100)
@@ -427,13 +427,13 @@ public static class DeleteCommands
     /// Deletes multiple entities of type <typeparamref name="TEntity"/> using an array of keys of type
     /// <typeparamref name="TKey"/> via an <see cref="IDbTransaction"/>.
     /// </summary>
-    /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <typeparam name="TEntity">The type of the entities to delete.</typeparam>
+    /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <param name="transaction">An open transaction in the database.</param>
     /// <param name="keys">An array of key values representing the entities to delete.</param>
     /// <param name="batchSize">The number of deletions to perform per batch.</param>
     /// <returns>The number of entities successfully deleted.</returns>
-    public static Task<int> BulkDeleteAsync<TKey, TEntity>(
+    public static Task<int> BulkDeleteAsync<TEntity, TKey>(
         this IDbTransaction transaction,
         TKey[] keys,
         int batchSize = 100)

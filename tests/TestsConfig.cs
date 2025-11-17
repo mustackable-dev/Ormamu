@@ -6,7 +6,7 @@ using Ormamu;
 namespace OrmamuTests;
 public static class TestsConfig
 {
-    public const SqlDialect DbVariant = SqlDialect.SqlServer;
+    public const SqlDialect DbVariant = SqlDialect.Sqlite;
     public const string SchemaName = "Tests";
     public const string SecondarySchemaName = "MulticonfigTests";
     public const string ReadTestsTableName = "Goblins";

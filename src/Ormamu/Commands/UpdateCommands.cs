@@ -144,6 +144,20 @@ public static class UpdateCommands
     #endregion
     
     #region PartialRegular
+    
+    /// <summary>
+    /// Partially updates an existing entity of type <typeparamref name="TEntity"/> using an <see cref="IDbConnection"/>.
+    /// Only the properties specified by the <paramref name="propertySettersFactory"/> are updated, and their values
+    /// are copied from the provided <paramref name="entity"/>.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
+    /// <param name="connection">A connection to the database.</param>
+    /// <param name="entity">The entity whose property values will be copied into the update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertyCopiers{TEntity}"/> instance.
+    /// </param>
+    /// <returns>The number of affected rows (typically 1).</returns>
     public static int PartialUpdate<TEntity>(
         this IDbConnection connection,
         TEntity entity,
@@ -161,6 +175,19 @@ public static class UpdateCommands
         return connection.Execute(components.Command, components.Parameters);
     }
     
+    /// <summary>
+    /// Partially updates an existing entity of type <typeparamref name="TEntity"/> using an <see cref="IDbTransaction"/>.
+    /// Only the properties specified by the <paramref name="propertySettersFactory"/> are updated, and their values
+    /// are copied from the provided <paramref name="entity"/>.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
+    /// <param name="transaction">An open transaction in the database.</param>
+    /// <param name="entity">The entity whose property values will be copied into the update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertyCopiers{TEntity}"/> instance.
+    /// </param>
+    /// <returns>The number of affected rows (typically 1).</returns>
     public static int PartialUpdate<TEntity>(
         this IDbTransaction transaction,
         TEntity entity,
@@ -178,21 +205,61 @@ public static class UpdateCommands
         return transaction.Execute(components.Command, components.Parameters);
     }
     
+    /// <summary>
+    /// Partially updates an existing entity of type <typeparamref name="TEntity"/> identified by its integer key
+    /// using an <see cref="IDbConnection"/>. Only the properties specified by the
+    /// <paramref name="propertySettersFactory"/> are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
+    /// <param name="connection">A connection to the database.</param>
+    /// <param name="key">The primary key value of the entity to update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters{TEntity}"/> instance.
+    /// </param>
+    /// <returns>The number of affected rows (typically 1).</returns>
     public static int PartialUpdate<TEntity>(
         this IDbConnection connection,
-        int entityKey,
+        int key,
         Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
-        => connection.PartialUpdate<int, TEntity>(entityKey, propertySettersFactory);
+        => connection.PartialUpdate<TEntity, int>(key, propertySettersFactory);
 
+    /// <summary>
+    /// Partially updates an existing entity of type <typeparamref name="TEntity"/> identified by its integer key
+    /// using an <see cref="IDbTransaction"/>. Only the properties specified by the
+    /// <paramref name="propertySettersFactory"/> are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
+    /// <param name="transaction">An open transaction in the database.</param>
+    /// <param name="key">The primary key value of the entity to update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters{TEntity}"/> instance.
+    /// </param>
+    /// <returns>The number of affected rows (typically 1).</returns>
     public static int PartialUpdate<TEntity>(
         this IDbTransaction transaction,
-        int entityKey,
+        int key,
         Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
-        => transaction.PartialUpdate<int, TEntity>(entityKey, propertySettersFactory);
+        => transaction.PartialUpdate<TEntity, int>(key, propertySettersFactory);
     
-    public static int PartialUpdate<TKey, TEntity>(
+    /// <summary>
+    /// Partially updates an existing entity of type <typeparamref name="TEntity"/> identified by a key of type
+    /// <typeparamref name="TKey"/> using an <see cref="IDbConnection"/>. Only the properties specified by the
+    /// <paramref name="propertySettersFactory"/> are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
+    /// <typeparam name="TKey">The type of the primary key.</typeparam>
+    /// <param name="connection">A connection to the database.</param>
+    /// <param name="key">The key value identifying the entity to update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters{TEntity}"/> instance.
+    /// </param>
+    /// <returns>The number of affected rows (typically 1).</returns>
+    public static int PartialUpdate<TEntity, TKey>(
         this IDbConnection connection,
-        TKey entityKey,
+        TKey key,
         Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
     {
         CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
@@ -200,15 +267,29 @@ public static class UpdateCommands
             .GetPartialUpdateComponents(builderData);
         
         CommandComponents components = GenerateUpdateSql<TKey>(
-            [entityKey],
+            [key],
             builderData,
             partials: partials);
         return connection.Execute(components.Command, components.Parameters);
     }
 
-    public static int PartialUpdate<TKey, TEntity>(
+    /// <summary>
+    /// Partially updates an existing entity of type <typeparamref name="TEntity"/> identified by a key of type
+    /// <typeparamref name="TKey"/> using an <see cref="IDbTransaction"/>. Only the properties specified by the
+    /// <paramref name="propertySettersFactory"/> are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
+    /// <typeparam name="TKey">The type of the primary key.</typeparam>
+    /// <param name="transaction">An open transaction in the database.</param>
+    /// <param name="key">The key value identifying the entity to update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters{TEntity}"/> instance.
+    /// </param>
+    /// <returns>The number of affected rows (typically 1).</returns>
+    public static int PartialUpdate<TEntity, TKey>(
         this IDbTransaction transaction,
-        TKey entityKey,
+        TKey key,
         Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
     {
         CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
@@ -216,11 +297,27 @@ public static class UpdateCommands
             .GetPartialUpdateComponents(builderData);
         
         CommandComponents components = GenerateUpdateSql<TKey>(
-            [entityKey],
+            [key],
             builderData,
             partials: partials);
         return transaction.Execute(components.Command, components.Parameters);
     }
+    
+    /// <summary>
+    /// Partially updates multiple entities of type <typeparamref name="TEntity"/> in batches using an
+    /// <see cref="IDbConnection"/>. The property values used in the update are copied from each entity in
+    /// <paramref name="entities"/>. Only the properties selected by the <paramref name="propertySettersFactory"/>
+    /// are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update.</typeparam>
+    /// <param name="connection">A connection to the database.</param>
+    /// <param name="entities">The array of entities whose property values will be copied into the update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertyCopiers{TEntity}"/> instance.
+    /// </param>
+    /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
+    /// <returns>The total number of affected rows.</returns>
     public static int BulkPartialUpdate<TEntity>(
         this IDbConnection connection,
         TEntity[] entities,
@@ -235,6 +332,21 @@ public static class UpdateCommands
             (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end, partials), entities, batchSize);
     }
     
+    /// <summary>
+    /// Partially updates multiple entities of type <typeparamref name="TEntity"/> in batches using an
+    /// <see cref="IDbTransaction"/>. The property values used in the update are copied from each entity in
+    /// <paramref name="entities"/>. Only the properties selected by the <paramref name="propertySettersFactory"/>
+    /// are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update.</typeparam>
+    /// <param name="transaction">An open transaction in the database.</param>
+    /// <param name="entities">The array of entities whose property values will be copied into the update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertyCopiers{TEntity}"/> instance.
+    /// </param>
+    /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
+    /// <returns>The total number of affected rows.</returns>
     public static int BulkPartialUpdate<TEntity>(
         this IDbTransaction transaction,
         TEntity[] entities,
@@ -249,21 +361,64 @@ public static class UpdateCommands
             (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end, partials), entities, batchSize);
     }
     
+    /// <summary>
+    /// Partially updates multiple entities of type <typeparamref name="TEntity"/> identified by their integer keys
+    /// in batches using an <see cref="IDbConnection"/>. Only the properties selected by the
+    /// <paramref name="propertySettersFactory"/> are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update.</typeparam>
+    /// <param name="connection">A connection to the database.</param>
+    /// <param name="keys">The array of primary key values identifying the entities to update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters{TEntity}"/> instance.
+    /// </param>
+    /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
+    /// <returns>The total number of affected rows.</returns>
     public static int BulkPartialUpdate<TEntity>(
         this IDbConnection connection,
         int[] keys,
         Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
         int batchSize = 100)
-        => connection.BulkPartialUpdate<int, TEntity>(keys, propertySettersFactory, batchSize);
+        => connection.BulkPartialUpdate<TEntity, int>(keys, propertySettersFactory, batchSize);
 
+    /// <summary>
+    /// Partially updates multiple entities of type <typeparamref name="TEntity"/> identified by their integer keys
+    /// in batches using an <see cref="IDbTransaction"/>. Only the properties selected by the
+    /// <paramref name="propertySettersFactory"/> are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update.</typeparam>
+    /// <param name="transaction">An open transaction in the database.</param>
+    /// <param name="keys">The array of primary key values identifying the entities to update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters{TEntity}"/> instance.
+    /// </param>
+    /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
+    /// <returns>The total number of affected rows.</returns>
     public static int BulkPartialUpdate<TEntity>(
         this IDbTransaction transaction,
         int[] keys,
         Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
         int batchSize = 100)
-        => transaction.BulkPartialUpdate<int, TEntity>(keys, propertySettersFactory, batchSize);
+        => transaction.BulkPartialUpdate<TEntity, int>(keys, propertySettersFactory, batchSize);
     
-    public static int BulkPartialUpdate<TKey, TEntity>(
+    /// <summary>
+    /// Partially updates multiple entities of type <typeparamref name="TEntity"/> identified by keys of type
+    /// <typeparamref name="TKey"/> in batches using an <see cref="IDbConnection"/>. Only the properties selected by the
+    /// <paramref name="propertySettersFactory"/> are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update.</typeparam>
+    /// <typeparam name="TKey">The type of the primary key.</typeparam>
+    /// <param name="connection">A connection to the database.</param>
+    /// <param name="keys">The array of key values identifying the entities to update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters{TEntity}"/> instance.
+    /// </param>
+    /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
+    /// <returns>The total number of affected rows.</returns>
+    public static int BulkPartialUpdate<TEntity, TKey>(
         this IDbConnection connection,
         TKey[] keys,
         Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
@@ -277,7 +432,22 @@ public static class UpdateCommands
             (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end, partials), keys, batchSize);
     }
 
-    public static int BulkPartialUpdate<TKey, TEntity>(
+    /// <summary>
+    /// Partially updates multiple entities of type <typeparamref name="TEntity"/> identified by keys of type
+    /// <typeparamref name="TKey"/> in batches using an <see cref="IDbTransaction"/>. Only the properties selected
+    /// by the <paramref name="propertySettersFactory"/> are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update.</typeparam>
+    /// <typeparam name="TKey">The type of the primary key.</typeparam>
+    /// <param name="transaction">An open transaction in the database.</param>
+    /// <param name="keys">The array of key values identifying the entities to update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters{TEntity}"/> instance.
+    /// </param>
+    /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
+    /// <returns>The total number of affected rows.</returns>
+    public static int BulkPartialUpdate<TEntity, TKey>(
         this IDbTransaction transaction,
         TKey[] keys,
         Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
@@ -294,6 +464,20 @@ public static class UpdateCommands
     #endregion
     
     #region PartialAsync
+    
+    /// <summary>
+    /// Asynchronously and partially updates an existing entity of type <typeparamref name="TEntity"/> using an
+    /// <see cref="IDbConnection"/>. Only the properties specified by the <paramref name="propertySettersFactory"/>
+    /// are updated, and their values are copied from the provided <paramref name="entity"/>.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
+    /// <param name="connection">A connection to the database.</param>
+    /// <param name="entity">The entity whose property values will be copied into the update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertyCopiers{TEntity}"/> instance.
+    /// </param>
+    /// <returns>A task representing the asynchronous operation, containing the number of affected rows.</returns>
     public static Task<int> PartialUpdateAsync<TEntity>(
         this IDbConnection connection,
         TEntity entity,
@@ -311,6 +495,19 @@ public static class UpdateCommands
         return connection.ExecuteAsync(components.Command, components.Parameters);
     }
     
+    /// <summary>
+    /// Asynchronously and partially updates an existing entity of type <typeparamref name="TEntity"/> using an
+    /// <see cref="IDbTransaction"/>. Only the properties specified by the <paramref name="propertySettersFactory"/>
+    /// are updated, and their values are copied from the provided <paramref name="entity"/>.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
+    /// <param name="transaction">An open transaction in the database.</param>
+    /// <param name="entity">The entity whose property values will be copied into the update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertyCopiers{TEntity}"/> instance.
+    /// </param>
+    /// <returns>A task representing the asynchronous operation, containing the number of affected rows.</returns>
     public static Task<int> PartialUpdateAsync<TEntity>(
         this IDbTransaction transaction,
         TEntity entity,
@@ -328,21 +525,61 @@ public static class UpdateCommands
         return transaction.ExecuteAsync(components.Command, components.Parameters);
     }
     
+    /// <summary>
+    /// Asynchronously and partially updates an existing entity of type <typeparamref name="TEntity"/> identified by
+    /// its integer key using an <see cref="IDbConnection"/>. Only the properties specified by the
+    /// <paramref name="propertySettersFactory"/> are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
+    /// <param name="connection">A connection to the database.</param>
+    /// <param name="key">The primary key identifying the entity to update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters{TEntity}"/> instance.
+    /// </param>
+    /// <returns>A task representing the asynchronous operation, containing the number of affected rows.</returns>
     public static Task<int> PartialUpdateAsync<TEntity>(
         this IDbConnection connection,
-        int entityKey,
+        int key,
         Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
-        => connection.PartialUpdateAsync<int, TEntity>(entityKey, propertySettersFactory);
+        => connection.PartialUpdateAsync<TEntity, int>(key, propertySettersFactory);
 
+    /// <summary>
+    /// Asynchronously and partially updates an existing entity of type <typeparamref name="TEntity"/> identified by
+    /// its integer key using an <see cref="IDbTransaction"/>. Only the properties specified by the
+    /// <paramref name="propertySettersFactory"/> are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
+    /// <param name="transaction">An open transaction in the database.</param>
+    /// <param name="key">The primary key identifying the entity to update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters{TEntity}"/> instance.
+    /// </param>
+    /// <returns>A task representing the asynchronous operation, containing the number of affected rows.</returns>
     public static Task<int> PartialUpdateAsync<TEntity>(
         this IDbTransaction transaction,
-        int entityKey,
+        int key,
         Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
-        => transaction.PartialUpdateAsync<int, TEntity>(entityKey, propertySettersFactory);
+        => transaction.PartialUpdateAsync<TEntity, int>(key, propertySettersFactory);
     
-    public static Task<int> PartialUpdateAsync<TKey, TEntity>(
+    /// <summary>
+    /// Asynchronously and partially updates an existing entity of type <typeparamref name="TEntity"/> identified by
+    /// a key of type <typeparamref name="TKey"/> using an <see cref="IDbConnection"/>. Only the properties specified
+    /// by the <paramref name="propertySettersFactory"/> are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
+    /// <typeparam name="TKey">The type of the primary key.</typeparam>
+    /// <param name="connection">A connection to the database.</param>
+    /// <param name="key">The key identifying the entity to update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters{TEntity}"/> instance.
+    /// </param>
+    /// <returns>A task representing the asynchronous operation, containing the number of affected rows.</returns>
+    public static Task<int> PartialUpdateAsync<TEntity, TKey>(
         this IDbConnection connection,
-        TKey entityKey,
+        TKey key,
         Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
     {
         CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
@@ -350,15 +587,29 @@ public static class UpdateCommands
             .GetPartialUpdateComponents(builderData);
         
         CommandComponents components = GenerateUpdateSql<TKey>(
-            [entityKey],
+            [key],
             builderData,
             partials: partials);
         return connection.ExecuteAsync(components.Command, components.Parameters);
     }
 
-    public static Task<int> PartialUpdateAsync<TKey, TEntity>(
+    /// <summary>
+    /// Asynchronously and partially updates an existing entity of type <typeparamref name="TEntity"/> identified by
+    /// a key of type <typeparamref name="TKey"/> using an <see cref="IDbTransaction"/>. Only the properties specified
+    /// by the <paramref name="propertySettersFactory"/> are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
+    /// <typeparam name="TKey">The type of the primary key.</typeparam>
+    /// <param name="transaction">An open transaction in the database.</param>
+    /// <param name="key">The key identifying the entity to update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters{TEntity}"/> instance.
+    /// </param>
+    /// <returns>A task representing the asynchronous operation, containing the number of affected rows.</returns>
+    public static Task<int> PartialUpdateAsync<TEntity, TKey>(
         this IDbTransaction transaction,
-        TKey entityKey,
+        TKey key,
         Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory)
     {
         CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
@@ -366,11 +617,27 @@ public static class UpdateCommands
             .GetPartialUpdateComponents(builderData);
         
         CommandComponents components = GenerateUpdateSql<TKey>(
-            [entityKey],
+            [key],
             builderData,
             partials: partials);
         return transaction.ExecuteAsync(components.Command, components.Parameters);
     }
+    
+    /// <summary>
+    /// Asynchronously and partially updates multiple entities of type <typeparamref name="TEntity"/> in batches using
+    /// an <see cref="IDbConnection"/>. The property values used in each update are copied from each entity in
+    /// <paramref name="entities"/>. Only the properties selected by the <paramref name="propertySettersFactory"/>
+    /// are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update.</typeparam>
+    /// <param name="connection">A connection to the database.</param>
+    /// <param name="entities">The array of entities whose property values will be copied into the update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertyCopiers{TEntity}"/> instance.
+    /// </param>
+    /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
+    /// <returns>A task representing the asynchronous operation, containing the total number of affected rows.</returns>
     public static Task<int> BulkPartialUpdateAsync<TEntity>(
         this IDbConnection connection,
         TEntity[] entities,
@@ -385,6 +652,21 @@ public static class UpdateCommands
             (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end, partials), entities, batchSize);
     }
     
+    /// <summary>
+    /// Asynchronously and partially updates multiple entities of type <typeparamref name="TEntity"/> in batches using
+    /// an <see cref="IDbTransaction"/>. The property values used in each update are copied from each entity in
+    /// <paramref name="entities"/>. Only the properties selected by the <paramref name="propertySettersFactory"/>
+    /// are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update.</typeparam>
+    /// <param name="transaction">An open transaction in the database.</param>
+    /// <param name="entities">The array of entities whose property values will be copied into the update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertyCopiers{TEntity}"/> instance.
+    /// </param>
+    /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
+    /// <returns>A task representing the asynchronous operation, containing the total number of affected rows.</returns>
     public static Task<int> BulkPartialUpdateAsync<TEntity>(
         this IDbTransaction transaction,
         TEntity[] entities,
@@ -399,21 +681,64 @@ public static class UpdateCommands
             (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end, partials), entities, batchSize);
     }
     
+    /// <summary>
+    /// Asynchronously and partially updates multiple entities of type <typeparamref name="TEntity"/> identified by
+    /// their integer keys in batches using an <see cref="IDbConnection"/>. Only the properties selected by the
+    /// <paramref name="propertySettersFactory"/> are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update.</typeparam>
+    /// <param name="connection">A connection to the database.</param>
+    /// <param name="keys">The array of primary key values identifying the entities to update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters{TEntity}"/> instance.
+    /// </param>
+    /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
+    /// <returns>A task representing the asynchronous operation, containing the total number of affected rows.</returns>
     public static Task<int> BulkPartialUpdateAsync<TEntity>(
         this IDbConnection connection,
         int[] keys,
         Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
         int batchSize = 100)
-        => connection.BulkPartialUpdateAsync<int, TEntity>(keys, propertySettersFactory, batchSize);
+        => connection.BulkPartialUpdateAsync<TEntity, int>(keys, propertySettersFactory, batchSize);
 
+    /// <summary>
+    /// Asynchronously and partially updates multiple entities of type <typeparamref name="TEntity"/> identified by
+    /// their integer keys in batches using an <see cref="IDbTransaction"/>. Only the properties selected by the
+    /// <paramref name="propertySettersFactory"/> are updated.
+    /// </summary>
+    /// <typeparamref name="TEntity">The type of the entities to update.</typeparamref>
+    /// <param name="transaction">An open transaction in the database.</param>
+    /// <param name="keys">The array of primary key values identifying the entities to update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory that selects which properties to update by configuring
+    /// a <see cref="PropertySetters{TEntity}"/> instance.
+    /// </param>
+    /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
+    /// <returns>A task representing the asynchronous operation, containing the total number of affected rows.</returns>
     public static Task<int> BulkPartialUpdateAsync<TEntity>(
         this IDbTransaction transaction,
         int[] keys,
         Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
         int batchSize = 100)
-        => transaction.BulkPartialUpdateAsync<int, TEntity>(keys, propertySettersFactory, batchSize);
+        => transaction.BulkPartialUpdateAsync<TEntity, int>(keys, propertySettersFactory, batchSize);
     
-    public static Task<int> BulkPartialUpdateAsync<TKey, TEntity>(
+    /// <summary>
+    /// Asynchronously and partially updates multiple entities of type <typeparamref name="TEntity"/> identified by
+    /// keys of type <typeparamref name="TKey"/> in batches using an <see cref="IDbConnection"/>. Only the properties
+    /// selected by the <paramref name="propertySettersFactory"/> are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update.</typeparam>
+    /// <typeparam name="TKey">The type of the primary key.</typeparam>
+    /// <param name="connection">A connection to the database.</param>
+    /// <param name="keys">The array of key values identifying the entities to update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters{TEntity}"/> instance.
+    /// </param>
+    /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
+    /// <returns>A task representing the asynchronous operation, containing the total number of affected rows.</returns>
+    public static Task<int> BulkPartialUpdateAsync<TEntity, TKey>(
         this IDbConnection connection,
         TKey[] keys,
         Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
@@ -427,7 +752,22 @@ public static class UpdateCommands
             (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end, partials), keys, batchSize);
     }
 
-    public static Task<int> BulkPartialUpdateAsync<TKey, TEntity>(
+    /// <summary>
+    /// Asynchronously and partially updates multiple entities of type <typeparamref name="TEntity"/> identified by
+    /// keys of type <typeparamref name="TKey"/> in batches using an <see cref="IDbTransaction"/>. Only the properties
+    /// selected by the <paramref name="propertySettersFactory"/> are updated.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update.</typeparam>
+    /// <typeparam name="TKey">The type of the primary key.</typeparam>
+    /// <param name="transaction">An open transaction in the database.</param>
+    /// <param name="keys">The array of key values identifying the entities to update.</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters{TEntity}"/> instance.
+    /// </param>
+    /// <param name="batchSize">The number of entities to update per batch. Defaults to 100.</param>
+    /// <returns>A task representing the asynchronous operation, containing the total number of affected rows.</returns>
+    public static Task<int> BulkPartialUpdateAsync<TEntity, TKey>(
         this IDbTransaction transaction,
         TKey[] keys,
         Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
@@ -556,9 +896,6 @@ public static class UpdateCommands
         foreach (PartialUpdates update in partials)
         {
             string key = string.Concat("@", update.Property.AssemblyName, index);
-
-            if (!update.Property.IsDbGenerated)
-            {
                 if (update.KeySetter)
                 {
                     parameters.Add(
@@ -569,9 +906,11 @@ public static class UpdateCommands
                 }
                 else
                 {
-                    parameters.Add(key, update.Value);
+                    if (!update.Property.IsDbGenerated)
+                    {
+                        parameters.Add(key, update.Value);
+                    }
                 }
-            }
 
             if (!update.Property.IsKey)
             {

@@ -213,11 +213,11 @@ public class DeleteTests(DbFixture fixture)
             MagicPower = 10,
             DateOfBirth = new DateTime(1985, 1, 1),
         };
-        long pixieId = connection.Insert<long, Pixie>(pixie);
+        long pixieId = connection.Insert<Pixie, long>(pixie);
         
         //Act
-        connection.Delete<long, Pixie>(pixieId);
-        Pixie? pixie2 = connection.Get<long, Pixie>(pixieId);
+        connection.Delete<Pixie, long>(pixieId);
+        Pixie? pixie2 = connection.Get<Pixie, long>(pixieId);
         
         //Assert
         Assert.True(pixie2 is null);
@@ -237,11 +237,11 @@ public class DeleteTests(DbFixture fixture)
             MagicPower = 10,
             DateOfBirth = new DateTime(1985, 1, 1),
         };
-        long pixieId = transaction.Insert<long, Pixie>(pixie);
+        long pixieId = transaction.Insert<Pixie, long>(pixie);
         
         //Act
-        transaction.Delete<long, Pixie>(pixieId);
-        Pixie? pixie2 = transaction.Get<long, Pixie>(pixieId);
+        transaction.Delete<Pixie, long>(pixieId);
+        Pixie? pixie2 = transaction.Get<Pixie, long>(pixieId);
         
         transaction.Commit();
         
@@ -261,11 +261,11 @@ public class DeleteTests(DbFixture fixture)
             MagicPower = 10,
             DateOfBirth = new DateTime(1985, 1, 1),
         };
-        long pixieId = await connection.InsertAsync<long, Pixie>(pixie);
+        long pixieId = await connection.InsertAsync<Pixie, long>(pixie);
         
         //Act
-        await connection.DeleteAsync<long, Pixie>(pixieId);
-        Pixie? pixie2 = await connection.GetAsync<long, Pixie>(pixieId);
+        await connection.DeleteAsync<Pixie, long>(pixieId);
+        Pixie? pixie2 = await connection.GetAsync<Pixie, long>(pixieId);
         
         //Assert
         Assert.True(pixie2 is null);
@@ -285,11 +285,11 @@ public class DeleteTests(DbFixture fixture)
             MagicPower = 10,
             DateOfBirth = new DateTime(1985, 1, 1),
         };
-        long pixieId = await transaction.InsertAsync<long, Pixie>(pixie);
+        long pixieId = await transaction.InsertAsync<Pixie, long>(pixie);
         
         //Act
-        await transaction.DeleteAsync<long, Pixie>(pixieId);
-        Pixie? pixie2 = await transaction.GetAsync<long, Pixie>(pixieId);
+        await transaction.DeleteAsync<Pixie, long>(pixieId);
+        Pixie? pixie2 = await transaction.GetAsync<Pixie, long>(pixieId);
         
         transaction.Commit();
         
@@ -474,18 +474,18 @@ public class DeleteTests(DbFixture fixture)
         
         foreach (Pixie pixie in pixies)
         {
-            pixie.Id = connection.Insert<long, Pixie>(pixie);
+            pixie.Id = connection.Insert<Pixie, long>(pixie);
         }
         
         
         //Act
-        int deletedRecords = connection.BulkDelete<long, Pixie>(pixies.Select(x=>x.Id).ToArray());
+        int deletedRecords = connection.BulkDelete<Pixie, long>(pixies.Select(x=>x.Id).ToArray());
         
         //Assert
         Assert.True(deletedRecords == 2);
         foreach (Pixie pixie in pixies)
         {
-            Assert.True(connection.Get<long, Pixie>(pixie.Id) is null);
+            Assert.True(connection.Get<Pixie, long>(pixie.Id) is null);
         }
     }
     
@@ -513,19 +513,19 @@ public class DeleteTests(DbFixture fixture)
         
         foreach (Pixie pixie in pixies)
         {
-            pixie.Id = transaction.Insert<long, Pixie>(pixie);
+            pixie.Id = transaction.Insert<Pixie, long>(pixie);
         }
         
         
         //Act
-        int deletedRecords = transaction.BulkDelete<long, Pixie>(pixies.Select(x=>x.Id).ToArray());
+        int deletedRecords = transaction.BulkDelete<Pixie, long>(pixies.Select(x=>x.Id).ToArray());
         transaction.Commit();
         
         //Assert
         Assert.True(deletedRecords == 2);
         foreach (Pixie pixie in pixies)
         {
-            Assert.True(connection.Get<long, Pixie>(pixie.Id) is null);
+            Assert.True(connection.Get<Pixie, long>(pixie.Id) is null);
         }
     }
     
@@ -705,18 +705,18 @@ public class DeleteTests(DbFixture fixture)
         
         foreach (Pixie pixie in pixies)
         {
-            pixie.Id = await connection.InsertAsync<long, Pixie>(pixie);
+            pixie.Id = await connection.InsertAsync<Pixie, long>(pixie);
         }
         
         
         //Act
-        int deletedRecords = await connection.BulkDeleteAsync<long, Pixie>(pixies.Select(x=>x.Id).ToArray());
+        int deletedRecords = await connection.BulkDeleteAsync<Pixie, long>(pixies.Select(x=>x.Id).ToArray());
         
         //Assert
         Assert.True(deletedRecords == 2);
         foreach (Pixie pixie in pixies)
         {
-            Assert.True(await connection.GetAsync<long, Pixie>(pixie.Id) is null);
+            Assert.True(await connection.GetAsync<Pixie, long>(pixie.Id) is null);
         }
     }
     
@@ -744,19 +744,19 @@ public class DeleteTests(DbFixture fixture)
         
         foreach (Pixie pixie in pixies)
         {
-            pixie.Id = await transaction.InsertAsync<long, Pixie>(pixie);
+            pixie.Id = await transaction.InsertAsync<Pixie, long>(pixie);
         }
         
         
         //Act
-        int deletedRecords = await transaction.BulkDeleteAsync<long, Pixie>(pixies.Select(x=>x.Id).ToArray());
+        int deletedRecords = await transaction.BulkDeleteAsync<Pixie, long>(pixies.Select(x=>x.Id).ToArray());
         transaction.Commit();
         
         //Assert
         Assert.True(deletedRecords == 2);
         foreach (Pixie pixie in pixies)
         {
-            Assert.True(await connection.GetAsync<long, Pixie>(pixie.Id) is null);
+            Assert.True(await connection.GetAsync<Pixie, long>(pixie.Id) is null);
         }
     }
     
@@ -777,10 +777,10 @@ public class DeleteTests(DbFixture fixture)
         
         //Act
         
-        Guid impId = connection.Insert<Guid, Imp>(imp);
-        Imp? imp2 = connection.Get<Guid, Imp>(impId);
-        int deletedImp = connection.Delete<Guid, Imp>(impId);
-        Imp? imp3 = connection.Get<Guid, Imp>(impId);
+        Guid impId = connection.Insert<Imp, Guid>(imp);
+        Imp? imp2 = connection.Get<Imp, Guid>(impId);
+        int deletedImp = connection.Delete<Imp, Guid>(impId);
+        Imp? imp3 = connection.Get<Imp, Guid>(impId);
         //Assert
         Assert.True(imp2 is not null);
         Assert.True(deletedImp == 1);
@@ -814,7 +814,7 @@ public class DeleteTests(DbFixture fixture)
         
         int insertedImps = connection.BulkInsert(imps, 99);
         IEnumerable<Imp> imps2 = connection.Get<Imp>($"\"{TestsConfig.CustomColumnName}\"=@templateName", param: new { templateName = name });
-        int deleteImps = connection.BulkDelete<Guid, Imp>(imps.Select(x=>x.GuidKey).ToArray());
+        int deleteImps = connection.BulkDelete<Imp, Guid>(imps.Select(x=>x.GuidKey).ToArray());
         IEnumerable<Imp> imps3 = connection.Get<Imp>($"\"{TestsConfig.CustomColumnName}\"=@templateName", param: new { templateName = name });
         //Assert
         
@@ -839,11 +839,11 @@ public class DeleteTests(DbFixture fixture)
                 Personality = Personality.Assertive
             };
         
-        ThrongletKey insertedKey = connection.Insert<ThrongletKey, Thronglet>(thronglet);
+        ThrongletKey insertedKey = connection.Insert<Thronglet, ThrongletKey>(thronglet);
         //Act
         ThrongletKey key = new(Id: 13, Name: "Lemonadesther");
-        int deletedCount = connection.Delete<ThrongletKey, Thronglet>(key);
-        Thronglet? thronglet2 = connection.Get<ThrongletKey, Thronglet>(key);
+        int deletedCount = connection.Delete<Thronglet, ThrongletKey>(key);
+        Thronglet? thronglet2 = connection.Get<Thronglet, ThrongletKey>(key);
         //Assert
         Assert.True(insertedKey == key);
         Assert.True(deletedCount == 1);
@@ -866,11 +866,11 @@ public class DeleteTests(DbFixture fixture)
                 Personality = Personality.Assertive
             };
         
-        ThrongletKey insertedKey = transaction.Insert<ThrongletKey, Thronglet>(thronglet);
+        ThrongletKey insertedKey = transaction.Insert<Thronglet, ThrongletKey>(thronglet);
         //Act
         ThrongletKey key = new(Id: 14, Name: "Lemonadesther");
-        int deletedCount = transaction.Delete<ThrongletKey, Thronglet>(key);
-        Thronglet? thronglet2 = transaction.Get<ThrongletKey, Thronglet>(key);
+        int deletedCount = transaction.Delete<Thronglet, ThrongletKey>(key);
+        Thronglet? thronglet2 = transaction.Get<Thronglet, ThrongletKey>(key);
         transaction.Commit();
         //Assert
         Assert.True(insertedKey == key);
@@ -892,11 +892,11 @@ public class DeleteTests(DbFixture fixture)
                 Personality = Personality.Assertive
             };
         
-        ThrongletKey insertedKey = await connection.InsertAsync<ThrongletKey, Thronglet>(thronglet);
+        ThrongletKey insertedKey = await connection.InsertAsync<Thronglet, ThrongletKey>(thronglet);
         //Act
         ThrongletKey key = new(Id: 15, Name: "Lemonadesther");
-        int deletedCount = await connection.DeleteAsync<ThrongletKey, Thronglet>(key);
-        Thronglet? thronglet2 = await connection.GetAsync<ThrongletKey, Thronglet>(key);
+        int deletedCount = await connection.DeleteAsync<Thronglet, ThrongletKey>(key);
+        Thronglet? thronglet2 = await connection.GetAsync<Thronglet, ThrongletKey>(key);
         //Assert
         Assert.True(insertedKey == key);
         Assert.True(deletedCount == 1);
@@ -919,11 +919,11 @@ public class DeleteTests(DbFixture fixture)
                 Personality = Personality.Assertive
             };
         
-        ThrongletKey insertedKey = await transaction.InsertAsync<ThrongletKey, Thronglet>(thronglet);
+        ThrongletKey insertedKey = await transaction.InsertAsync<Thronglet, ThrongletKey>(thronglet);
         //Act
         ThrongletKey key = new(Id: 16, Name: "Lemonadesther");
-        int deletedCount = await transaction.DeleteAsync<ThrongletKey, Thronglet>(key);
-        Thronglet? thronglet2 = await transaction.GetAsync<ThrongletKey, Thronglet>(key);
+        int deletedCount = await transaction.DeleteAsync<Thronglet, ThrongletKey>(key);
+        Thronglet? thronglet2 = await transaction.GetAsync<Thronglet, ThrongletKey>(key);
         transaction.Commit();
         //Assert
         Assert.True(insertedKey == key);
@@ -962,7 +962,7 @@ public class DeleteTests(DbFixture fixture)
         int insertedThronglets = connection.BulkInsert(thronglets);
         //Act
         
-        int deletedThronglets = connection.BulkDelete<ThrongletKey, Thronglet>(
+        int deletedThronglets = connection.BulkDelete<Thronglet, ThrongletKey>(
             thronglets.Skip(1).Select(x=>new ThrongletKey(x.Id, x.Name)).ToArray());
         IEnumerable<Thronglet> thronglets2 = connection.Get<Thronglet>(
             $"{_idColumn}>=@id AND {_idColumn}<=@id2",
@@ -1006,7 +1006,7 @@ public class DeleteTests(DbFixture fixture)
         int insertedThronglets = transaction.BulkInsert(thronglets);
         //Act
         
-        int deletedThronglets = transaction.BulkDelete<ThrongletKey, Thronglet>(
+        int deletedThronglets = transaction.BulkDelete<Thronglet, ThrongletKey>(
             thronglets.Reverse().Skip(1).Select(x=>new ThrongletKey(x.Id, x.Name)).ToArray());
         IEnumerable<Thronglet> thronglets2 = transaction.Get<Thronglet>(
             $"{_idColumn}>=@id AND {_idColumn}<=@id2",
@@ -1049,7 +1049,7 @@ public class DeleteTests(DbFixture fixture)
         int insertedThronglets = await connection.BulkInsertAsync(thronglets);
         //Act
         
-        int deletedThronglets = await connection.BulkDeleteAsync<ThrongletKey, Thronglet>(
+        int deletedThronglets = await connection.BulkDeleteAsync<Thronglet, ThrongletKey>(
             thronglets.Skip(2).Select(x=>new ThrongletKey(x.Id, x.Name)).ToArray());
         IEnumerable<Thronglet> thronglets2 = await connection.GetAsync<Thronglet>(
             $"{_idColumn}>=@id AND {_idColumn}<=@id2",
@@ -1093,7 +1093,7 @@ public class DeleteTests(DbFixture fixture)
         int insertedThronglets = await transaction.BulkInsertAsync(thronglets);
         //Act
         
-        int deletedThronglets = await transaction.BulkDeleteAsync<ThrongletKey, Thronglet>(
+        int deletedThronglets = await transaction.BulkDeleteAsync<Thronglet, ThrongletKey>(
             thronglets.Reverse().Skip(2).Select(x=>new ThrongletKey(x.Id, x.Name)).ToArray());
         IEnumerable<Thronglet> thronglets2 = await transaction.GetAsync<Thronglet>(
             $"{_idColumn}>=@id AND {_idColumn}<=@id2",

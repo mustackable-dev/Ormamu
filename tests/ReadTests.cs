@@ -46,7 +46,7 @@ public class ReadTests(DbFixture fixture)
         using IDbConnection connection = fixture.DbProvider.GetConnection();
         int tenthId = 10;
         //Act
-        Goblin? goblin = connection.Get<int, Goblin>(tenthId);
+        Goblin? goblin = connection.Get<Goblin, int>(tenthId);
         //Assert
         Assert.NotNull(goblin);
         Assert.True(goblin.Id == tenthId);
@@ -59,7 +59,7 @@ public class ReadTests(DbFixture fixture)
         using IDbConnection connection = fixture.DbProvider.GetConnection();
         int tenthId = 10;
         //Act
-        Goblin? goblin = await connection.GetAsync<int, Goblin>(tenthId);
+        Goblin? goblin = await connection.GetAsync<Goblin, int>(tenthId);
         //Assert
         Assert.NotNull(goblin);
         Assert.True(goblin.Id == tenthId);
@@ -111,7 +111,7 @@ public class ReadTests(DbFixture fixture)
         
         //Act
         
-        Goblin? goblin = transaction.Get<int, Goblin>(tenthId);
+        Goblin? goblin = transaction.Get<Goblin, int>(tenthId);
         
         transaction.Commit();
         
@@ -133,7 +133,7 @@ public class ReadTests(DbFixture fixture)
         
         //Act
         
-        Goblin? goblin = await transaction.GetAsync<int, Goblin>(tenthId);
+        Goblin? goblin = await transaction.GetAsync<Goblin, int>(tenthId);
         
         transaction.Commit();
         
@@ -418,11 +418,11 @@ public class ReadTests(DbFixture fixture)
         
         foreach (Imp imp in imps)
         {
-            imp.GuidKey = connection.Insert<Guid, Imp>(imp);
+            imp.GuidKey = connection.Insert<Imp, Guid>(imp);
         }
         
         //Act
-        Imp? imp2 = connection.Get<Guid, Imp>(imps[1].GuidKey);
+        Imp? imp2 = connection.Get<Imp, Guid>(imps[1].GuidKey);
         
         //Assert
         
@@ -460,7 +460,7 @@ public class ReadTests(DbFixture fixture)
         connection.BulkInsert(thronglets);
         //Act
         ThrongletKey key = new(Id: 2, Name: "Fixit");
-        Thronglet? thronglet = connection.Get<ThrongletKey, Thronglet>(key);
+        Thronglet? thronglet = connection.Get<Thronglet, ThrongletKey>(key);
         //Assert
         Assert.NotNull(thronglet);
         Assert.True(key.Equals(new ThrongletKey(Id: thronglet.Id, Name: thronglet.Name)));
@@ -499,7 +499,7 @@ public class ReadTests(DbFixture fixture)
         transaction.BulkInsert(thronglets);
         //Act
         ThrongletKey key = new(Id: 6, Name: "Tinyomi");
-        Thronglet? thronglet = transaction.Get<ThrongletKey, Thronglet>(key);
+        Thronglet? thronglet = transaction.Get<Thronglet, ThrongletKey>(key);
         
         transaction.Commit();
         //Assert
@@ -538,7 +538,7 @@ public class ReadTests(DbFixture fixture)
         await connection.BulkInsertAsync(thronglets);
         //Act
         ThrongletKey key = new(Id: 8, Name: "Fixit");
-        Thronglet? thronglet = await connection.GetAsync<ThrongletKey, Thronglet>(key);
+        Thronglet? thronglet = await connection.GetAsync<Thronglet, ThrongletKey>(key);
         //Assert
         Assert.NotNull(thronglet);
         Assert.True(key.Equals(new ThrongletKey(Id: thronglet.Id, Name: thronglet.Name)));
@@ -577,7 +577,7 @@ public class ReadTests(DbFixture fixture)
         await transaction.BulkInsertAsync(thronglets);
         //Act
         ThrongletKey key = new(Id: 12, Name: "Tinyomi");
-        Thronglet? thronglet = await transaction.GetAsync<ThrongletKey, Thronglet>(key);
+        Thronglet? thronglet = await transaction.GetAsync<Thronglet, ThrongletKey>(key);
         
         transaction.Commit();
         //Assert
@@ -661,7 +661,7 @@ public class ReadTests(DbFixture fixture)
         using IDbConnection connection = fixture.DbProvider.GetConnection();
         
         //Act
-        IEnumerable<Goblin> goblins = connection.Get<int, Goblin>(queryKeys);
+        IEnumerable<Goblin> goblins = connection.Get<Goblin, int>(queryKeys);
             
         //Assert
         Assert.True(goblins.Count() == 2);;
@@ -678,7 +678,7 @@ public class ReadTests(DbFixture fixture)
         using IDbTransaction transaction = connection.BeginTransaction();
         
         //Act
-        IEnumerable<Goblin> goblins = transaction.Get<int, Goblin>(queryKeys);
+        IEnumerable<Goblin> goblins = transaction.Get<Goblin, int>(queryKeys);
         
         transaction.Commit();
             
@@ -695,7 +695,7 @@ public class ReadTests(DbFixture fixture)
         using IDbConnection connection = fixture.DbProvider.GetConnection();
         
         //Act
-        IEnumerable<Goblin> goblins = await connection.GetAsync<int, Goblin>(queryKeys);
+        IEnumerable<Goblin> goblins = await connection.GetAsync<Goblin, int>(queryKeys);
             
         //Assert
         Assert.True(goblins.Count() == 2);;
@@ -712,7 +712,7 @@ public class ReadTests(DbFixture fixture)
         using IDbTransaction transaction = connection.BeginTransaction();
         
         //Act
-        IEnumerable<Goblin> goblins = await transaction.GetAsync<int, Goblin>(queryKeys);
+        IEnumerable<Goblin> goblins = await transaction.GetAsync<Goblin, int>(queryKeys);
         
         transaction.Commit();
             
@@ -750,7 +750,7 @@ public class ReadTests(DbFixture fixture)
         ];
         connection.BulkInsert(thronglets);
         //Act
-        IEnumerable<Thronglet> throngletsQuery = connection.Get<ThrongletKey, Thronglet>(queryKeys);
+        IEnumerable<Thronglet> throngletsQuery = connection.Get<Thronglet, ThrongletKey>(queryKeys);
         //Assert;
         Assert.True(throngletsQuery.Count() == 2);
         Assert.DoesNotContain(throngletsQuery.Select(x => new ThrongletKey(x.Id, x.Name)), y =>!queryKeys.Contains(y));
@@ -788,7 +788,7 @@ public class ReadTests(DbFixture fixture)
         ];
         transaction.BulkInsert(thronglets);
         //Act
-        IEnumerable<Thronglet> throngletsQuery = transaction.Get<ThrongletKey, Thronglet>(queryKeys);
+        IEnumerable<Thronglet> throngletsQuery = transaction.Get<Thronglet, ThrongletKey>(queryKeys);
         transaction.Commit();
         //Assert;
         Assert.True(throngletsQuery.Count() == 2);

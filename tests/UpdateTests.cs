@@ -26,13 +26,13 @@ public class UpdateTests(DbFixture fixture)
             IsActive = true,
             Strength = 50
         };
-        string gnomeId = connection.Insert<string, Gnome>(gnome);
+        string gnomeId = connection.Insert<Gnome, string>(gnome);
         
         //Act
         gnome.Id = gnomeId;
         gnome.Height = 130;
         int updatedRecords = connection.Update(gnome);
-        Gnome? gnomeFromDb = connection.Get<string, Gnome>(gnomeId);
+        Gnome? gnomeFromDb = connection.Get<Gnome, string>(gnomeId);
         
         //Assert
         Assert.True(gnomeFromDb is not null);
@@ -57,13 +57,13 @@ public class UpdateTests(DbFixture fixture)
             IsActive = true,
             Strength = 50
         };
-        string gnomeId = transaction.Insert<string, Gnome>(gnome);
+        string gnomeId = transaction.Insert<Gnome, string>(gnome);
         
         //Act
         gnome.Id = gnomeId;
         gnome.Height = 130;
         int updatedRecords = transaction.Update(gnome);
-        Gnome? gnomeFromDb = transaction.Get<string, Gnome>(gnomeId);
+        Gnome? gnomeFromDb = transaction.Get<Gnome, string>(gnomeId);
         transaction.Commit();
         
         //Assert
@@ -87,13 +87,13 @@ public class UpdateTests(DbFixture fixture)
             IsActive = true,
             Strength = 50
         };
-        string gnomeId = await connection.InsertAsync<string, Gnome>(gnome);
+        string gnomeId = await connection.InsertAsync<Gnome, string>(gnome);
         
         //Act
         gnome.Id = gnomeId;
         gnome.Name = "Mazelin";
         int updatedRecords = await connection.UpdateAsync(gnome);
-        Gnome? gnomeFromDb = await connection.GetAsync<string, Gnome>(gnomeId);
+        Gnome? gnomeFromDb = await connection.GetAsync<Gnome, string>(gnomeId);
         
         //Assert
         Assert.True(gnomeFromDb is not null);
@@ -118,13 +118,13 @@ public class UpdateTests(DbFixture fixture)
             IsActive = true,
             Strength = 50
         };
-        string gnomeId = await transaction.InsertAsync<string, Gnome>(gnome);
+        string gnomeId = await transaction.InsertAsync<Gnome, string>(gnome);
         
         //Act
         gnome.Id = gnomeId;
         gnome.Name = "Sni";
         int updatedRecords = await transaction.UpdateAsync(gnome);
-        Gnome? gnomeFromDb = await transaction.GetAsync<string, Gnome>(gnomeId);
+        Gnome? gnomeFromDb = await transaction.GetAsync<Gnome, string>(gnomeId);
         transaction.Commit();
         
         //Assert
@@ -179,7 +179,7 @@ public class UpdateTests(DbFixture fixture)
         
         foreach (Gnome gnome in gnomes)
         {
-            gnome.Id=connection.Insert<string, Gnome>(gnome);
+            gnome.Id=connection.Insert<Gnome, string>(gnome);
             if(gnome.Height == height)
                 gnome.Name = title;
         }
@@ -243,7 +243,7 @@ public class UpdateTests(DbFixture fixture)
         
         foreach (Gnome gnome in gnomes)
         {
-            gnome.Id=transaction.Insert<string, Gnome>(gnome);
+            gnome.Id=transaction.Insert<Gnome, string>(gnome);
             if(gnome.Height == height)
                 gnome.Name = title;
         }
@@ -305,7 +305,7 @@ public class UpdateTests(DbFixture fixture)
         
         foreach (Gnome gnome in gnomes)
         {
-            gnome.Id= await connection.InsertAsync<string, Gnome>(gnome);
+            gnome.Id= await connection.InsertAsync<Gnome, string>(gnome);
             if(gnome.Height == height)
                 gnome.Name = title;
         }
@@ -369,7 +369,7 @@ public class UpdateTests(DbFixture fixture)
         
         foreach (Gnome gnome in gnomes)
         {
-            gnome.Id= await transaction.InsertAsync<string, Gnome>(gnome);
+            gnome.Id= await transaction.InsertAsync<Gnome, string>(gnome);
             if(gnome.Height == height)
                 gnome.Name = title;
         }
@@ -402,11 +402,11 @@ public class UpdateTests(DbFixture fixture)
         
         //Act
         
-        Guid impId = connection.Insert<Guid, Imp>(imp);
-        Imp? imp2 = connection.Get<Guid, Imp>(impId);
+        Guid impId = connection.Insert<Imp, Guid>(imp);
+        Imp? imp2 = connection.Get<Imp, Guid>(impId);
         imp.Name = "MegaPuratino";
         int updatedCount = connection.Update(imp);
-        Imp? imp3 = connection.Get<Guid, Imp>(impId);
+        Imp? imp3 = connection.Get<Imp, Guid>(impId);
         
         //Assert
         
@@ -474,11 +474,11 @@ public class UpdateTests(DbFixture fixture)
                 Personality = Personality.Assertive
             };
         
-        ThrongletKey insertedKey = connection.Insert<ThrongletKey, Thronglet>(thronglet);
+        ThrongletKey insertedKey = connection.Insert<Thronglet, ThrongletKey>(thronglet);
         thronglet.Personality = Personality.Reflective;
         //Act
         int updatedCount = connection.Update(thronglet);
-        Thronglet? thronglet2 = connection.Get<ThrongletKey, Thronglet>(insertedKey);
+        Thronglet? thronglet2 = connection.Get<Thronglet, ThrongletKey>(insertedKey);
         //Assert
         Assert.True(updatedCount == 1);
         Assert.NotNull(thronglet2);
@@ -501,11 +501,11 @@ public class UpdateTests(DbFixture fixture)
                 Personality = Personality.Assertive
             };
         
-        ThrongletKey insertedKey = transaction.Insert<ThrongletKey, Thronglet>(thronglet);
+        ThrongletKey insertedKey = transaction.Insert<Thronglet, ThrongletKey>(thronglet);
         thronglet.Personality = Personality.Reflective;
         //Act
         int updatedCount = transaction.Update(thronglet);
-        Thronglet? thronglet2 = transaction.Get<ThrongletKey, Thronglet>(insertedKey);
+        Thronglet? thronglet2 = transaction.Get<Thronglet, ThrongletKey>(insertedKey);
         transaction.Commit();
         //Assert
         Assert.True(updatedCount == 1);
@@ -527,11 +527,11 @@ public class UpdateTests(DbFixture fixture)
                 Personality = Personality.Assertive
             };
         
-        ThrongletKey insertedKey = await connection.InsertAsync<ThrongletKey, Thronglet>(thronglet);
+        ThrongletKey insertedKey = await connection.InsertAsync<Thronglet, ThrongletKey>(thronglet);
         thronglet.Personality = Personality.Reflective;
         //Act
         int updatedCount = await connection.UpdateAsync(thronglet);
-        Thronglet? thronglet2 = await connection.GetAsync<ThrongletKey, Thronglet>(insertedKey);
+        Thronglet? thronglet2 = await connection.GetAsync<Thronglet, ThrongletKey>(insertedKey);
         //Assert
         Assert.True(updatedCount == 1);
         Assert.NotNull(thronglet2);
@@ -554,11 +554,11 @@ public class UpdateTests(DbFixture fixture)
                 Personality = Personality.Assertive
             };
         
-        ThrongletKey insertedKey = await transaction.InsertAsync<ThrongletKey, Thronglet>(thronglet);
+        ThrongletKey insertedKey = await transaction.InsertAsync<Thronglet, ThrongletKey>(thronglet);
         thronglet.Personality = Personality.Reflective;
         //Act
         int updatedCount = await transaction.UpdateAsync(thronglet);
-        Thronglet? thronglet2 = await transaction.GetAsync<ThrongletKey, Thronglet>(insertedKey);
+        Thronglet? thronglet2 = await transaction.GetAsync<Thronglet, ThrongletKey>(insertedKey);
         transaction.Commit();
         //Assert
         Assert.True(updatedCount == 1);
@@ -807,19 +807,118 @@ public class UpdateTests(DbFixture fixture)
         };
         
         //Act
-        connection.Insert<string, Gnome>(gnome);
+        connection.Insert<Gnome, string>(gnome);
         int updatedRecords = connection.PartialUpdate(
             gnome with { Name = "The Mule", Height = 140, IsActive = false},
             x=>x
                 .CopyProperty(y=>y.Name)
                 .CopyProperty(y=>y.Height)
         );
-        Gnome? gnomeFromDb = connection.Get<string, Gnome>(gnome.Id);
+        Gnome? gnomeFromDb = connection.Get<Gnome, string>(gnome.Id);
         
         //Assert
         Assert.True(gnomeFromDb is not null);
         Assert.True(updatedRecords == 1);
         Assert.True(gnomeFromDb is { Name: "The Mule", Height: 140 });
+    }
+    
+    [Fact]
+    public void PartialUpdate_WithTransactionWithEntity_ShouldHaveChangedValue()
+    {
+        //Arrange
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Gnome gnome = new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        };
+        
+        //Act
+        transaction.Insert<Gnome, string>(gnome);
+        int updatedRecords =transaction.PartialUpdate(
+            gnome with { Name = "The Mule", Height = 140, IsActive = false},
+            x=>x
+                .CopyProperty(y=>y.Name)
+                .CopyProperty(y=>y.Height)
+        );
+        Gnome? gnomeFromDb = transaction.Get<Gnome, string>(gnome.Id);
+        
+        transaction.Commit();
+        
+        //Assert
+        Assert.True(gnomeFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(gnomeFromDb is { Name: "The Mule", Height: 140 });
+    }
+    
+    [Fact]
+    public void PartialUpdate_WithConnectionWithIntKey_ShouldHaveChangedValue()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Dwarf dwarf = new()
+        {
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        };
+        
+        //Act
+        int dwarfId = connection.Insert(dwarf);
+        int updatedRecords = connection.PartialUpdate<Dwarf>(
+            key: dwarfId,
+            x => x
+                    .SetProperty(y=>y.Name, "The Mule")
+                    .SetProperty(y=>y.Height, 140)
+        );
+        Dwarf? dwarfFromDb = connection.Get<Dwarf>(dwarfId);
+        
+        //Assert
+        Assert.True(dwarfFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(dwarfFromDb is { Name: "The Mule", Height: 140 });
+    }
+    
+    [Fact]
+    public void PartialUpdate_WithTransactionWithIntKey_ShouldHaveChangedValue()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Dwarf dwarf = new()
+        {
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        };
+        
+        //Act
+        int dwarfId = transaction.Insert(dwarf);
+        int updatedRecords = transaction.PartialUpdate<Dwarf>(
+            key: dwarfId,
+            x => x
+                .SetProperty(y=>y.Name, "Soupeter")
+                .SetProperty(y=>y.Height, 110)
+        );
+        Dwarf? dwarfFromDb = transaction.Get<Dwarf>(dwarfId);
+        
+        //Assert
+        Assert.True(dwarfFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(dwarfFromDb is { Name: "Soupeter", Height: 110 });
     }
     
     [Fact]
@@ -839,13 +938,13 @@ public class UpdateTests(DbFixture fixture)
         };
         
         //Act
-        connection.Insert<string, Gnome>(gnome);
-        int updatedRecords = connection.PartialUpdate<string, Gnome>(
+        connection.Insert<Gnome, string>(gnome);
+        int updatedRecords = connection.PartialUpdate<Gnome, string>(
             gnome.Id,
             x=>x.SetProperty(y=>y.Name, "The Mule")
                 .SetProperty(y=>y.Height, 140)
         );
-        Gnome? gnomeFromDb = connection.Get<string, Gnome>(gnome.Id);
+        Gnome? gnomeFromDb = connection.Get<Gnome, string>(gnome.Id);
         
         //Assert
         Assert.True(gnomeFromDb is not null);
@@ -854,7 +953,42 @@ public class UpdateTests(DbFixture fixture)
     }
     
     [Fact]
-    public void BulkPartialUpdate_WithConnectionWithEntities_ShouldHaveChangedValuse()
+    public void PartialUpdate_WithTransactionWithTypedKey_ShouldHaveChangedValue()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Gnome gnome = new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        };
+        
+        //Act
+        transaction.Insert<Gnome, string>(gnome);
+        int updatedRecords = transaction.PartialUpdate<Gnome, string>(
+            gnome.Id,
+            x=>x.SetProperty(y=>y.Name, "The Mule")
+                .SetProperty(y=>y.Height, 140)
+        );
+        Gnome? gnomeFromDb = transaction.Get<Gnome, string>(gnome.Id);
+        
+        transaction.Commit();
+        
+        //Assert
+        Assert.True(gnomeFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(gnomeFromDb is { Name: "The Mule", Height: 140 });
+    }
+    
+    [Fact]
+    public void BulkPartialUpdate_WithConnectionWithEntities_ShouldHaveChangedValues()
     {
         //Arrange
         
@@ -887,12 +1021,147 @@ public class UpdateTests(DbFixture fixture)
                 .CopyProperty(y=>y.IsActive)
                 .CopyProperty(y=>y.Height)
         );
-        IEnumerable<Gnome> gnomesFromDb = connection.Get<string, Gnome>(gnomes.Select(x=>x.Id).ToArray());
+        IEnumerable<Gnome> gnomesFromDb = connection.Get<Gnome, string>(gnomes.Select(x=>x.Id).ToArray());
         
         //Assert
         Assert.True(gnomesFromDb.Count() == 2);
         Assert.True(updatedRecords == 2);
         Assert.True(gnomesFromDb.All(x => x.Name != "The Mule"));
+    }
+    
+    [Fact]
+    public void BulkPartialUpdate_WithTransactionWithEntities_ShouldHaveChangedValues()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Gnome[] gnomes = [new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        }, new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Torord",
+            Height = 110,
+            IsActive = true,
+            Strength = 40
+        }];
+        
+        transaction.BulkInsert(gnomes);
+        
+        gnomes = gnomes.Select(x=> x with { Name = "The Mule", Height = 140, IsActive = false}).ToArray();
+        
+        //Act
+        int updatedRecords = transaction.BulkPartialUpdate(
+            gnomes,
+            x=>x
+                .CopyProperty(y=>y.IsActive)
+                .CopyProperty(y=>y.Height)
+        );
+        IEnumerable<Gnome> gnomesFromDb = transaction.Get<Gnome, string>(gnomes.Select(x=>x.Id).ToArray());
+        
+        transaction.Commit();
+        
+        //Assert
+        Assert.True(gnomesFromDb.Count() == 2);
+        Assert.True(updatedRecords == 2);
+        Assert.True(gnomesFromDb.All(x => x.Name != "The Mule"));
+    }
+    
+    [Fact]
+    public void BulkPartialUpdate_WithConnectionWithIntKeys_ShouldHaveChangedValues()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        string sharedName = Guid.NewGuid().ToString("N");
+        string whereFilter = $"{fixture.DbProvider.Options.NameConverter("Name")}='{sharedName}'";
+
+        Dwarf[] dwarves = [new()
+        {
+            Name = sharedName,
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        }, new()
+        {
+            Name = sharedName,
+            Height = 110,
+            IsActive = true,
+            Strength = 40
+        }];
+        
+        connection.BulkInsert(dwarves);
+        
+        dwarves = connection.Get<Dwarf>(whereFilter).ToArray();
+        
+        //Act
+        int updatedRecords = connection.BulkPartialUpdate<Dwarf>(
+            keys: dwarves.Select(x=>x.Id).ToArray(),
+            x=>x
+                .SetProperty(y=>y.IsActive, false)
+                .SetProperty(y=>y.Height, 140)
+        );
+        IEnumerable<Dwarf> dwarvesFromDb = connection.Get<Dwarf>(whereFilter);
+        
+        //Assert
+        Assert.True(dwarvesFromDb.Count() == 2);
+        Assert.True(updatedRecords == 2);
+        Assert.True(dwarvesFromDb.All(x => x.Name == sharedName && !x.IsActive));
+    }
+    
+    [Fact]
+    public void BulkPartialUpdate_WithTransactionWithIntKeys_ShouldHaveChangedValues()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+        
+        string sharedName = Guid.NewGuid().ToString("N");
+        string whereFilter = $"{fixture.DbProvider.Options.NameConverter("Name")}='{sharedName}'";
+
+        Dwarf[] dwarves = [new()
+        {
+            Name = sharedName,
+            Height = 120,
+            IsActive = false,
+            Strength = 50
+        }, new()
+        {
+            Name = sharedName,
+            Height = 110,
+            IsActive = false,
+            Strength = 40
+        }];
+        
+        transaction.BulkInsert(dwarves);
+        
+        dwarves = transaction.Get<Dwarf>(whereFilter).ToArray();
+        
+        //Act
+        int updatedRecords = transaction.BulkPartialUpdate<Dwarf>(
+            keys: dwarves.Select(x=>x.Id).ToArray(),
+            x=>x
+                .SetProperty(y=>y.IsActive, true)
+                .SetProperty(y=>y.Height, 140)
+        );
+        IEnumerable<Dwarf> dwarvesFromDb = transaction.Get<Dwarf>(whereFilter);
+        
+        transaction.Commit();
+        
+        //Assert
+        Assert.True(dwarvesFromDb.Count() == 2);
+        Assert.True(updatedRecords == 2);
+        Assert.True(dwarvesFromDb.All(x => x.Name == sharedName && x.IsActive));
     }
     
     [Fact]
@@ -921,13 +1190,517 @@ public class UpdateTests(DbFixture fixture)
         connection.BulkInsert(gnomes);
         
         //Act
-        int updatedRecords = connection.BulkPartialUpdate<string, Gnome>(
+        int updatedRecords = connection.BulkPartialUpdate<Gnome, string>(
             gnomes.Select(x=>x.Id).ToArray(),
             x=>x
                 .SetProperty(y=>y.IsActive, false)
                 .SetProperty(y=>y.Height, 140)
         );
-        IEnumerable<Gnome> gnomesFromDb = connection.Get<string, Gnome>(gnomes.Select(x=>x.Id).ToArray());
+        IEnumerable<Gnome> gnomesFromDb = connection.Get<Gnome, string>(gnomes.Select(x=>x.Id).ToArray());
+        
+        //Assert
+        Assert.True(gnomesFromDb.Count() == 2);
+        Assert.True(updatedRecords == 2);
+        Assert.True(gnomesFromDb.All(x => x is { IsActive: false, Height: 140 }));
+    }
+    
+    [Fact]
+    public void BulkPartialUpdate_WithTransactionWithTypedKeys_ShouldHaveChangedValues()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Gnome[] gnomes = [new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        }, new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Torord",
+            Height = 110,
+            IsActive = true,
+            Strength = 40
+        }];
+        
+        transaction.BulkInsert(gnomes);
+        
+        //Act
+        int updatedRecords = transaction.BulkPartialUpdate<Gnome, string>(
+            gnomes.Select(x=>x.Id).ToArray(),
+            x=>x
+                .SetProperty(y=>y.IsActive, false)
+                .SetProperty(y=>y.Height, 140)
+        );
+        IEnumerable<Gnome> gnomesFromDb = transaction.Get<Gnome, string>(gnomes.Select(x=>x.Id).ToArray());
+        
+        transaction.Commit();
+        
+        //Assert
+        Assert.True(gnomesFromDb.Count() == 2);
+        Assert.True(updatedRecords == 2);
+        Assert.True(gnomesFromDb.All(x => x is { IsActive: false, Height: 140 }));
+    }
+    
+    [Fact]
+    public async Task PartialUpdateAsync_WithConnectionWithEntity_ShouldHaveChangedValue()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Gnome gnome = new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        };
+        
+        //Act
+        await connection.InsertAsync<Gnome, string>(gnome);
+        int updatedRecords = await connection.PartialUpdateAsync(
+            gnome with { Name = "The Mule", Height = 140, IsActive = false},
+            x=>x
+                .CopyProperty(y=>y.Name)
+                .CopyProperty(y=>y.Height)
+        );
+        Gnome? gnomeFromDb = await connection.GetAsync<Gnome, string>(gnome.Id);
+        
+        //Assert
+        Assert.True(gnomeFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(gnomeFromDb is { Name: "The Mule", Height: 140 });
+    }
+    
+    [Fact]
+    public async Task PartialUpdateAsync_WithTransactionWithEntity_ShouldHaveChangedValue()
+    {
+        //Arrange
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Gnome gnome = new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        };
+        
+        //Act
+        await transaction.InsertAsync<Gnome, string>(gnome);
+        int updatedRecords = await transaction.PartialUpdateAsync(
+            gnome with { Name = "The Mule", Height = 140, IsActive = false},
+            x=>x
+                .CopyProperty(y=>y.Name)
+                .CopyProperty(y=>y.Height)
+        );
+        Gnome? gnomeFromDb = await transaction.GetAsync<Gnome, string>(gnome.Id);
+        
+        transaction.Commit();
+        
+        //Assert
+        Assert.True(gnomeFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(gnomeFromDb is { Name: "The Mule", Height: 140 });
+    }
+    
+    [Fact]
+    public async Task PartialUpdateAsync_WithConnectionWithIntKey_ShouldHaveChangedValue()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Dwarf dwarf = new()
+        {
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        };
+        
+        //Act
+        int dwarfId = await connection.InsertAsync(dwarf);
+        int updatedRecords = await connection.PartialUpdateAsync<Dwarf>(
+            key: dwarfId,
+            x => x
+                    .SetProperty(y=>y.Name, "The Mule")
+                    .SetProperty(y=>y.Height, 140)
+        );
+        Dwarf? dwarfFromDb = await connection.GetAsync<Dwarf>(dwarfId);
+        
+        //Assert
+        Assert.True(dwarfFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(dwarfFromDb is { Name: "The Mule", Height: 140 });
+    }
+    
+    [Fact]
+    public async Task PartialUpdateAsync_WithTransactionWithIntKey_ShouldHaveChangedValue()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Dwarf dwarf = new()
+        {
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        };
+        
+        //Act
+        int dwarfId = await transaction.InsertAsync(dwarf);
+        int updatedRecords = await transaction.PartialUpdateAsync<Dwarf>(
+            key: dwarfId,
+            x => x
+                .SetProperty(y=>y.Name, "Soupeter")
+                .SetProperty(y=>y.Height, 110)
+        );
+        Dwarf? dwarfFromDb = await transaction.GetAsync<Dwarf>(dwarfId);
+        
+        transaction.Commit();
+        
+        //Assert
+        Assert.True(dwarfFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(dwarfFromDb is { Name: "Soupeter", Height: 110 });
+    }
+    
+    [Fact]
+    public async Task PartialUpdateAsync_WithConnectionWithTypedKey_ShouldHaveChangedValue()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Gnome gnome = new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        };
+        
+        //Act
+        await connection.InsertAsync<Gnome, string>(gnome);
+        int updatedRecords = await connection.PartialUpdateAsync<Gnome, string>(
+            gnome.Id,
+            x=>x.SetProperty(y=>y.Name, "The Mule")
+                .SetProperty(y=>y.Height, 140)
+        );
+        Gnome? gnomeFromDb = await connection.GetAsync<Gnome, string>(gnome.Id);
+        
+        //Assert
+        Assert.True(gnomeFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(gnomeFromDb is { Name: "The Mule", Height: 140 });
+    }
+    
+    [Fact]
+    public async Task PartialUpdateAsync_WithTransactionWithTypedKey_ShouldHaveChangedValue()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Gnome gnome = new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        };
+        
+        //Act
+        await transaction.InsertAsync<Gnome, string>(gnome);
+        int updatedRecords = await transaction.PartialUpdateAsync<Gnome, string>(
+            gnome.Id,
+            x=>x.SetProperty(y=>y.Name, "The Mule")
+                .SetProperty(y=>y.Height, 140)
+        );
+        Gnome? gnomeFromDb = await transaction.GetAsync<Gnome, string>(gnome.Id);
+        
+        transaction.Commit();
+        
+        //Assert
+        Assert.True(gnomeFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(gnomeFromDb is { Name: "The Mule", Height: 140 });
+    }
+    
+    [Fact]
+    public async Task BulkPartialUpdateAsync_WithConnectionWithEntities_ShouldHaveChangedValues()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Gnome[] gnomes = [new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        }, new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Torord",
+            Height = 110,
+            IsActive = true,
+            Strength = 40
+        }];
+        
+        await connection.BulkInsertAsync(gnomes);
+        
+        gnomes = gnomes.Select(x=> x with { Name = "The Mule", Height = 140, IsActive = false}).ToArray();
+        
+        //Act
+        int updatedRecords = await connection.BulkPartialUpdateAsync(
+            gnomes,
+            x=>x
+                .CopyProperty(y=>y.IsActive)
+                .CopyProperty(y=>y.Height)
+        );
+        IEnumerable<Gnome> gnomesFromDb = await connection.GetAsync<Gnome, string>(gnomes.Select(x=>x.Id).ToArray());
+        
+        //Assert
+        Assert.True(gnomesFromDb.Count() == 2);
+        Assert.True(updatedRecords == 2);
+        Assert.True(gnomesFromDb.All(x => x.Name != "The Mule"));
+    }
+    
+    [Fact]
+    public async Task BulkPartialUpdateAsync_WithTransactionWithEntities_ShouldHaveChangedValues()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Gnome[] gnomes = [new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        }, new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Torord",
+            Height = 110,
+            IsActive = true,
+            Strength = 40
+        }];
+        
+        await transaction.BulkInsertAsync(gnomes);
+        
+        gnomes = gnomes.Select(x=> x with { Name = "The Mule", Height = 140, IsActive = false}).ToArray();
+        
+        //Act
+        int updatedRecords = await transaction.BulkPartialUpdateAsync(
+            gnomes,
+            x=>x
+                .CopyProperty(y=>y.IsActive)
+                .CopyProperty(y=>y.Height)
+        );
+        IEnumerable<Gnome> gnomesFromDb = await transaction.GetAsync<Gnome, string>(gnomes.Select(x=>x.Id).ToArray());
+        
+        transaction.Commit();
+        
+        //Assert
+        Assert.True(gnomesFromDb.Count() == 2);
+        Assert.True(updatedRecords == 2);
+        Assert.True(gnomesFromDb.All(x => x.Name != "The Mule"));
+    }
+    
+    [Fact]
+    public async Task BulkPartialUpdateAsync_WithConnectionWithIntKeys_ShouldHaveChangedValues()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        string sharedName = Guid.NewGuid().ToString("N");
+        string whereFilter = $"{fixture.DbProvider.Options.NameConverter("Name")}='{sharedName}'";
+
+        Dwarf[] dwarves = [new()
+        {
+            Name = sharedName,
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        }, new()
+        {
+            Name = sharedName,
+            Height = 110,
+            IsActive = true,
+            Strength = 40
+        }];
+        
+        await connection.BulkInsertAsync(dwarves);
+        
+        dwarves = (await connection.GetAsync<Dwarf>(whereFilter)).ToArray();
+        
+        //Act
+        int updatedRecords = await connection.BulkPartialUpdateAsync<Dwarf>(
+            keys: dwarves.Select(x=>x.Id).ToArray(),
+            x=>x
+                .SetProperty(y=>y.IsActive, false)
+                .SetProperty(y=>y.Height, 140)
+        );
+        IEnumerable<Dwarf> dwarvesFromDb = await connection.GetAsync<Dwarf>(whereFilter);
+        
+        //Assert
+        Assert.True(dwarvesFromDb.Count() == 2);
+        Assert.True(updatedRecords == 2);
+        Assert.True(dwarvesFromDb.All(x => x.Name == sharedName && !x.IsActive));
+    }
+    
+    [Fact]
+    public async Task BulkPartialUpdateAsync_WithTransactionWithIntKeys_ShouldHaveChangedValues()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+        
+        string sharedName = Guid.NewGuid().ToString("N");
+        string whereFilter = $"{fixture.DbProvider.Options.NameConverter("Name")}='{sharedName}'";
+
+        Dwarf[] dwarves = [new()
+        {
+            Name = sharedName,
+            Height = 120,
+            IsActive = false,
+            Strength = 50
+        }, new()
+        {
+            Name = sharedName,
+            Height = 110,
+            IsActive = false,
+            Strength = 40
+        }];
+        
+        await transaction.BulkInsertAsync(dwarves);
+        
+        dwarves = (await transaction.GetAsync<Dwarf>(whereFilter)).ToArray();
+        
+        //Act
+        int updatedRecords = await transaction.BulkPartialUpdateAsync<Dwarf>(
+            keys: dwarves.Select(x=>x.Id).ToArray(),
+            x=>x
+                .SetProperty(y=>y.IsActive, true)
+                .SetProperty(y=>y.Height, 140)
+        );
+        IEnumerable<Dwarf> dwarvesFromDb = await transaction.GetAsync<Dwarf>(whereFilter);
+        
+        transaction.Commit();
+        
+        //Assert
+        Assert.True(dwarvesFromDb.Count() == 2);
+        Assert.True(updatedRecords == 2);
+        Assert.True(dwarvesFromDb.All(x => x.Name == sharedName && x.IsActive));
+    }
+    
+    [Fact]
+    public async Task BulkPartialUpdateAsync_WithConnectionWithTypedKeys_ShouldHaveChangedValues()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Gnome[] gnomes = [new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        }, new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Torord",
+            Height = 110,
+            IsActive = true,
+            Strength = 40
+        }];
+        
+        await connection.BulkInsertAsync(gnomes);
+        
+        //Act
+        int updatedRecords = await connection.BulkPartialUpdateAsync<Gnome, string>(
+            gnomes.Select(x=>x.Id).ToArray(),
+            x=>x
+                .SetProperty(y=>y.IsActive, false)
+                .SetProperty(y=>y.Height, 140)
+        );
+        IEnumerable<Gnome> gnomesFromDb = await connection.GetAsync<Gnome, string>(gnomes.Select(x=>x.Id).ToArray());
+        
+        //Assert
+        Assert.True(gnomesFromDb.Count() == 2);
+        Assert.True(updatedRecords == 2);
+        Assert.True(gnomesFromDb.All(x => x is { IsActive: false, Height: 140 }));
+    }
+    
+    [Fact]
+    public async Task BulkPartialUpdateAsync_WithTransactionWithTypedKeys_ShouldHaveChangedValues()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Gnome[] gnomes = [new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Havord",
+            Height = 120,
+            IsActive = true,
+            Strength = 50
+        }, new()
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "Torord",
+            Height = 110,
+            IsActive = true,
+            Strength = 40
+        }];
+        
+        await transaction.BulkInsertAsync(gnomes);
+        
+        //Act
+        int updatedRecords = await transaction.BulkPartialUpdateAsync<Gnome, string>(
+            gnomes.Select(x=>x.Id).ToArray(),
+            x=>x
+                .SetProperty(y=>y.IsActive, false)
+                .SetProperty(y=>y.Height, 140)
+        );
+        IEnumerable<Gnome> gnomesFromDb = await transaction.GetAsync<Gnome, string>(gnomes.Select(x=>x.Id).ToArray());
+        
+        transaction.Commit();
         
         //Assert
         Assert.True(gnomesFromDb.Count() == 2);
