@@ -13,33 +13,33 @@ public static class CreateCommands
     #region Regular
     
     /// <summary>
-    /// Inserts an entity with a key of type <see cref="int"/> via an <see cref="IDbConnection"/>.
+    /// Inserts an entity with a key of type <see cref="int"/> via an <see cref="IDbConnection"/>
     /// </summary>
-    /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    /// <param name="connection">A connection to the database.</param>
-    /// <param name="entity">The entity to insert.</param>
-    /// <returns>The key (of type <see cref="int"/>) of the inserted entity.</returns>
+    /// <typeparam name="TEntity">The type of the entity</typeparam>
+    /// <param name="connection">A connection to the database</param>
+    /// <param name="entity">The entity to insert</param>
+    /// <returns>The key (of type <see cref="int"/>) of the inserted entity</returns>
     public static int Insert<TEntity>(this IDbConnection connection, TEntity entity)
         => connection.Insert<TEntity, int>(entity);
     
     /// <summary>
-    /// Inserts an entity with a key of type <see cref="int"/> via an <see cref="IDbTransaction"/>.
+    /// Inserts an entity with a key of type <see cref="int"/> via an <see cref="IDbTransaction"/>
     /// </summary>
-    /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    /// <param name="transaction">An open transaction in the database.</param>
-    /// <param name="entity">The entity to insert.</param>
-    /// <returns>The key (of type <see cref="int"/>) of the inserted entity.</returns>
+    /// <typeparam name="TEntity">The type of the entity</typeparam>
+    /// <param name="transaction">An open transaction in the database</param>
+    /// <param name="entity">The entity to insert</param>
+    /// <returns>The key (of type <see cref="int"/>) of the inserted entity</returns>
     public static int Insert<TEntity>(this IDbTransaction transaction, TEntity entity)
         => transaction.Insert<TEntity, int>(entity);
     
     /// <summary>
-    /// Inserts an entity with a generic key of type <typeparamref name="TKey"/> via an <see cref="IDbConnection"/>.
+    /// Inserts an entity with a generic key of type <typeparamref name="TKey"/> via an <see cref="IDbConnection"/>
     /// </summary>
-    /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    /// <typeparam name="TKey">The type of the key.</typeparam>
-    /// <param name="connection">A connection to the database.</param>
-    /// <param name="entity">The entity to insert.</param>
-    /// <returns>The inserted entity's key of type <typeparamref name="TKey"/>.</returns>
+    /// <typeparam name="TEntity">The type of the entity</typeparam>
+    /// <typeparam name="TKey">The type of the key</typeparam>
+    /// <param name="connection">A connection to the database</param>
+    /// <param name="entity">The entity to insert</param>
+    /// <returns>The inserted entity's key of type <typeparamref name="TKey"/></returns>
     public static TKey Insert<TEntity, TKey>(this IDbConnection connection, TEntity entity)
     {
         CommandComponents components = GenerateInsertSql(
@@ -50,13 +50,13 @@ public static class CreateCommands
     }
     
     /// <summary>
-    /// Inserts an entity with a generic key of type <typeparamref name="TKey"/> via an <see cref="IDbTransaction"/>.
+    /// Inserts an entity with a generic key of type <typeparamref name="TKey"/> via an <see cref="IDbTransaction"/>
     /// </summary>
-    /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    /// <typeparam name="TKey">The type of the key.</typeparam>
-    /// <param name="transaction">An open transaction in the database.</param>
-    /// <param name="entity">The entity to insert.</param>
-    /// <returns>The inserted entity's key of type <typeparamref name="TKey"/>.</returns>
+    /// <typeparam name="TEntity">The type of the entity</typeparam>
+    /// <typeparam name="TKey">The type of the key</typeparam>
+    /// <param name="transaction">An open transaction in the database</param>
+    /// <param name="entity">The entity to insert</param>
+    /// <returns>The inserted entity's key of type <typeparamref name="TKey"/></returns>
     public static TKey Insert<TEntity, TKey>(this IDbTransaction transaction, TEntity entity)
     {
         CommandComponents components = GenerateInsertSql(
@@ -67,13 +67,13 @@ public static class CreateCommands
     }
     
     /// <summary>
-    /// Inserts an array of entities via an <see cref="IDbConnection"/>.
+    /// Inserts an array of entities via an <see cref="IDbConnection"/>
     /// </summary>
-    /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    /// <param name="connection">A connection to the database.</param>
-    /// <param name="entities">An array of entities to insert.</param>
-    /// <param name="batchSize">The batch size for bulk insertion.</param>
-    /// <returns>The number of inserted entries.</returns>
+    /// <typeparam name="TEntity">The type of the entity</typeparam>
+    /// <param name="connection">A connection to the database</param>
+    /// <param name="entities">An array of entities to insert</param>
+    /// <param name="batchSize">The batch size for bulk insertion</param>
+    /// <returns>The number of inserted entries</returns>
     public static int BulkInsert<TEntity>(
         this IDbConnection connection,
         TEntity[] entities,
@@ -85,13 +85,13 @@ public static class CreateCommands
     }
     
     /// <summary>
-    /// Inserts an array of entities via an <see cref="IDbTransaction"/>.
+    /// Inserts an array of entities via an <see cref="IDbTransaction"/>
     /// </summary>
-    /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    /// <param name="transaction">An open transaction in the database.</param>
-    /// <param name="entities">An array of entities to insert.</param>
-    /// <param name="batchSize">The batch size for bulk insertion.</param>
-    /// <returns>The number of inserted entries.</returns>
+    /// <typeparam name="TEntity">The type of the entity</typeparam>
+    /// <param name="transaction">An open transaction in the database</param>
+    /// <param name="entities">An array of entities to insert</param>
+    /// <param name="batchSize">The batch size for bulk insertion</param>
+    /// <returns>The number of inserted entries</returns>
     public static int BulkInsert<TEntity>(
         this IDbTransaction transaction,
         TEntity[] entities,
@@ -107,37 +107,37 @@ public static class CreateCommands
     #region Async
     
     /// <summary>
-    /// Inserts an entity with a key of type <see cref="int"/> via an <see cref="IDbConnection"/>.
+    /// Inserts an entity with a key of type <see cref="int"/> via an <see cref="IDbConnection"/>
     /// </summary>
-    /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    /// <param name="connection">A connection to the database.</param>
-    /// <param name="entity">The entity to insert.</param>
-    /// <returns>The key (of type <see cref="int"/>) of the inserted entity.</returns>
+    /// <typeparam name="TEntity">The type of the entity</typeparam>
+    /// <param name="connection">A connection to the database</param>
+    /// <param name="entity">The entity to insert</param>
+    /// <returns>The key (of type <see cref="int"/>) of the inserted entity</returns>
     public static Task<int> InsertAsync<TEntity>(
         this IDbConnection connection,
         TEntity entity)
         => connection.InsertAsync<TEntity, int>(entity);
     
     /// <summary>
-    /// Inserts an entity with a key of type <see cref="int"/> via an <see cref="IDbTransaction"/>.
+    /// Inserts an entity with a key of type <see cref="int"/> via an <see cref="IDbTransaction"/>
     /// </summary>
-    /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    /// <param name="transaction">An open transaction in the database.</param>
-    /// <param name="entity">The entity to insert.</param>
-    /// <returns>The key (of type <see cref="int"/>) of the inserted entity.</returns>
+    /// <typeparam name="TEntity">The type of the entity</typeparam>
+    /// <param name="transaction">An open transaction in the database</param>
+    /// <param name="entity">The entity to insert</param>
+    /// <returns>The key (of type <see cref="int"/>) of the inserted entity</returns>
     public static Task<int> InsertAsync<TEntity>(
         this IDbTransaction transaction,
         TEntity entity)
         => transaction.InsertAsync<TEntity, int>(entity);
     
     /// <summary>
-    /// Inserts an entity with a generic key of type <typeparamref name="TKey"/> via an <see cref="IDbConnection"/>.
+    /// Inserts an entity with a generic key of type <typeparamref name="TKey"/> via an <see cref="IDbConnection"/>
     /// </summary>
-    /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    /// <typeparam name="TKey">The type of the key.</typeparam>
-    /// <param name="connection">A connection to the database.</param>
-    /// <param name="entity">The entity to insert.</param>
-    /// <returns>The inserted entity's key of type <typeparamref name="TKey"/>.</returns>
+    /// <typeparam name="TEntity">The type of the entity</typeparam>
+    /// <typeparam name="TKey">The type of the key</typeparam>
+    /// <param name="connection">A connection to the database</param>
+    /// <param name="entity">The entity to insert</param>
+    /// <returns>The inserted entity's key of type <typeparamref name="TKey"/></returns>
     public static Task<TKey> InsertAsync<TEntity, TKey>(
         this IDbConnection connection,
         TEntity entity)
@@ -150,13 +150,13 @@ public static class CreateCommands
     }
     
     /// <summary>
-    /// Inserts an entity with a generic key of type <typeparamref name="TKey"/> via an <see cref="IDbTransaction"/>.
+    /// Inserts an entity with a generic key of type <typeparamref name="TKey"/> via an <see cref="IDbTransaction"/>
     /// </summary>
-    /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    /// <typeparam name="TKey">The type of the key.</typeparam>
-    /// <param name="transaction">An open transaction in the database.</param>
-    /// <param name="entity">The entity to insert.</param>
-    /// <returns>The inserted entity's key of type <typeparamref name="TKey"/>.</returns>
+    /// <typeparam name="TEntity">The type of the entity</typeparam>
+    /// <typeparam name="TKey">The type of the key</typeparam>
+    /// <param name="transaction">An open transaction in the database</param>
+    /// <param name="entity">The entity to insert</param>
+    /// <returns>The inserted entity's key of type <typeparamref name="TKey"/></returns>
     public static Task<TKey> InsertAsync<TEntity, TKey>(
         this IDbTransaction transaction,
         TEntity entity)
@@ -169,13 +169,13 @@ public static class CreateCommands
     }
     
     /// <summary>
-    /// Inserts an array of entities via an <see cref="IDbConnection"/>.
+    /// Inserts an array of entities via an <see cref="IDbConnection"/>
     /// </summary>
-    /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    /// <param name="connection">A connection to the database.</param>
-    /// <param name="entities">An array of entities to insert.</param>
-    /// <param name="batchSize">The batch size for bulk insertion.</param>
-    /// <returns>The number of inserted entries.</returns>
+    /// <typeparam name="TEntity">The type of the entity</typeparam>
+    /// <param name="connection">A connection to the database</param>
+    /// <param name="entities">An array of entities to insert</param>
+    /// <param name="batchSize">The batch size for bulk insertion</param>
+    /// <returns>The number of inserted entries</returns>
     public static Task<int> BulkInsertAsync<TEntity>(
         this IDbConnection connection,
         TEntity[] entities,
@@ -187,13 +187,13 @@ public static class CreateCommands
     }
     
     /// <summary>
-    /// Inserts an array of entities via an <see cref="IDbTransaction"/>.
+    /// Inserts an array of entities via an <see cref="IDbTransaction"/>
     /// </summary>
-    /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    /// <param name="transaction">An open transaction in the database.</param>
-    /// <param name="entities">An array of entities to insert.</param>
-    /// <param name="batchSize">The batch size for bulk insertion.</param>
-    /// <returns>The number of inserted entries.</returns>
+    /// <typeparam name="TEntity">The type of the entity</typeparam>
+    /// <param name="transaction">An open transaction in the database</param>
+    /// <param name="entities">An array of entities to insert</param>
+    /// <param name="batchSize">The batch size for bulk insertion</param>
+    /// <returns>The number of inserted entries</returns>
     public static Task<int> BulkInsertAsync<TEntity>(
         this IDbTransaction transaction,
         TEntity[] entities,

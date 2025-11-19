@@ -8,7 +8,7 @@ public record struct GremlinKey(int Id, string Name);
 
 [CompositeKey(typeof(GremlinKey))]
 [Table(TestsConfig.AutoIncrementingCompositeKeyTestsTableName, Schema = TestsConfig.SchemaName)]
-[ConfigId(TestsConfig.DbVariant)]
+[OrmamuConfigId(TestsConfig.DbVariant)]
 public class Gremlin
 {
     [Key]

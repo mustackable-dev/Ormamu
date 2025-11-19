@@ -40,7 +40,7 @@ public sealed class DbFixture: IDisposable
                 break;
         }
         
-        Configuration.Apply(TestsConfig.DbOptions);
+        OrmamuConfig.Apply(TestsConfig.DbOptions);
         
         DbProvider.DeploySchema();
         DbProvider.DeployTestData();

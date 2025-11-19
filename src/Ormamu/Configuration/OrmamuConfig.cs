@@ -3,7 +3,7 @@ namespace Ormamu;
 /// <summary>
 /// Provides configuration methods for setting up Ormamu.
 /// </summary>
-public static class Configuration
+public static class OrmamuConfig
 {
     internal static void Apply()
         =>InitiateOrmamu(new (){ {true, new()} });
@@ -16,7 +16,7 @@ public static class Configuration
     /// This configuration applies to all entities.
     /// </para>
     /// </summary>
-    /// <param name="options">The OrmamuOptions instance used for configuration.</param>
+    /// <param name="options">The OrmamuOptions instance used for configuration</param>
     public static void Apply(OrmamuOptions options)
         =>InitiateOrmamu(new (){ {true, options} });
     
@@ -26,13 +26,10 @@ public static class Configuration
     /// Configures Ormamu with multiple <see cref="OrmamuOptions"/> instances. Useful when your project uses
     /// multiple databases that use different naming conventions or dialects.
     /// </para>
-    /// <para>
-    /// Ensure each <see cref="OrmamuOptions"/> has a unique <see cref="OrmamuOptions.ConfigId"/>. Apply the
-    /// <see cref="ConfigIdAttribute"/> to your entity classes to indicate which configuration to use.
-    /// </para>
     /// </summary>
     /// <param name="configs">
-    /// An array of <see cref="OrmamuOptions"/> instances, each representing a different configuration context.
+    /// A configuration mapping specifying <see cref="OrmamuOptions"/> to be used for each
+    /// <see cref="OrmamuConfigIdAttribute"/> tag
     /// </param>
     public static void Apply(Dictionary<object, OrmamuOptions> configs)
         =>InitiateOrmamu(configs);

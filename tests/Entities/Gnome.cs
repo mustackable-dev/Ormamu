@@ -4,7 +4,7 @@ using Ormamu;
 
 namespace OrmamuTests.Entities;
 
-[ConfigId(TestsConfig.DbVariant)]
+[OrmamuConfigId(TestsConfig.DbVariant)]
 [Table(TestsConfig.UpdateTestsTableName, Schema = TestsConfig.SchemaName)]
 public record Gnome
 {

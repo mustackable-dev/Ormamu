@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Text;
 using Dapper;
 using Ormamu.Exceptions;
-using System.Threading;
 
 namespace Ormamu;
 
@@ -23,9 +22,9 @@ internal static class Cache
             TableAttribute? tableAttribute = type.GetCustomAttribute<TableAttribute>();
             if(tableAttribute is null) continue;
             
-            ConfigIdAttribute? configAttribute = type.GetCustomAttribute<ConfigIdAttribute>();
+            OrmamuConfigIdAttribute? configAttribute = type.GetCustomAttribute<OrmamuConfigIdAttribute>();
             OrmamuOptions options = buildOptions.First().Value;
-            if (configAttribute is not null && !buildOptions.TryGetValue(configAttribute.ConfigId, out options))
+            if (configAttribute is not null && !buildOptions.TryGetValue(configAttribute.ConfigId, out options!))
             {
                 throw new CacheBuilderException(CacheBuilderExceptionType.ConfigNotFound, configAttribute.ConfigId, type.Name);
             }
@@ -185,7 +184,7 @@ internal static class Cache
             lock(ConfigLock)
             {
                 if(BuilderDataCache is null)
-                    Configuration.Apply();
+                    OrmamuConfig.Apply();
             }
         }
         

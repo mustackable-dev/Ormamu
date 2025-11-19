@@ -1,4 +1,5 @@
 using System.Data;
+using Dapper;
 using Ormamu;
 using OrmamuTests.Entities;
 using OrmamuTests.Fixtures;
@@ -8,6 +9,8 @@ namespace OrmamuTests;
 public class DeleteTests(DbFixture fixture)
 {
     private readonly string _idColumn = fixture.DbProvider.Options.NameConverter("Id");
+    private readonly string _magicPower = fixture.DbProvider.Options.NameConverter("MagicPower");
+    private readonly string _dateOfBirth = fixture.DbProvider.Options.NameConverter("DateOfBirth");
     
     [Fact]
     public void Delete_WithConnectionWithEntity_ShouldNotFindEntry()
@@ -595,7 +598,7 @@ public class DeleteTests(DbFixture fixture)
         
         
         //Act
-        int deletedRecords = await transaction.BulkDeleteAsync<Pixie>(pixies);
+        int deletedRecords = await transaction.BulkDeleteAsync(pixies);
         transaction.Commit();
         
         //Assert
@@ -813,9 +816,9 @@ public class DeleteTests(DbFixture fixture)
         //Act
         
         int insertedImps = connection.BulkInsert(imps, 99);
-        IEnumerable<Imp> imps2 = connection.Get<Imp>($"\"{TestsConfig.CustomColumnName}\"=@templateName", param: new { templateName = name });
+        IEnumerable<Imp> imps2 = connection.Get<Imp>($"\"{TestsConfig.CustomColumnName}\"=@templateName", commandParams: new { templateName = name });
         int deleteImps = connection.BulkDelete<Imp, Guid>(imps.Select(x=>x.GuidKey).ToArray());
-        IEnumerable<Imp> imps3 = connection.Get<Imp>($"\"{TestsConfig.CustomColumnName}\"=@templateName", param: new { templateName = name });
+        IEnumerable<Imp> imps3 = connection.Get<Imp>($"\"{TestsConfig.CustomColumnName}\"=@templateName", commandParams: new { templateName = name });
         //Assert
         
         Assert.True(insertedImps == impsSampleSize);
@@ -937,6 +940,13 @@ public class DeleteTests(DbFixture fixture)
         //Arrange
         using IDbConnection connection = fixture.DbProvider.GetConnection();
 
+        string wrapper = fixture.DbProvider.Options.Dialect switch
+        {
+            SqlDialect.PostgreSql => "\"",
+            SqlDialect.MySql or SqlDialect.MariaDb => "`",
+            _ => ""
+        };
+
         Thronglet[] thronglets =
         [
             new()
@@ -965,8 +975,8 @@ public class DeleteTests(DbFixture fixture)
         int deletedThronglets = connection.BulkDelete<Thronglet, ThrongletKey>(
             thronglets.Skip(1).Select(x=>new ThrongletKey(x.Id, x.Name)).ToArray());
         IEnumerable<Thronglet> thronglets2 = connection.Get<Thronglet>(
-            $"{_idColumn}>=@id AND {_idColumn}<=@id2",
-            param: new { id = 21, id2 = 23 });
+            $"{wrapper}{_idColumn}{wrapper}>=@id AND {wrapper}{_idColumn}{wrapper}<=@id2",
+            commandParams: new { id = 21, id2 = 23 });
         //Assert
         Assert.True(insertedThronglets == 3);
         Assert.True(deletedThronglets == 2);
@@ -980,6 +990,13 @@ public class DeleteTests(DbFixture fixture)
         using IDbConnection connection = fixture.DbProvider.GetConnection();
         connection.Open();
         using IDbTransaction transaction = connection.BeginTransaction();
+
+        string wrapper = fixture.DbProvider.Options.Dialect switch
+        {
+            SqlDialect.PostgreSql => "\"",
+            SqlDialect.MySql or SqlDialect.MariaDb => "`",
+            _ => ""
+        };
 
         Thronglet[] thronglets =
         [
@@ -1004,14 +1021,15 @@ public class DeleteTests(DbFixture fixture)
         ];
         
         int insertedThronglets = transaction.BulkInsert(thronglets);
-        //Act
         
+        //Act
         int deletedThronglets = transaction.BulkDelete<Thronglet, ThrongletKey>(
             thronglets.Reverse().Skip(1).Select(x=>new ThrongletKey(x.Id, x.Name)).ToArray());
         IEnumerable<Thronglet> thronglets2 = transaction.Get<Thronglet>(
-            $"{_idColumn}>=@id AND {_idColumn}<=@id2",
-            param: new { id = 24, id2 = 26 });
+            $"{wrapper}{_idColumn}{wrapper}>=@id AND {wrapper}{_idColumn}{wrapper}<=@id2",
+            commandParams: new { id = 24, id2 = 26 });
         transaction.Commit();
+        
         //Assert
         Assert.True(insertedThronglets == 3);
         Assert.True(deletedThronglets == 2);
@@ -1023,6 +1041,13 @@ public class DeleteTests(DbFixture fixture)
     {
         //Arrange
         using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        string wrapper = fixture.DbProvider.Options.Dialect switch
+        {
+            SqlDialect.PostgreSql => "\"",
+            SqlDialect.MySql or SqlDialect.MariaDb => "`",
+            _ => ""
+        };
 
         Thronglet[] thronglets =
         [
@@ -1052,8 +1077,8 @@ public class DeleteTests(DbFixture fixture)
         int deletedThronglets = await connection.BulkDeleteAsync<Thronglet, ThrongletKey>(
             thronglets.Skip(2).Select(x=>new ThrongletKey(x.Id, x.Name)).ToArray());
         IEnumerable<Thronglet> thronglets2 = await connection.GetAsync<Thronglet>(
-            $"{_idColumn}>=@id AND {_idColumn}<=@id2",
-            param: new { id = 27, id2 = 29 });
+            $"{wrapper}{_idColumn}{wrapper}>=@id AND {wrapper}{_idColumn}{wrapper}<=@id2",
+            commandParams: new { id = 27, id2 = 29 });
         //Assert
         Assert.True(insertedThronglets == 3);
         Assert.True(deletedThronglets == 1);
@@ -1067,6 +1092,13 @@ public class DeleteTests(DbFixture fixture)
         using IDbConnection connection = fixture.DbProvider.GetConnection();
         connection.Open();
         using IDbTransaction transaction = connection.BeginTransaction();
+
+        string wrapper = fixture.DbProvider.Options.Dialect switch
+        {
+            SqlDialect.PostgreSql => "\"",
+            SqlDialect.MySql or SqlDialect.MariaDb => "`",
+            _ => ""
+        };
 
         Thronglet[] thronglets =
         [
@@ -1091,17 +1123,112 @@ public class DeleteTests(DbFixture fixture)
         ];
         
         int insertedThronglets = await transaction.BulkInsertAsync(thronglets);
-        //Act
         
+        //Act
         int deletedThronglets = await transaction.BulkDeleteAsync<Thronglet, ThrongletKey>(
             thronglets.Reverse().Skip(2).Select(x=>new ThrongletKey(x.Id, x.Name)).ToArray());
+        
+        DynamicParameters queryParameters = new();
+        queryParameters.AddDynamicParams(new { id = 30, id2 = 32 });
+        
         IEnumerable<Thronglet> thronglets2 = await transaction.GetAsync<Thronglet>(
-            $"{_idColumn}>=@id AND {_idColumn}<=@id2",
-            param: new { id = 30, id2 = 32 });
+            $"{wrapper}{_idColumn}{wrapper}>=@id AND {wrapper}{_idColumn}{wrapper}<=@id2",
+            commandParams: queryParameters);
         transaction.Commit();
+        
         //Assert
         Assert.True(insertedThronglets == 3);
         Assert.True(deletedThronglets == 1);
         Assert.True(thronglets2.Count()==2);
+    }
+    
+    [Fact]
+    public void BulkDelete_WithConnectionWithCustomWhere_ShouldNotFindEntries()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        string wrapper = fixture.DbProvider.Options.Dialect switch
+        {
+            SqlDialect.PostgreSql => "\"",
+            SqlDialect.MySql or SqlDialect.MariaDb => "`",
+            _ => ""
+        };
+
+        Pixie[] pixies = [
+            new()
+            {
+                MagicPower = 10,
+                DateOfBirth = new DateTime(1985, 1, 1),
+            },
+            new()
+            {
+                MagicPower = 30,
+                DateOfBirth = new DateTime(1990, 1, 1),
+            },
+            new()
+            {
+                MagicPower = 30,
+                DateOfBirth = new DateTime(2000, 1, 1),
+                Ignored = "yep",
+            }
+        ];
+        
+        connection.BulkInsert(pixies);
+        
+        //Act
+        int deletedRecords = connection.BulkDelete<Pixie>(
+            $"{wrapper}{_dateOfBirth}{wrapper}<@dateOfBirth",
+            new { dateOfBirth = new DateTime(2000, 1, 1) });
+        
+        //Assert
+        Assert.True(deletedRecords == 2);
+    }
+    
+    [Fact]
+    public void BulkDelete_WithTransactionWithCustomWhere_ShouldNotFindEntries()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        string wrapper = fixture.DbProvider.Options.Dialect switch
+        {
+            SqlDialect.PostgreSql => "\"",
+            SqlDialect.MySql or SqlDialect.MariaDb => "`",
+            _ => ""
+        };
+        
+        Pixie[] pixies = [
+            new()
+            {
+                MagicPower = 990,
+                DateOfBirth = new DateTime(1985, 1, 1),
+            },
+            new()
+            {
+                MagicPower = 1000,
+                DateOfBirth = new DateTime(1990, 1, 1),
+            },
+            new()
+            {
+                MagicPower = 1200,
+                DateOfBirth = new DateTime(2000, 1, 1),
+                Ignored = "yep",
+            }
+        ];
+        
+        transaction.BulkInsert(pixies);
+        
+        //Act
+        int deletedRecords = transaction.BulkDelete<Pixie>(
+            $"{wrapper}{_magicPower}{wrapper}>@magicPower",
+            new { magicPower = 980 });
+        
+        //Assert
+        Assert.True(deletedRecords == 3);
     }
 }

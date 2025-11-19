@@ -2,11 +2,23 @@ using System.Linq.Expressions;
 
 namespace Ormamu;
 
+/// <summary>
+/// Represents a collection of property setters for a specific entity type <typeparamref name="TEntity"/>.
+/// Provides functionality to define property updates for partial updates.
+/// </summary>
+/// <typeparam name="TEntity">The entity type whose properties are being updated</typeparam>
 public class PropertySetters<TEntity> : PropertyModifiers
 {
-    public PropertySetters<TEntity> SetProperty<TProperty, TValue>(
+    /// <summary>
+    /// Defines a property to be updated with a specified value when building partial updates
+    /// </summary>
+    /// <typeparam name="TProperty">The property type selected on the entity</typeparam>
+    /// <param name="selector">An expression selecting the property on <typeparamref name="TEntity"/></param>
+    /// <param name="value">The value to assign to the selected property</param>
+    /// <returns>The current <see cref="PropertySetters{TEntity}"/> instance</returns>
+    public PropertySetters<TEntity> SetProperty<TProperty>(
         Expression<Func<TEntity, TProperty>> selector,
-        TValue value)
+        TProperty value)
     {
         Setters.Add(new Setter(selector, value));
         return this;
@@ -15,8 +27,19 @@ public class PropertySetters<TEntity> : PropertyModifiers
         => GetPartialUpdateComponents(builderData, false);
 }
 
+/// <summary>
+/// Represents a collection of property copiers for a specific entity type <typeparamref name="TEntity"/>.
+/// Provides functionality to define property copy operations for partial updates.
+/// </summary>
+/// <typeparam name="TEntity">The entity type whose properties are being copied</typeparam>
 public class PropertyCopiers<TEntity> : PropertyModifiers
 {
+    /// <summary>
+    /// Defines a property to be copied from a <typeparamref name="TEntity"/> instance
+    /// </summary>
+    /// <typeparam name="TProperty">The type of the property being copied</typeparam>
+    /// <param name="selector">An expression selecting the property on <typeparamref name="TEntity"/></param>
+    /// <returns>The current <see cref="PropertyCopiers{TEntity}"/> instance</returns>
     public PropertyCopiers<TEntity> CopyProperty<TProperty>(
         Expression<Func<TEntity, TProperty>> selector) 
     {
@@ -26,6 +49,11 @@ public class PropertyCopiers<TEntity> : PropertyModifiers
     internal PartialUpdateComponents GetPartialUpdateComponents(CommandBuilderData builderData)
         => GetPartialUpdateComponents(builderData, true);
 }
+
+/// <summary>
+/// Base class for property modifiers, providing common functionality for property setters and copiers.
+/// Tracks the set of property changes and provides partial update generation.
+/// </summary>
 public abstract class PropertyModifiers
 {
     internal readonly List<Setter> Setters = new();

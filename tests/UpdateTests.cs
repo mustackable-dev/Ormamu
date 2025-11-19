@@ -1,5 +1,6 @@
 using System.Data;
 using System.Text.Json;
+using Dapper;
 using Ormamu;
 using OrmamuTests.Entities;
 using OrmamuTests.Fixtures;
@@ -10,6 +11,7 @@ public class UpdateTests(DbFixture fixture)
 {
     private readonly string _heightColumn = fixture.DbProvider.Options.NameConverter("Height");
     private readonly string _idColumn = fixture.DbProvider.Options.NameConverter("Id");
+    private readonly string _nameColumn = fixture.DbProvider.Options.NameConverter("Name");
     
     [Fact]
     public void Update_WithConnection_ShouldHaveChangedValue()
@@ -137,8 +139,6 @@ public class UpdateTests(DbFixture fixture)
     public void BulkUpdate_WithConnection_ShouldHaveChangedValues()
     {
         //Arrange
-        
-        
         string wrapper = fixture.DbProvider.Options.Dialect switch
         {
             SqlDialect.PostgreSql => "\"",
@@ -186,7 +186,7 @@ public class UpdateTests(DbFixture fixture)
         
         //Act
         int updatedRecords = connection.BulkUpdate(gnomes.Where(x=>x.Height == height).ToArray());
-        IEnumerable<Gnome> gnomesFromDb = connection.Get<Gnome>($"{wrapper}{_heightColumn}{wrapper} = @height", param: new {height});
+        IEnumerable<Gnome> gnomesFromDb = connection.Get<Gnome>($"{wrapper}{_heightColumn}{wrapper} = @height", commandParams: new {height});
         
         //Assert
         Assert.True(updatedRecords == 2);
@@ -250,7 +250,7 @@ public class UpdateTests(DbFixture fixture)
         
         //Act
         int updatedRecords = transaction.BulkUpdate(gnomes.Where(x=>x.Height == height).ToArray());
-        IEnumerable<Gnome> gnomesFromDb = transaction.Get<Gnome>($"{wrapper}{_heightColumn}{wrapper} = @height", param: new {height});
+        IEnumerable<Gnome> gnomesFromDb = transaction.Get<Gnome>($"{wrapper}{_heightColumn}{wrapper} = @height", commandParams: new {height});
         transaction.Commit();
         
         //Assert
@@ -312,7 +312,7 @@ public class UpdateTests(DbFixture fixture)
         
         //Act
         int updatedRecords = await connection.BulkUpdateAsync(gnomes.Where(x=>x.Height == height).ToArray());
-        IEnumerable<Gnome> gnomesFromDb = await connection.GetAsync<Gnome>($"{wrapper}{_heightColumn}{wrapper} = @height", param: new {height});
+        IEnumerable<Gnome> gnomesFromDb = await connection.GetAsync<Gnome>($"{wrapper}{_heightColumn}{wrapper} = @height", commandParams: new {height});
         
         //Assert
         Assert.True(updatedRecords == 2);
@@ -324,8 +324,6 @@ public class UpdateTests(DbFixture fixture)
     public async Task BulkUpdateAsync_WithTransaction_ShouldHaveChangedValues()
     {
         //Arrange
-        
-        
         string wrapper = fixture.DbProvider.Options.Dialect switch
         {
             SqlDialect.PostgreSql => "\"",
@@ -375,8 +373,11 @@ public class UpdateTests(DbFixture fixture)
         }
         
         //Act
+        DynamicParameters queryParameters = new();
+        queryParameters.AddDynamicParams(new { height });
+        
         int updatedRecords = await transaction.BulkUpdateAsync(gnomes.Where(x=>x.Height == height).ToArray());
-        IEnumerable<Gnome> gnomesFromDb = await transaction.GetAsync<Gnome>($"{wrapper}{_heightColumn}{wrapper} = @height", param: new {height});
+        IEnumerable<Gnome> gnomesFromDb = await transaction.GetAsync<Gnome>($"{wrapper}{_heightColumn}{wrapper} = @height", commandParams: queryParameters);
         transaction.Commit();
         
         //Assert
@@ -443,14 +444,14 @@ public class UpdateTests(DbFixture fixture)
         //Act
         
         int insertedImps = connection.BulkInsert(imps, 99);
-        IEnumerable<Imp> imps2 = connection.Get<Imp>($"\"{TestsConfig.CustomColumnName}\"=@templateName", param: new { templateName = name });
+        IEnumerable<Imp> imps2 = connection.Get<Imp>($"\"{TestsConfig.CustomColumnName}\"=@templateName", commandParams: new { templateName = name });
         imps = imps.Select(x =>
         {
             x.Name = "Milano";
             return x;
         }).ToArray();
         int updatedImps = connection.BulkUpdate(imps);
-        IEnumerable<Imp> imps3 = connection.Get<Imp>($"\"{TestsConfig.CustomColumnName}\"=@templateName", param: new { templateName = "Milano" });
+        IEnumerable<Imp> imps3 = connection.Get<Imp>($"\"{TestsConfig.CustomColumnName}\"=@templateName", commandParams: new { templateName = "Milano" });
         //Assert
         
         Assert.True(insertedImps == impsSampleSize);
@@ -598,7 +599,7 @@ public class UpdateTests(DbFixture fixture)
         connection.BulkInsert(thronglets);
         IEnumerable<Thronglet> thronglets2 = connection.Get<Thronglet>(
             $"{_idColumn}>=@id AND {_idColumn}<=@id2",
-            param: new { id = 37, id2 = 39 });
+            commandParams: new { id = 37, id2 = 39 });
         
         //Act
         
@@ -610,7 +611,7 @@ public class UpdateTests(DbFixture fixture)
         
         IEnumerable<Thronglet> thronglets3 = connection.Get<Thronglet>(
             $"{_idColumn}>=@id AND {_idColumn}<=@id2",
-            param: new { id = 37, id2 = 39 });
+            commandParams: new { id = 37, id2 = 39 });
         
         //Assert
         
@@ -654,7 +655,7 @@ public class UpdateTests(DbFixture fixture)
         transaction.BulkInsert(thronglets);
         IEnumerable<Thronglet> thronglets2 = transaction.Get<Thronglet>(
             $"{_idColumn}>=@id AND {_idColumn}<=@id2",
-            param: new { id = 40, id2 = 42 });
+            commandParams: new { id = 40, id2 = 42 });
         
         //Act
         
@@ -666,7 +667,7 @@ public class UpdateTests(DbFixture fixture)
         
         IEnumerable<Thronglet> thronglets3 = transaction.Get<Thronglet>(
             $"{_idColumn}>=@id AND {_idColumn}<=@id2",
-            param: new { id = 40, id2 = 42 });
+            commandParams: new { id = 40, id2 = 42 });
         
         transaction.Commit();
         
@@ -710,7 +711,7 @@ public class UpdateTests(DbFixture fixture)
         await connection.BulkInsertAsync(thronglets);
         IEnumerable<Thronglet> thronglets2 = await connection.GetAsync<Thronglet>(
             $"{_idColumn}>=@id AND {_idColumn}<=@id2",
-            param: new { id = 43, id2 = 45 });
+            commandParams: new { id = 43, id2 = 45 });
         
         //Act
         
@@ -722,7 +723,7 @@ public class UpdateTests(DbFixture fixture)
         
         IEnumerable<Thronglet> thronglets3 = await connection.GetAsync<Thronglet>(
             $"{_idColumn}>=@id AND {_idColumn}<=@id2",
-            param: new { id = 43, id2 = 45 });
+            commandParams: new { id = 43, id2 = 45 });
         
         //Assert
         
@@ -764,9 +765,13 @@ public class UpdateTests(DbFixture fixture)
         ];
         
         await transaction.BulkInsertAsync(thronglets);
+        
+        DynamicParameters queryParameters = new();
+        queryParameters.AddDynamicParams(new { id = 46, id2 = 48 });
+        
         IEnumerable<Thronglet> thronglets2 = await transaction.GetAsync<Thronglet>(
             $"{_idColumn}>=@id AND {_idColumn}<=@id2",
-            param: new { id = 46, id2 = 48 });
+            commandParams: queryParameters);
         
         //Act
         
@@ -778,7 +783,7 @@ public class UpdateTests(DbFixture fixture)
         
         IEnumerable<Thronglet> thronglets3 = await transaction.GetAsync<Thronglet>(
             $"{_idColumn}>=@id AND {_idColumn}<=@id2",
-            param: new { id = 46, id2 = 48 });
+            commandParams: queryParameters);
 
         transaction.Commit();
         
@@ -1706,5 +1711,240 @@ public class UpdateTests(DbFixture fixture)
         Assert.True(gnomesFromDb.Count() == 2);
         Assert.True(updatedRecords == 2);
         Assert.True(gnomesFromDb.All(x => x is { IsActive: false, Height: 140 }));
+    }
+    
+    [Fact]
+    public void PartialUpdate_WithConnectionWithCompositeKey_ShouldHaveChangedValue()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Thronglet thronglet = new()
+        {
+            Name = "Havord",
+            Personality = Personality.Aloof
+        };
+        
+        //Act
+        ThrongletKey throngletKey = connection.Insert<Thronglet, ThrongletKey>(thronglet);
+        int updatedRecords = connection.PartialUpdate<Thronglet, ThrongletKey>(
+            key: throngletKey,
+            x => x
+                .SetProperty(y=>y.Personality, Personality.Assertive)
+        );
+        Thronglet? throngletFromDb = connection.Get<Thronglet, ThrongletKey>(throngletKey);
+        
+        //Assert
+        Assert.True(throngletFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(throngletFromDb is { Personality: Personality.Assertive, Name: "Havord" });
+    }
+    
+    [Fact]
+    public void PartialUpdate_WithTransactionWithCompositeKey_ShouldHaveChangedValue()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Thronglet thronglet = new()
+        {
+            Name = "Havord",
+            Personality = Personality.Aloof
+        };
+        
+        //Act
+        ThrongletKey throngletKey = transaction.Insert<Thronglet, ThrongletKey>(thronglet);
+        int updatedRecords = transaction.PartialUpdate<Thronglet, ThrongletKey>(
+            key: throngletKey,
+            x => x
+                .SetProperty(y=>y.Personality, Personality.Assertive)
+        );
+        Thronglet? throngletFromDb = transaction.Get<Thronglet, ThrongletKey>(throngletKey);
+        
+        //Assert
+        Assert.True(throngletFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(throngletFromDb is { Personality: Personality.Assertive, Name: "Havord" });
+    }
+    
+    [Fact]
+    public void PartialUpdate_WithConnectionWithEntityWithCompositeKey_ShouldHaveChangedValue()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+
+        Thronglet thronglet = new()
+        {
+            Id = 1,
+            Name = "Havord",
+            Personality = Personality.Aloof
+        };
+        
+        //Act
+        
+        connection.Insert<Thronglet, ThrongletKey>(thronglet);
+        
+        thronglet.Personality = Personality.Assertive;
+        
+        int updatedRecords = connection.PartialUpdate(
+            thronglet,
+            x => x.CopyProperty(y=>y.Personality)
+        );
+        Thronglet? throngletFromDb = connection.Get<Thronglet, ThrongletKey>(new (thronglet.Id, thronglet.Name));
+        
+        //Assert
+        Assert.True(throngletFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(throngletFromDb is { Personality: Personality.Assertive, Name: "Havord" });
+    }
+    
+    [Fact]
+    public void PartialUpdate_WithTransactionWithEntityWithCompositeKey_ShouldHaveChangedValue()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+
+        Thronglet thronglet = new()
+        {
+            Id = 1,
+            Name = "Havord",
+            Personality = Personality.Aloof
+        };
+        
+        //Act
+        
+        transaction.Insert<Thronglet, ThrongletKey>(thronglet);
+        
+        thronglet.Personality = Personality.Assertive;
+        
+        int updatedRecords = transaction.PartialUpdate(
+            thronglet,
+            x => x.CopyProperty(y=>y.Personality)
+        );
+        Thronglet? throngletFromDb = transaction.Get<Thronglet, ThrongletKey>(new (thronglet.Id, thronglet.Name));
+        
+        //Assert
+        Assert.True(throngletFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(throngletFromDb is { Personality: Personality.Assertive, Name: "Havord" });
+    }
+
+    [Fact]
+    public void BulkUpdate_WithConnectionWithCustomWhere_ShouldHaveChangedValues()
+    {
+        //Arrange
+        string wrapper = fixture.DbProvider.Options.Dialect switch
+        {
+            SqlDialect.PostgreSql => "\"",
+            SqlDialect.MySql or SqlDialect.MariaDb => "`",
+            _ => ""
+        };
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        string commonName = Guid.NewGuid().ToString("N");
+        
+        Gnome[] gnomes = [
+            new()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = commonName,
+                IsActive = true,
+                Strength = 8,
+            },
+            new()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = commonName,
+                IsActive = true,
+                Strength = 1
+            },
+            new()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = commonName,
+                Height = 120,
+                IsActive = true,
+                Strength = 999
+            }
+        ];
+        
+        connection.BulkInsert(gnomes);
+        
+        //Act
+        Gnome payload = new()
+        {
+            Name = "Potatotto",
+            Height = 999
+        };
+        
+        int updatedRecords = connection.BulkUpdate(payload, $"{wrapper}{_nameColumn}{wrapper}='{commonName}'");
+        
+        //Assert
+        Assert.True(updatedRecords == 3);
+    }
+
+    [Fact]
+    public void BulkUpdate_WithTransactionWithCustomWhere_ShouldHaveChangedValues()
+    {
+        //Arrange
+        string wrapper = fixture.DbProvider.Options.Dialect switch
+        {
+            SqlDialect.PostgreSql => "\"",
+            SqlDialect.MySql or SqlDialect.MariaDb => "`",
+            _ => ""
+        };
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+        
+        string commonName = Guid.NewGuid().ToString("N");
+        
+        Gnome[] gnomes = [
+            new()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = commonName,
+                IsActive = true,
+                Strength = 8,
+            },
+            new()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = commonName,
+                IsActive = true,
+                Strength = 1
+            },
+            new()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = commonName,
+                Height = 120,
+                IsActive = true,
+                Strength = 999
+            }
+        ];
+        
+        transaction.BulkInsert(gnomes);
+        
+        //Act
+        Gnome payload = new()
+        {
+            Name = "Potatotto",
+            Height = 999
+        };
+        
+        int updatedRecords = transaction.BulkUpdate(payload, $"{wrapper}{_nameColumn}{wrapper}='{commonName}'");
+        
+        //Assert
+        Assert.True(updatedRecords == 3);
     }
 }

@@ -10,8 +10,11 @@ public enum CacheBuilderExceptionType
     /// </summary>
     CompositeKeyMissingProperty,
     /// <summary>
-    /// An invalid type was used in a ConfigId attribute
+    /// An invalid type was used in a OrmamuConfigId attribute
     /// </summary>
     InvalidConfigIdType,
+    /// <summary>
+    /// An invalid type was used in a OrmamuConfigId attribute
+    /// </summary>
     ConfigNotFound,
 }

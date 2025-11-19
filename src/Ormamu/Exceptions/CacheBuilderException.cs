@@ -18,7 +18,7 @@ public class CacheBuilderException: Exception
         },
         {
             CacheBuilderExceptionType.InvalidConfigIdType, "The provided value \"{0}\" of type \"{1}\", used in a " +
-                                                           "ConfigId attribute is not a value type, you can only use " +
+                                                           "OrmamuConfigId attribute is not a value type, you can only use " +
                                                            "value types for config ids"
         },
         {

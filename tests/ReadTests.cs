@@ -1,5 +1,5 @@
 using System.Data;
-using System.Text.Json;
+using Dapper;
 using Ormamu;
 using OrmamuTests.Entities;
 using OrmamuTests.Fixtures;
@@ -162,7 +162,7 @@ public class ReadTests(DbFixture fixture)
         IEnumerable<Goblin> goblins = connection.Get<Goblin>(
             whereClause: where,
             orderByClause: orderBy,
-            param: new { Id = 10, Age = 30 });
+            commandParams: new { Id = 10, Age = 30 });
             
         //Assert
         Assert.True(goblins.Count() == 5);
@@ -192,7 +192,7 @@ public class ReadTests(DbFixture fixture)
         IEnumerable<Goblin> goblins = transaction.Get<Goblin>(
             whereClause: where,
             orderByClause: orderBy,
-            param: new { Id = 10, Age = 30 });
+            commandParams: new { Id = 10, Age = 30 });
         
         transaction.Commit();
             
@@ -221,7 +221,7 @@ public class ReadTests(DbFixture fixture)
         IEnumerable<Goblin> goblins = await connection.GetAsync<Goblin>(
             whereClause: where,
             orderByClause: orderBy,
-            param: new { Id = 10, Age = 30 });
+            commandParams: new { Id = 10, Age = 30 });
             
         //Assert
         Assert.True(goblins.Count() == 5);
@@ -246,11 +246,15 @@ public class ReadTests(DbFixture fixture)
         string where = $"{wrapper}{_idColumn}{wrapper} > @Id AND {wrapper}{_ageColumn}{wrapper} < @Age";
         string orderBy = $"{wrapper}{_isActiveColumn}{wrapper} ASC, {wrapper}{_agilityColumn}{wrapper} DESC";
         
+        DynamicParameters queryParameters = new();
+        queryParameters.AddDynamicParams(new { Id = 10, Age = 30 });
+        
         //Act
+        
         IEnumerable<Goblin> goblins = await transaction.GetAsync<Goblin>(
             whereClause: where,
             orderByClause: orderBy,
-            param: new { Id = 10, Age = 30 });
+            commandParams: queryParameters);
         
         transaction.Commit();
             
@@ -283,7 +287,7 @@ public class ReadTests(DbFixture fixture)
             orderByClause: orderBy,
             pageSize,
             pageNumber,
-            param: new { Id = 10, Age = 30 });
+            commandParams: new { Id = 10, Age = 30 });
             
         //Assert
         Assert.True(goblins.Count() == 2);
@@ -316,7 +320,7 @@ public class ReadTests(DbFixture fixture)
             orderByClause: orderBy,
             pageSize,
             pageNumber,
-            param: new { Id = 10, Age = 30 });
+            commandParams: new { Id = 10, Age = 30 });
             
         transaction.Commit();
         
@@ -349,7 +353,7 @@ public class ReadTests(DbFixture fixture)
             orderByClause: orderBy,
             pageSize,
             pageNumber,
-            param: new { Id = 10, Age = 30 });
+            commandParams: new { Id = 10, Age = 30 });
             
         //Assert
         Assert.True(goblins.Count() == 2);
@@ -376,13 +380,16 @@ public class ReadTests(DbFixture fixture)
         int pageSize = 3;
         int pageNumber = 1;
         
+        DynamicParameters queryParameters = new();
+        queryParameters.AddDynamicParams(new { Id = 10, Age = 30 });
+        
         //Act
         IEnumerable<Goblin> goblins = await transaction.GetAsync<Goblin>(
             whereClause: where,
             orderByClause: orderBy,
             pageSize,
             pageNumber,
-            param: new { Id = 10, Age = 30 });
+            commandParams: queryParameters);
         
         transaction.Commit();
             

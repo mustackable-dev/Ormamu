@@ -3,7 +3,7 @@ using Ormamu;
 
 namespace OrmamuTests.Entities;
 
-[ConfigId(TestsConfig.DbVariant)]
+[OrmamuConfigId(TestsConfig.DbVariant)]
 public abstract record EntityBase<T>
 {
     [Key]

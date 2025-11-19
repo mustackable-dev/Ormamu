@@ -468,7 +468,7 @@ public class CreateTests(DbFixture fixture)
         //Assert
         
         Assert.True(insertedImps == impsSampleSize);
-        IEnumerable<Imp> imps2 = connection.Get<Imp>($"\"{TestsConfig.CustomColumnName}\"=@templateName", param: new { templateName = name });
+        IEnumerable<Imp> imps2 = connection.Get<Imp>($"\"{TestsConfig.CustomColumnName}\"=@templateName", commandParams: new { templateName = name });
         Assert.True(imps2 is not null);
         Assert.True(imps2.Count() == impsSampleSize);
     }

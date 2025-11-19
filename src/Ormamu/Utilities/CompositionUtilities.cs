@@ -5,6 +5,7 @@ namespace Ormamu;
 
 internal static class CompositionUtilities
 {
+    internal const string ParameterPrefix = "__orm_";
     internal static StringBuilder AppendProperties(
         this StringBuilder sb,
         PropertyMapping[] properties,
@@ -110,7 +111,7 @@ internal static class CompositionUtilities
     internal static void AppendEquality(
         this StringBuilder sb,
         PropertyMapping key,
-        bool paramFromAssembly = false,
+        bool attachPrefix = false,
         char propertyWrapper = '\0',
         int index = -1)
     {
@@ -122,9 +123,10 @@ internal static class CompositionUtilities
         {
             sb.Append(key.DbName);
         }
-        
-        sb.Append("=@")
-            .Append(paramFromAssembly ? key.AssemblyName : "KeyValue");
+
+        sb.Append("=@");
+        if(attachPrefix) sb.Append(ParameterPrefix);
+        sb.Append(key.AssemblyName);
         
         if(index != -1) sb.Append(index);
     }
