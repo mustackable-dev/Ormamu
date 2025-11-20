@@ -15,7 +15,7 @@ public class PropertySetters<TEntity> : PropertyModifiers
     /// <typeparam name="TProperty">The property type selected on the entity</typeparam>
     /// <param name="selector">An expression selecting the property on <typeparamref name="TEntity"/></param>
     /// <param name="value">The value to assign to the selected property</param>
-    /// <returns>The current <see cref="PropertySetters{TEntity}"/> instance</returns>
+    /// <returns>The current <see cref="PropertySetters&lt;TEntity&gt;"/> instance</returns>
     public PropertySetters<TEntity> SetProperty<TProperty>(
         Expression<Func<TEntity, TProperty>> selector,
         TProperty value)
@@ -39,7 +39,7 @@ public class PropertyCopiers<TEntity> : PropertyModifiers
     /// </summary>
     /// <typeparam name="TProperty">The type of the property being copied</typeparam>
     /// <param name="selector">An expression selecting the property on <typeparamref name="TEntity"/></param>
-    /// <returns>The current <see cref="PropertyCopiers{TEntity}"/> instance</returns>
+    /// <returns>The current <see cref="PropertyCopiers&lt;TEntity&gt;"/> instance</returns>
     public PropertyCopiers<TEntity> CopyProperty<TProperty>(
         Expression<Func<TEntity, TProperty>> selector) 
     {

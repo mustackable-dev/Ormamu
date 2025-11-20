@@ -18,7 +18,7 @@ public static class UtilityCommands
     /// <typeparam name="TEntity">The entity type</typeparam>
     /// <typeparam name="TValue">The numeric type of the count result</typeparam>
     /// <param name="connection">The database connection</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The count of matching entities</returns>
@@ -35,7 +35,7 @@ public static class UtilityCommands
     /// <typeparam name="TEntity">The entity type</typeparam>
     /// <typeparam name="TValue">The numeric type of the count result</typeparam>
     /// <param name="transaction">The database transaction</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The count of matching entities</returns>
@@ -51,7 +51,7 @@ public static class UtilityCommands
     /// <typeparam name="TEntity">The entity type</typeparam>
     /// <typeparam name="TValue">The numeric type of the count result</typeparam>
     /// <param name="connection">The database connection</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The count of matching entities</returns>
@@ -68,7 +68,7 @@ public static class UtilityCommands
     /// <typeparam name="TEntity">The entity type</typeparam>
     /// <typeparam name="TValue">The numeric type of the count result</typeparam>
     /// <param name="transaction">The database transaction</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The count of matching entities</returns>
@@ -87,7 +87,7 @@ public static class UtilityCommands
     /// <typeparam name="TProperty">The numeric type of the summed property</typeparam>
     /// <param name="connection">The database connection</param>
     /// <param name="propertySelector">An expression selecting the property to sum</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The sum of the selected property</returns>
@@ -111,7 +111,7 @@ public static class UtilityCommands
     /// <typeparam name="TValue">The numeric type of the sum result and the summed property</typeparam>
     /// <param name="connection">The database connection</param>
     /// <param name="propertySelector">An expression selecting the property to sum</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The sum of the selected property</returns>
@@ -132,7 +132,7 @@ public static class UtilityCommands
     /// <typeparam name="TProperty">The numeric type of the summed property</typeparam>
     /// <param name="transaction">The database transaction</param>
     /// <param name="propertySelector">An expression selecting the property to sum</param>
-    /// <param name="whereClause">Optional SQL WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional SQL WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The sum of the selected property</returns>
@@ -156,7 +156,7 @@ public static class UtilityCommands
     /// <typeparam name="TValue">The numeric type of the sum result and the summed property</typeparam>
     /// <param name="transaction">The database transaction</param>
     /// <param name="propertySelector">An expression selecting the property to sum</param>
-    /// <param name="whereClause">Optional SQL WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional SQL WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The sum of the selected property</returns>
@@ -177,7 +177,7 @@ public static class UtilityCommands
     /// <typeparam name="TProperty">The numeric type of the summed property</typeparam>
     /// <param name="connection">The database connection</param>
     /// <param name="propertySelector">An expression selecting the property to sum</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The sum of the selected property</returns>
@@ -201,7 +201,7 @@ public static class UtilityCommands
     /// <typeparam name="TValue">The numeric type of the sum result and the summed property</typeparam>
     /// <param name="connection">The database connection</param>
     /// <param name="propertySelector">An expression selecting the property to sum</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The sum of the selected property</returns>
@@ -222,7 +222,7 @@ public static class UtilityCommands
     /// <typeparam name="TProperty">The numeric type of the summed property</typeparam>
     /// <param name="transaction">The database transaction</param>
     /// <param name="propertySelector">An expression selecting the property to sum</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The sum of the selected property</returns>
@@ -267,7 +267,7 @@ public static class UtilityCommands
     /// <typeparam name="TProperty">The numeric type of the averaged property</typeparam>
     /// <param name="connection">The database connection</param>
     /// <param name="propertySelector">An expression selecting the property to average</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The average value of the selected property</returns>
@@ -291,7 +291,7 @@ public static class UtilityCommands
     /// <typeparam name="TValue">The numeric type of the average result and the averaged propery</typeparam>
     /// <param name="connection">The database connection</param>
     /// <param name="propertySelector">An expression selecting the property to average</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The average value of the selected property</returns>
@@ -312,7 +312,7 @@ public static class UtilityCommands
     /// <typeparam name="TProperty">The numeric type of the averaged property</typeparam>
     /// <param name="transaction">The database transaction</param>
     /// <param name="propertySelector">An expression selecting the property to average</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The average value of the selected property</returns>
@@ -336,7 +336,7 @@ public static class UtilityCommands
     /// <typeparam name="TValue">The numeric type of the average result and the averaged property</typeparam>
     /// <param name="transaction">The database transaction</param>
     /// <param name="propertySelector">An expression selecting the property to average</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The average value of the selected property</returns>
@@ -357,7 +357,7 @@ public static class UtilityCommands
     /// <typeparam name="TProperty">The numeric type of the averaged property</typeparam>
     /// <param name="connection">The database connection</param>
     /// <param name="propertySelector">An expression selecting the property to average</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The average value of the selected property</returns>
@@ -381,7 +381,7 @@ public static class UtilityCommands
     /// <typeparam name="TValue">The numeric type of the average result and the averaged property</typeparam>
     /// <param name="connection">The database connection</param>
     /// <param name="propertySelector">An expression selecting the property to average</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The average value of the selected property</returns>
@@ -402,7 +402,7 @@ public static class UtilityCommands
     /// <typeparam name="TProperty">The numeric type of the averaged property</typeparam>
     /// <param name="transaction">The database transaction</param>
     /// <param name="propertySelector">An expression selecting the property to average</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The average value of the selected property</returns>
@@ -426,7 +426,7 @@ public static class UtilityCommands
     /// <typeparam name="TValue">The numeric type of the average result and the averaged property</typeparam>
     /// <param name="transaction">The database transaction</param>
     /// <param name="propertySelector">An expression selecting the property to average</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The average value of the selected property</returns>
@@ -447,7 +447,7 @@ public static class UtilityCommands
     /// <typeparam name="TProperty">The numeric type of the minimized property</typeparam>
     /// <param name="connection">The database connection</param>
     /// <param name="propertySelector">An expression selecting the property to find the minimum value of</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The minimum value of the selected property</returns>
@@ -471,7 +471,7 @@ public static class UtilityCommands
     /// <typeparam name="TValue">The numeric type of the minimum result and the minimized property</typeparam>
     /// <param name="connection">The database connection</param>
     /// <param name="propertySelector">An expression selecting the property to find the minimum value of</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The minimum value of the selected property</returns>
@@ -492,7 +492,7 @@ public static class UtilityCommands
     /// <typeparam name="TProperty">The numeric type of the minimized property</typeparam>
     /// <param name="transaction">The database transaction</param>
     /// <param name="propertySelector">An expression selecting the property to find the minimum value of</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The minimum value of the selected property</returns>
@@ -516,7 +516,7 @@ public static class UtilityCommands
     /// <typeparam name="TValue">The numeric type of the minimum result and the minimized property</typeparam>
     /// <param name="transaction">The database transaction</param>
     /// <param name="propertySelector">An expression selecting the property to find the minimum value of</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The minimum value of the selected property</returns>
@@ -537,7 +537,7 @@ public static class UtilityCommands
     /// <typeparam name="TProperty">The numeric type of the minimized property</typeparam>
     /// <param name="connection">The database connection</param>
     /// <param name="propertySelector">An expression selecting the property to find the minimum value of</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The minimum value of the selected property</returns>
@@ -561,7 +561,7 @@ public static class UtilityCommands
     /// <typeparam name="TValue">The numeric type of the minimum result and the minimized property</typeparam>
     /// <param name="connection">The database connection</param>
     /// <param name="propertySelector">An expression selecting the property to find the minimum value of</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The minimum value of the selected property</returns>
@@ -582,7 +582,7 @@ public static class UtilityCommands
     /// <typeparam name="TProperty">The numeric type of the minimized property</typeparam>
     /// <param name="transaction">The database transaction</param>
     /// <param name="propertySelector">An expression selecting the property to find the minimum value of</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The minimum value of the selected property</returns>
@@ -606,7 +606,7 @@ public static class UtilityCommands
     /// <typeparam name="TValue">The numeric type of the minimum result and the minimized property</typeparam>
     /// <param name="transaction">The database transaction</param>
     /// <param name="propertySelector">An expression selecting the property to find the minimum value of</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The minimum value of the selected property</returns>
@@ -627,7 +627,7 @@ public static class UtilityCommands
     /// <typeparam name="TProperty">The numeric type of the maximized property</typeparam>
     /// <param name="connection">The database connection</param>
     /// <param name="propertySelector">An expression selecting the property to find the maximum value of</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The maximum value of the selected property</returns>
@@ -651,7 +651,7 @@ public static class UtilityCommands
     /// <typeparam name="TValue">The numeric type of the maximum result and the maximized property</typeparam>
     /// <param name="connection">The database connection</param>
     /// <param name="propertySelector">An expression selecting the property to find the maximum value of</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The maximum value of the selected property</returns>
@@ -672,7 +672,7 @@ public static class UtilityCommands
     /// <typeparam name="TProperty">The numeric type of the maximized property</typeparam>
     /// <param name="transaction">The database transaction</param>
     /// <param name="propertySelector">An expression selecting the property to find the maximum value of</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The maximum value of the selected property</returns>
@@ -696,7 +696,7 @@ public static class UtilityCommands
     /// <typeparam name="TValue">The numeric type of the maximum result and the maximized property</typeparam>
     /// <param name="transaction">The database transaction</param>
     /// <param name="propertySelector">An expression selecting the property to find the maximum value of</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The maximum value of the selected property</returns>
@@ -717,7 +717,7 @@ public static class UtilityCommands
     /// <typeparam name="TProperty">The numeric type of the maximized property</typeparam>
     /// <param name="connection">The database connection</param>
     /// <param name="propertySelector">An expression selecting the property to find the maximum value of</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The maximum value of the selected property</returns>
@@ -741,7 +741,7 @@ public static class UtilityCommands
     /// <typeparam name="TValue">The numeric type of the maximum result and the maximized property</typeparam>
     /// <param name="connection">The database connection</param>
     /// <param name="propertySelector">An expression selecting the property to find the maximum value of</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The maximum value of the selected property</returns>
@@ -762,7 +762,7 @@ public static class UtilityCommands
     /// <typeparam name="TProperty">The numeric type of the maximized property</typeparam>
     /// <param name="transaction">The database transaction</param>
     /// <param name="propertySelector">An expression selecting the property to find the maximum value of</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The maximum value of the selected property</returns>
@@ -786,7 +786,7 @@ public static class UtilityCommands
     /// <typeparam name="TValue">The numeric type of the maximum result and the maximized property</typeparam>
     /// <param name="transaction">The database transaction</param>
     /// <param name="propertySelector">An expression selecting the property to find the maximum value of</param>
-    /// <param name="whereClause">Optional WHERE clause to filter records</param>
+    /// <param name="whereClause">Optional WHERE clause to filter records (without the WHERE keyword)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
     /// <see cref="Dapper.DynamicParameters"/> here</param>
     /// <returns>The maximum value of the selected property</returns>

@@ -72,7 +72,7 @@ public static class ReadCommands
     /// <typeparam name="TEntity">The type of the entities to retrieve</typeparam>
     /// <param name="connection">A connection to the database</param>
     /// <param name="keys">An array of integer primary key values to match</param>
-    /// <param name="orderByClause">An optional ORDER BY clause</param>
+    /// <param name="orderByClause">An optional ORDER BY clause (without the ORDER BY keyword)</param>
     /// <param name="pageSize">The number of results per page (for pagination)</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination)</param>
     /// <returns>A collection of matching entities</returns>
@@ -91,7 +91,7 @@ public static class ReadCommands
     /// <typeparam name="TEntity">The type of the entities to retrieve</typeparam>
     /// <param name="transaction">An open transaction in the database</param>
     /// <param name="keys">An array of integer primary key values to match</param>
-    /// <param name="orderByClause">An optional ORDER BY clause</param>
+    /// <param name="orderByClause">An optional ORDER BY clause (without the ORDER BY keyword)</param>
     /// <param name="pageSize">The number of results per page (for pagination)</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination)</param>
     /// <returns>A collection of matching entities</returns>
@@ -111,7 +111,7 @@ public static class ReadCommands
     /// <typeparam name="TKey">The type of the primary key values</typeparam>
     /// <param name="connection">A connection to the database</param>
     /// <param name="keys">An array of primary key values to match</param>
-    /// <param name="orderByClause">An optional ORDER BY clause</param>
+    /// <param name="orderByClause">An optional ORDER BY clause (without the ORDER BY keyword)</param>
     /// <param name="pageSize">The number of results per page (for pagination)</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination)</param>
     /// <returns>A collection of matching entities</returns>
@@ -140,7 +140,7 @@ public static class ReadCommands
     /// <typeparam name="TKey">The type of the primary key values</typeparam>
     /// <param name="transaction">An open transaction in the database</param>
     /// <param name="keys">An array of primary key values to match</param>
-    /// <param name="orderByClause">An optional ORDER BY clause</param>
+    /// <param name="orderByClause">An optional ORDER BY clause (without the ORDER BY keyword)</param>
     /// <param name="pageSize">The number of results per page (for pagination)</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination)</param>
     /// <returns>A collection of matching entities</returns>
@@ -167,8 +167,8 @@ public static class ReadCommands
     /// </summary>
     /// <typeparam name="TEntity">The type of the entities to retrieve</typeparam>
     /// <param name="connection">A connection to the database</param>
-    /// <param name="whereClause">An optional WHERE clause to filter the results</param>
-    /// <param name="orderByClause">An optional ORDER BY clause</param>
+    /// <param name="whereClause">An optional WHERE clause to filter the results (without the WHERE keyword)</param>
+    /// <param name="orderByClause">An optional ORDER BY clause (without the ORDER BY keyword)</param>
     /// <param name="pageSize">The number of results per page (for pagination)</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
@@ -197,8 +197,8 @@ public static class ReadCommands
     /// </summary>
     /// <typeparam name="TEntity">The type of the entities to retrieve</typeparam>
     /// <param name="transaction">An open transaction in the database</param>
-    /// <param name="whereClause">An optional WHERE clause to filter the results</param>
-    /// <param name="orderByClause">An optional ORDER BY clause</param>
+    /// <param name="whereClause">An optional WHERE clause to filter the results (without the WHERE keyword)</param>
+    /// <param name="orderByClause">An optional ORDER BY clause (without the ORDER BY keyword)</param>
     /// <param name="pageSize">The number of results per page (for pagination)</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination)</param>
     /// <param name="commandParams">An optional object containing parameters for the SQL command. It is advisable to use
@@ -284,7 +284,7 @@ public static class ReadCommands
     /// <typeparam name="TEntity">The type of the entities to retrieve</typeparam>
     /// <param name="connection">A connection to the database</param>
     /// <param name="keys">An array of integer primary key values to match</param>
-    /// <param name="orderByClause">An optional ORDER BY clause</param>
+    /// <param name="orderByClause">An optional ORDER BY clause (without the ORDER BY keyword)</param>
     /// <param name="pageSize">The number of results per page (for pagination)</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination)</param>
     /// <returns>A collection of matching entities</returns>
@@ -303,7 +303,7 @@ public static class ReadCommands
     /// <typeparam name="TEntity">The type of the entities to retrieve</typeparam>
     /// <param name="transaction">An open transaction in the database</param>
     /// <param name="keys">An array of integer primary key values to match</param>
-    /// <param name="orderByClause">An optional ORDER BY clause</param>
+    /// <param name="orderByClause">An optional ORDER BY clause (without the ORDER BY keyword)</param>
     /// <param name="pageSize">The number of results per page (for pagination)</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination)</param>
     /// <returns>A collection of matching entities</returns>
@@ -323,7 +323,7 @@ public static class ReadCommands
     /// <typeparam name="TKey">The type of the primary key values</typeparam>
     /// <param name="connection">A connection to the database</param>
     /// <param name="keys">An array of primary key values to match</param>
-    /// <param name="orderByClause">An optional ORDER BY clause</param>
+    /// <param name="orderByClause">An optional ORDER BY clause (without the ORDER BY keyword)</param>
     /// <param name="pageSize">The number of results per page (for pagination)</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination)</param>
     /// <returns>A collection of matching entities</returns>
@@ -352,7 +352,7 @@ public static class ReadCommands
     /// <typeparam name="TKey">The type of the primary key values</typeparam>
     /// <param name="transaction">An open transaction in the database</param>
     /// <param name="keys">An array of primary key values to match</param>
-    /// <param name="orderByClause">An optional ORDER BY clause</param>
+    /// <param name="orderByClause">An optional ORDER BY clause (without the ORDER BY keyword)</param>
     /// <param name="pageSize">The number of results per page (for pagination)</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination)</param>
     /// <returns>A collection of matching entities</returns>
@@ -379,8 +379,8 @@ public static class ReadCommands
     /// </summary>
     /// <typeparam name="TEntity">The type of the entities to retrieve</typeparam>
     /// <param name="connection">A connection to the database</param>
-    /// <param name="whereClause">An optional WHERE clause to filter the results</param>
-    /// <param name="orderByClause">An optional ORDER BY clause</param>
+    /// <param name="whereClause">An optional WHERE clause to filter the results (without the WHERE keyword)</param>
+    /// <param name="orderByClause">An optional ORDER BY clause (without the ORDER BY keyword)</param>
     /// <param name="pageSize">The number of results per page (for pagination)</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination)</param>
     /// <param name="commandParams">Parameters to use for the query</param>
@@ -409,8 +409,8 @@ public static class ReadCommands
     /// </summary>
     /// <typeparam name="TEntity">The type of the entities to retrieve</typeparam>
     /// <param name="transaction">An open transaction in the database</param>
-    /// <param name="whereClause">An optional WHERE clause to filter the results</param>
-    /// <param name="orderByClause">An optional ORDER BY clause</param>
+    /// <param name="whereClause">An optional WHERE clause to filter the results (without the WHERE keyword)</param>
+    /// <param name="orderByClause">An optional ORDER BY clause (without the ORDER BY keyword)</param>
     /// <param name="pageSize">The number of results per page (for pagination)</param>
     /// <param name="pageNumber">The page number to retrieve (for pagination)</param>
     /// <param name="commandParams">Parameters to use for the query</param>

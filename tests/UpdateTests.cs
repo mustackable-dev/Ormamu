@@ -1947,4 +1947,184 @@ public class UpdateTests(DbFixture fixture)
         //Assert
         Assert.True(updatedRecords == 3);
     }
+
+    [Fact]
+    public void BulkPartialUpdate_WithConnectionWithCustomWhere_ShouldHaveChangedValues()
+    {
+        //Arrange
+        string wrapper = fixture.DbProvider.Options.Dialect switch
+        {
+            SqlDialect.PostgreSql => "\"",
+            SqlDialect.MySql or SqlDialect.MariaDb => "`",
+            _ => ""
+        };
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        
+        string commonName = Guid.NewGuid().ToString("N");
+        
+        Gnome[] gnomes = [
+            new()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = commonName,
+                IsActive = true,
+                Strength = 8,
+            },
+            new()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = commonName,
+                IsActive = true,
+                Strength = 1
+            },
+            new()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = commonName,
+                Height = 120,
+                IsActive = true,
+                Strength = 999
+            }
+        ];
+        
+        connection.BulkInsert(gnomes);
+        
+        //Act
+        Gnome payload = new()
+        {
+            Name = "Potatotto",
+            Height = 999
+        };
+        
+        int updatedRecords = connection.BulkPartialUpdate(
+            payload,
+            x=>x.CopyProperty(y=>y.Height),
+            $"{wrapper}{_nameColumn}{wrapper}='{commonName}'");
+        
+        IEnumerable<Gnome> updatedGnomes = connection.Get<Gnome, string>(gnomes.Select(z=>z.Id).ToArray());
+        
+        //Assert
+        Assert.True(updatedRecords == 3);
+        Assert.True(updatedGnomes.All(x=>x.Name != "Potatotto" && x.Height == 999));
+    }
+
+    [Fact]
+    public void BulkPartialUpdate_WithTransactionWithCustomWhere_ShouldHaveChangedValues()
+    {
+        //Arrange
+        string wrapper = fixture.DbProvider.Options.Dialect switch
+        {
+            SqlDialect.PostgreSql => "\"",
+            SqlDialect.MySql or SqlDialect.MariaDb => "`",
+            _ => ""
+        };
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        connection.Open();
+        using IDbTransaction transaction = connection.BeginTransaction();
+        
+        string commonName = Guid.NewGuid().ToString("N");
+        
+        Gnome[] gnomes = [
+            new()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = commonName,
+                IsActive = true,
+                Strength = 8,
+            },
+            new()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = commonName,
+                IsActive = true,
+                Strength = 1
+            },
+            new()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = commonName,
+                Height = 120,
+                IsActive = true,
+                Strength = 999
+            }
+        ];
+        
+        transaction.BulkInsert(gnomes);
+        
+        //Act
+        Gnome payload = new()
+        {
+            Name = "Potatotto",
+            Height = 999
+        };
+        
+        int updatedRecords = transaction.BulkPartialUpdate(
+            payload,
+            x=>x.CopyProperty(y=>y.Height),
+            $"{wrapper}{_nameColumn}{wrapper}='{commonName}'");
+        
+        IEnumerable<Gnome> updatedGnomes = transaction.Get<Gnome, string>(gnomes.Select(z=>z.Id).ToArray());
+        
+        //Assert
+        Assert.True(updatedRecords == 3);
+        Assert.True(updatedGnomes.All(x=>x.Name != "Potatotto" && x.Height == 999));
+    }
+
+    [Fact]
+    public void BulkPartialUpdate_WithConnectionWithTypedKeyWithCustomWhere_ShouldHaveChangedValues()
+    {
+        //Arrange
+        string wrapper = fixture.DbProvider.Options.Dialect switch
+        {
+            SqlDialect.PostgreSql => "\"",
+            SqlDialect.MySql or SqlDialect.MariaDb => "`",
+            _ => ""
+        };
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        
+        string commonName = Guid.NewGuid().ToString("N");
+        
+        Gnome[] gnomes = [
+            new()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = commonName,
+                IsActive = true,
+                Strength = 8,
+            },
+            new()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = commonName,
+                IsActive = true,
+                Strength = 1
+            },
+            new()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = commonName,
+                Height = 120,
+                IsActive = true,
+                Strength = 999
+            }
+        ];
+        
+        connection.BulkInsert(gnomes);
+        
+        //Act
+        
+        int updatedRecords = connection.BulkPartialUpdate<Gnome, string>(
+            gnomes.Select(x=>x.Id).ToArray(),
+            x=>x.SetProperty(y=>y.Height, 7999),
+            $"{wrapper}{_nameColumn}{wrapper}='{commonName}'");
+        
+        IEnumerable<Gnome> updatedGnomes = connection.Get<Gnome, string>(gnomes.Select(z=>z.Id).ToArray());
+        
+        //Assert
+        Assert.True(updatedRecords == 3);
+        Assert.True(updatedGnomes.All(x=>x.Height == 7999));
+    }
 }

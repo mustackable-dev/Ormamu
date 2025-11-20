@@ -59,7 +59,8 @@ public static class UpdateCommands
     }
 
     /// <summary>
-    /// Updates multiple entities of type <typeparamref name="TEntity"/> in batches using an <see cref="IDbTransaction"/>
+    /// Updates multiple entities of type <typeparamref name="TEntity"/> in batches using an
+    /// <see cref="IDbTransaction"/>
     /// </summary>
     /// <typeparam name="TEntity">The type of the entities to update</typeparam>
     /// <param name="transaction">An open transaction in the database</param>
@@ -75,6 +76,22 @@ public static class UpdateCommands
         return transaction.ExecuteBulk(
             (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end), entities, batchSize);
     }
+    
+    /// <summary>
+    /// Updates one or more entities of type <typeparamref name="TEntity"/> using a custom WHERE clause with
+    /// an <see cref="IDbConnection"/>. The values to update are taken from the <paramref name="payload"/> object.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update</typeparam>
+    /// <param name="connection">A connection to the database</param>
+    /// <param name="payload">An object containing the values to update</param>
+    /// <param name="whereClause">
+    /// A SQL WHERE clause defining which entities to update (without the WHERE keyword)
+    /// </param>
+    /// <param name="commandParams">
+    /// An object containing parameters for the SQL command. It is advisable to use
+    /// <see cref="Dapper.DynamicParameters"/> here
+    /// </param>
+    /// <returns>The number of affected rows</returns>
     public static int BulkUpdate<TEntity>(
         this IDbConnection connection,
         TEntity payload,
@@ -92,6 +109,22 @@ public static class UpdateCommands
         
         return connection.Execute(components.Command, components.Parameters);
     }
+    
+    /// <summary>
+    /// Updates one or more entities of type <typeparamref name="TEntity"/> using a custom WHERE clause within
+    /// an <see cref="IDbTransaction"/>. The values to update are taken from the <paramref name="payload"/> object.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update</typeparam>
+    /// <param name="transaction">An open transaction in the database</param>
+    /// <param name="payload">An object containing the values to update</param>
+    /// <param name="whereClause">
+    /// A SQL WHERE clause defining which entities to update (without the WHERE keyword)
+    /// </param>
+    /// <param name="commandParams">
+    /// An object containing parameters for the SQL command. It is advisable to use
+    /// <see cref="Dapper.DynamicParameters"/> here
+    /// </param>
+    /// <returns>The number of affected rows</returns>
     public static int BulkUpdate<TEntity>(
         this IDbTransaction transaction,
         TEntity payload,
@@ -175,6 +208,72 @@ public static class UpdateCommands
         return transaction.ExecuteBulkAsync(
             (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end), entities, batchSize);
     }
+    
+    /// <summary>
+    /// Asynchronously updates one or more entities of type <typeparamref name="TEntity"/> using a custom WHERE clause with
+    /// an <see cref="IDbConnection"/>. The values to update are taken from the <paramref name="payload"/> object.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update</typeparam>
+    /// <param name="connection">A connection to the database</param>
+    /// <param name="payload">An object containing the values to update</param>
+    /// <param name="whereClause">
+    /// A SQL WHERE clause defining which entities to update (without the WHERE keyword)
+    /// </param>
+    /// <param name="commandParams">
+    /// An object containing parameters for the SQL command. It is advisable to use
+    /// <see cref="Dapper.DynamicParameters"/> here
+    /// </param>
+    /// <returns>The number of affected rows</returns>
+    public static Task<int> BulkUpdateAsync<TEntity>(
+        this IDbConnection connection,
+        TEntity payload,
+        string whereClause,
+        object commandParams = null!)
+    {
+        DynamicParameters initialParams = new();
+        initialParams.AddDynamicParams(commandParams);
+        
+        CommandComponents components = GenerateUpdateSql(
+            [payload],
+            Cache.ResolveCommandBuilderData(typeof(TEntity)),
+            whereClause: whereClause,
+            initialParams: initialParams);
+        
+        return connection.ExecuteAsync(components.Command, components.Parameters);
+    }
+    
+    /// <summary>
+    /// Asynchronously updates one or more entities of type <typeparamref name="TEntity"/> using a custom WHERE clause within
+    /// an <see cref="IDbTransaction"/>. The values to update are taken from the <paramref name="payload"/> object.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update</typeparam>
+    /// <param name="transaction">An open transaction in the database</param>
+    /// <param name="payload">An object containing the values to update</param>
+    /// <param name="whereClause">
+    /// A SQL WHERE clause defining which entities to update (without the WHERE keyword)
+    /// </param>
+    /// <param name="commandParams">
+    /// An object containing parameters for the SQL command. It is advisable to use
+    /// <see cref="Dapper.DynamicParameters"/> here
+    /// </param>
+    /// <returns>The number of affected rows</returns>
+    public static Task<int> BulkUpdateAsync<TEntity>(
+        this IDbTransaction transaction,
+        TEntity payload,
+        string whereClause,
+        object commandParams = null!)
+    {
+        DynamicParameters initialParams = new();
+        initialParams.AddDynamicParams(commandParams);
+        
+        CommandComponents components = GenerateUpdateSql(
+            [payload],
+            Cache.ResolveCommandBuilderData(typeof(TEntity)),
+            whereClause: whereClause,
+            initialParams: initialParams);
+        
+        return transaction.ExecuteAsync(components.Command, components.Parameters);
+    }
      
     #endregion
     
@@ -190,7 +289,7 @@ public static class UpdateCommands
     /// <param name="entity">The entity whose property values will be copied into the update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertyCopiers{TEntity}"/> instance
+    /// a <see cref="PropertyCopiers&lt;TEntity&gt;"/> instance
     /// </param>
     /// <returns>The number of affected rows (typically 1)</returns>
     public static int PartialUpdate<TEntity>(
@@ -220,7 +319,7 @@ public static class UpdateCommands
     /// <param name="entity">The entity whose property values will be copied into the update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertyCopiers{TEntity}"/> instance
+    /// a <see cref="PropertyCopiers&lt;TEntity&gt;"/> instance
     /// </param>
     /// <returns>The number of affected rows (typically 1)</returns>
     public static int PartialUpdate<TEntity>(
@@ -250,7 +349,7 @@ public static class UpdateCommands
     /// <param name="key">The primary key value of the entity to update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertySetters{TEntity}"/> instance
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
     /// </param>
     /// <returns>The number of affected rows (typically 1)</returns>
     public static int PartialUpdate<TEntity>(
@@ -269,7 +368,7 @@ public static class UpdateCommands
     /// <param name="key">The primary key value of the entity to update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertySetters{TEntity}"/> instance
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
     /// </param>
     /// <returns>The number of affected rows (typically 1)</returns>
     public static int PartialUpdate<TEntity>(
@@ -289,7 +388,7 @@ public static class UpdateCommands
     /// <param name="key">The key value identifying the entity to update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertySetters{TEntity}"/> instance
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
     /// </param>
     /// <returns>The number of affected rows (typically 1)</returns>
     public static int PartialUpdate<TEntity, TKey>(
@@ -319,7 +418,7 @@ public static class UpdateCommands
     /// <param name="key">The key value identifying the entity to update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertySetters{TEntity}"/> instance
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
     /// </param>
     /// <returns>The number of affected rows (typically 1)</returns>
     public static int PartialUpdate<TEntity, TKey>(
@@ -349,7 +448,7 @@ public static class UpdateCommands
     /// <param name="entities">The array of entities whose property values will be copied into the update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertyCopiers{TEntity}"/> instance
+    /// a <see cref="PropertyCopiers&lt;TEntity&gt;"/> instance
     /// </param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100</param>
     /// <returns>The total number of affected rows</returns>
@@ -378,7 +477,7 @@ public static class UpdateCommands
     /// <param name="entities">The array of entities whose property values will be copied into the update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertyCopiers{TEntity}"/> instance
+    /// a <see cref="PropertyCopiers&lt;TEntity&gt;"/> instance
     /// </param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100</param>
     /// <returns>The total number of affected rows</returns>
@@ -406,7 +505,7 @@ public static class UpdateCommands
     /// <param name="keys">The array of primary key values identifying the entities to update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertySetters{TEntity}"/> instance
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
     /// </param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100</param>
     /// <returns>The total number of affected rows</returns>
@@ -427,7 +526,7 @@ public static class UpdateCommands
     /// <param name="keys">The array of primary key values identifying the entities to update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertySetters{TEntity}"/> instance
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
     /// </param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100</param>
     /// <returns>The total number of affected rows</returns>
@@ -449,7 +548,7 @@ public static class UpdateCommands
     /// <param name="keys">The array of key values identifying the entities to update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertySetters{TEntity}"/> instance
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
     /// </param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100</param>
     /// <returns>The total number of affected rows</returns>
@@ -478,7 +577,7 @@ public static class UpdateCommands
     /// <param name="keys">The array of key values identifying the entities to update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertySetters{TEntity}"/> instance
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
     /// </param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100</param>
     /// <returns>The total number of affected rows</returns>
@@ -496,6 +595,251 @@ public static class UpdateCommands
             (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end, partials), keys, batchSize);
     }
     
+    /// <summary>
+    /// Partially copies values into one or multiple entities of type <typeparamref name="TEntity"/> using an
+    /// <see cref="IDbConnection"/>. Only the properties selected by the <paramref name="propertySettersFactory"/> are
+    /// copied, and the copy operation is constrained by the specified <paramref name="whereClause"/>. The values are
+    /// copied from <paramref name="payload"/>
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to copy into</typeparam>
+    /// <param name="connection">A connection to the database</param>
+    /// <param name="payload">An entity instance providing the values to copy</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to copy by configuring
+    /// a <see cref="PropertyCopiers&lt;TEntity&gt;"/> instance
+    /// </param>
+    /// <param name="whereClause">
+    /// A SQL WHERE clause defining which entities to update (without the WHERE keyword)
+    /// </param>
+    /// <param name="commandParams">
+    /// An object containing parameters for the SQL command. It is advisable to use
+    /// <see cref="Dapper.DynamicParameters"/> here
+    /// </param>
+    /// <returns>The total number of affected rows</returns>
+    public static int BulkPartialUpdate<TEntity>(
+        this IDbConnection connection,
+        TEntity payload,
+        Func<PropertyCopiers<TEntity>, PropertyCopiers<TEntity>> propertySettersFactory,
+        string whereClause,
+        object commandParams = null!)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        DynamicParameters initialParams = new();
+        initialParams.AddDynamicParams(commandParams);
+        
+        CommandComponents components = GenerateUpdateSql(
+            [payload],
+            Cache.ResolveCommandBuilderData(typeof(TEntity)),
+            partials: partials,
+            whereClause: whereClause,
+            initialParams: initialParams);
+        
+        return connection.Execute(components.Command, components.Parameters);
+    }
+    
+    /// <summary>
+    /// Partially copies values into one or multiple entities of type <typeparamref name="TEntity"/> using an
+    /// <see cref="IDbTransaction"/>. Only the properties selected by the <paramref name="propertySettersFactory"/>
+    /// are copied, and the copy operation is constrained by the specified <paramref name="whereClause"/>. The values
+    /// are copied from <paramref name="payload"/>
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to copy into</typeparam>
+    /// <param name="transaction">An open transaction in the database</param>
+    /// <param name="payload">An entity instance providing the values to copy</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to copy by configuring
+    /// a <see cref="PropertyCopiers&lt;TEntity&gt;"/> instance
+    /// </param>
+    /// <param name="whereClause">
+    /// A SQL WHERE clause defining which entities to update (without the WHERE keyword)
+    /// </param>
+    /// <param name="commandParams">
+    /// An object containing parameters for the SQL command. It is advisable to use
+    /// <see cref="Dapper.DynamicParameters"/> here
+    /// </param>
+    /// <returns>The total number of affected rows</returns>
+    public static int BulkPartialUpdate<TEntity>(
+        this IDbTransaction transaction,
+        TEntity payload,
+        Func<PropertyCopiers<TEntity>, PropertyCopiers<TEntity>> propertySettersFactory,
+        string whereClause,
+        object commandParams = null!)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        DynamicParameters initialParams = new();
+        initialParams.AddDynamicParams(commandParams);
+        
+        CommandComponents components = GenerateUpdateSql(
+            [payload],
+            Cache.ResolveCommandBuilderData(typeof(TEntity)),
+            partials: partials,
+            whereClause: whereClause,
+            initialParams: initialParams);
+        
+        return transaction.Execute(components.Command, components.Parameters);
+    }
+    
+    /// <summary>
+    /// Partially updates one or multiple entities of type <typeparamref name="TEntity"/> identified by integer primary keys
+    /// using an <see cref="IDbConnection"/>. Only the properties selected by the
+    /// <paramref name="propertySettersFactory"/> are updated, and the update is constrained by the specified
+    /// <paramref name="whereClause"/>. The updated values are configured through
+    /// <paramref name="propertySettersFactory"/>
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update</typeparam>
+    /// <param name="connection">A connection to the database</param>
+    /// <param name="keys">The array of integer primary keys identifying the entities to update</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
+    /// </param>
+    /// <param name="whereClause">
+    /// A SQL WHERE clause defining which entities to update (without the WHERE keyword)
+    /// </param>
+    /// <param name="commandParams">
+    /// An object containing parameters for the SQL command. It is advisable to use
+    /// <see cref="Dapper.DynamicParameters"/> here
+    /// </param>
+    /// <returns>The total number of affected rows</returns>
+    public static int BulkPartialUpdate<TEntity>(
+        this IDbConnection connection,
+        int[] keys,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
+        string whereClause,
+        object commandParams = null!)
+        => BulkPartialUpdate<TEntity, int>(connection, keys, propertySettersFactory, whereClause, commandParams);
+    
+    /// <summary>
+    /// Partially updates one or multiple entities of type <typeparamref name="TEntity"/> identified by integer primary keys
+    /// using an <see cref="IDbTransaction"/>. Only the properties selected by the
+    /// <paramref name="propertySettersFactory"/> are updated, and the update is constrained by the specified
+    /// <paramref name="whereClause"/>. The updated values are configured through
+    /// <paramref name="propertySettersFactory"/>
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update</typeparam>
+    /// <param name="transaction">An open transaction in the database</param>
+    /// <param name="keys">The array of integer primary keys identifying the entities to update</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
+    /// </param>
+    /// <param name="whereClause">
+    /// A SQL WHERE clause defining which entities to update (without the WHERE keyword)
+    /// </param>
+    /// <param name="commandParams">
+    /// An object containing parameters for the SQL command. It is advisable to use
+    /// <see cref="Dapper.DynamicParameters"/> here
+    /// </param>
+    /// <returns>The total number of affected rows</returns>
+    public static int BulkPartialUpdate<TEntity>(
+        this IDbTransaction transaction,
+        int[] keys,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
+        string whereClause,
+        object commandParams = null!)
+        => BulkPartialUpdate<TEntity, int>(transaction, keys, propertySettersFactory, whereClause, commandParams);
+    
+    /// <summary>
+    /// Partially updates one or multiple entities of type <typeparamref name="TEntity"/> identified by keys of type
+    /// <typeparamref name="TKey"/> using an <see cref="IDbConnection"/>. Only the properties selected by the
+    /// <paramref name="propertySettersFactory"/> are updated, and the update is constrained by the specified
+    /// <paramref name="whereClause"/>. The updated values are configured through
+    /// <paramref name="propertySettersFactory"/>.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update</typeparam>
+    /// <typeparam name="TKey">The type of the primary key</typeparam>
+    /// <param name="connection">A connection to the database</param>
+    /// <param name="keys">The array of primary key values identifying the entities to update</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
+    /// </param>
+    /// <param name="whereClause">
+    /// A SQL WHERE clause defining which entities to update (without the WHERE keyword)
+    /// </param>
+    /// <param name="commandParams">
+    /// An object containing parameters for the SQL command. It is advisable to use
+    /// <see cref="Dapper.DynamicParameters"/> here
+    /// </param>
+    /// <returns>The total number of affected rows</returns>
+    public static int BulkPartialUpdate<TEntity, TKey>(
+        this IDbConnection connection,
+        TKey[] keys,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
+        string whereClause,
+        object commandParams = null!)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        DynamicParameters initialParams = new();
+        initialParams.AddDynamicParams(commandParams);
+        
+        CommandComponents components = GenerateUpdateSql(
+            keys,
+            Cache.ResolveCommandBuilderData(typeof(TEntity)),
+            partials: partials,
+            whereClause: whereClause,
+            initialParams: initialParams);
+        
+        return connection.Execute(components.Command, components.Parameters);
+    }
+    
+    /// <summary>
+    /// Partially updates one or multiple entities of type <typeparamref name="TEntity"/> identified by keys of type
+    /// <typeparamref name="TKey"/> using an <see cref="IDbTransaction"/>. Only the properties selected by the
+    /// <paramref name="propertySettersFactory"/> are updated, and the update is constrained by the specified
+    /// <paramref name="whereClause"/>. The updated values are configured through
+    /// <paramref name="propertySettersFactory"/>.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update</typeparam>
+    /// <typeparam name="TKey">The type of the primary key</typeparam>
+    /// <param name="transaction">An open transaction in the database</param>
+    /// <param name="keys">The array of primary key values identifying the entities to update</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
+    /// </param>
+    /// <param name="whereClause">
+    /// A SQL WHERE clause defining which entities to update (without the WHERE keyword)
+    /// </param>
+    /// <param name="commandParams">
+    /// An object containing parameters for the SQL command. It is advisable to use
+    /// <see cref="Dapper.DynamicParameters"/> here
+    /// </param>
+    /// <returns>The total number of affected rows</returns>
+
+    public static int BulkPartialUpdate<TEntity, TKey>(
+        this IDbTransaction transaction,
+        TKey[] keys,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
+        string whereClause,
+        object commandParams = null!)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        DynamicParameters initialParams = new();
+        initialParams.AddDynamicParams(commandParams);
+        
+        CommandComponents components = GenerateUpdateSql(
+            keys,
+            Cache.ResolveCommandBuilderData(typeof(TEntity)),
+            partials: partials,
+            whereClause: whereClause,
+            initialParams: initialParams);
+        
+        return transaction.Execute(components.Command, components.Parameters);
+    }
+    
     #endregion
     
     #region PartialAsync
@@ -510,7 +854,7 @@ public static class UpdateCommands
     /// <param name="entity">The entity whose property values will be copied into the update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertyCopiers{TEntity}"/> instance
+    /// a <see cref="PropertyCopiers&lt;TEntity&gt;"/> instance
     /// </param>
     /// <returns>A task representing the asynchronous operation, containing the number of affected rows</returns>
     public static Task<int> PartialUpdateAsync<TEntity>(
@@ -540,7 +884,7 @@ public static class UpdateCommands
     /// <param name="entity">The entity whose property values will be copied into the update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertyCopiers{TEntity}"/> instance
+    /// a <see cref="PropertyCopiers&lt;TEntity&gt;"/> instance
     /// </param>
     /// <returns>A task representing the asynchronous operation, containing the number of affected rows</returns>
     public static Task<int> PartialUpdateAsync<TEntity>(
@@ -570,7 +914,7 @@ public static class UpdateCommands
     /// <param name="key">The primary key identifying the entity to update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertySetters{TEntity}"/> instance
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
     /// </param>
     /// <returns>A task representing the asynchronous operation, containing the number of affected rows</returns>
     public static Task<int> PartialUpdateAsync<TEntity>(
@@ -589,7 +933,7 @@ public static class UpdateCommands
     /// <param name="key">The primary key identifying the entity to update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertySetters{TEntity}"/> instance
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
     /// </param>
     /// <returns>A task representing the asynchronous operation, containing the number of affected rows</returns>
     public static Task<int> PartialUpdateAsync<TEntity>(
@@ -609,7 +953,7 @@ public static class UpdateCommands
     /// <param name="key">The key identifying the entity to update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertySetters{TEntity}"/> instance
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
     /// </param>
     /// <returns>A task representing the asynchronous operation, containing the number of affected rows</returns>
     public static Task<int> PartialUpdateAsync<TEntity, TKey>(
@@ -639,7 +983,7 @@ public static class UpdateCommands
     /// <param name="key">The key identifying the entity to update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertySetters{TEntity}"/> instance
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
     /// </param>
     /// <returns>A task representing the asynchronous operation, containing the number of affected rows</returns>
     public static Task<int> PartialUpdateAsync<TEntity, TKey>(
@@ -669,7 +1013,7 @@ public static class UpdateCommands
     /// <param name="entities">The array of entities whose property values will be copied into the update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertyCopiers{TEntity}"/> instance
+    /// a <see cref="PropertyCopiers&lt;TEntity&gt;"/> instance
     /// </param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100</param>
     /// <returns>A task representing the asynchronous operation, containing the total number of affected rows</returns>
@@ -698,7 +1042,7 @@ public static class UpdateCommands
     /// <param name="entities">The array of entities whose property values will be copied into the update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertyCopiers{TEntity}"/> instance
+    /// a <see cref="PropertyCopiers&lt;TEntity&gt;"/> instance
     /// </param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100</param>
     /// <returns>A task representing the asynchronous operation, containing the total number of affected rows</returns>
@@ -726,7 +1070,7 @@ public static class UpdateCommands
     /// <param name="keys">The array of primary key values identifying the entities to update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertySetters{TEntity}"/> instance
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
     /// </param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100</param>
     /// <returns>A task representing the asynchronous operation, containing the total number of affected rows</returns>
@@ -747,7 +1091,7 @@ public static class UpdateCommands
     /// <param name="keys">The array of primary key values identifying the entities to update</param>
     /// <param name="propertySettersFactory">
     /// A factory that selects which properties to update by configuring
-    /// a <see cref="PropertySetters{TEntity}"/> instance
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
     /// </param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100</param>
     /// <returns>A task representing the asynchronous operation, containing the total number of affected rows</returns>
@@ -769,7 +1113,7 @@ public static class UpdateCommands
     /// <param name="keys">The array of key values identifying the entities to update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertySetters{TEntity}"/> instance
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
     /// </param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100</param>
     /// <returns>A task representing the asynchronous operation, containing the total number of affected rows</returns>
@@ -798,7 +1142,7 @@ public static class UpdateCommands
     /// <param name="keys">The array of key values identifying the entities to update</param>
     /// <param name="propertySettersFactory">
     /// A factory function that selects which properties to update by configuring
-    /// a <see cref="PropertySetters{TEntity}"/> instance
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
     /// </param>
     /// <param name="batchSize">The number of entities to update per batch. Defaults to 100</param>
     /// <returns>A task representing the asynchronous operation, containing the total number of affected rows</returns>
@@ -815,6 +1159,251 @@ public static class UpdateCommands
         return transaction.ExecuteBulkAsync(
             (entries, start, end) => GenerateUpdateSql(entries, builderData, start, end, partials), keys, batchSize);
     }
+    
+    /// <summary>
+    /// Asynchronously and partially copies values into one or multiple entities of type <typeparamref name="TEntity"/>
+    /// using an <see cref="IDbConnection"/>. Only the properties selected by the
+    /// <paramref name="propertySettersFactory"/> are copied, and the copy operation is constrained by the specified
+    /// <paramref name="whereClause"/>. The values are copied from <paramref name="payload"/>
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to copy into</typeparam>
+    /// <param name="connection">A connection to the database</param>
+    /// <param name="payload">An entity instance providing the values to copy</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to copy by configuring
+    /// a <see cref="PropertyCopiers&lt;TEntity&gt;"/> instance
+    /// </param>
+    /// <param name="whereClause">
+    /// A SQL WHERE clause defining which entities to update (without the WHERE keyword)
+    /// </param>
+    /// <param name="commandParams">
+    /// An object containing parameters for the SQL command. It is advisable to use
+    /// <see cref="Dapper.DynamicParameters"/> here
+    /// </param>
+    /// <returns>The total number of affected rows</returns>
+    public static Task<int> BulkPartialUpdateAsync<TEntity>(
+        this IDbConnection connection,
+        TEntity payload,
+        Func<PropertyCopiers<TEntity>, PropertyCopiers<TEntity>> propertySettersFactory,
+        string whereClause,
+        object commandParams = null!)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        DynamicParameters initialParams = new();
+        initialParams.AddDynamicParams(commandParams);
+        
+        CommandComponents components = GenerateUpdateSql(
+            [payload],
+            Cache.ResolveCommandBuilderData(typeof(TEntity)),
+            partials: partials,
+            whereClause: whereClause,
+            initialParams: initialParams);
+        
+        return connection.ExecuteAsync(components.Command, components.Parameters);
+    }
+    
+    /// <summary>
+    /// Asynchronously and partially copies values into one or multiple entities of type <typeparamref name="TEntity"/>
+    /// using an <see cref="IDbTransaction"/>. Only the properties selected by the
+    /// <paramref name="propertySettersFactory"/> are copied, and the copy operation is constrained by the specified
+    /// <paramref name="whereClause"/>. The values are copied from <paramref name="payload"/>
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to copy into</typeparam>
+    /// <param name="transaction">An open transaction in the database</param>
+    /// <param name="payload">An entity instance providing the values to copy</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to copy by configuring
+    /// a <see cref="PropertyCopiers&lt;TEntity&gt;"/> instance
+    /// </param>
+    /// <param name="whereClause">
+    /// A SQL WHERE clause defining which entities to update (without the WHERE keyword)
+    /// </param>
+    /// <param name="commandParams">
+    /// An object containing parameters for the SQL command. It is advisable to use
+    /// <see cref="Dapper.DynamicParameters"/> here
+    /// </param>
+    /// <returns>The total number of affected rows</returns>
+    public static Task<int> BulkPartialUpdateAsync<TEntity>(
+        this IDbTransaction transaction,
+        TEntity payload,
+        Func<PropertyCopiers<TEntity>, PropertyCopiers<TEntity>> propertySettersFactory,
+        string whereClause,
+        object commandParams = null!)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        DynamicParameters initialParams = new();
+        initialParams.AddDynamicParams(commandParams);
+        
+        CommandComponents components = GenerateUpdateSql(
+            [payload],
+            Cache.ResolveCommandBuilderData(typeof(TEntity)),
+            partials: partials,
+            whereClause: whereClause,
+            initialParams: initialParams);
+        
+        return transaction.ExecuteAsync(components.Command, components.Parameters);
+    }
+    
+    /// <summary>
+    /// Asynchronously and partially updates one or multiple entities of type <typeparamref name="TEntity"/> identified
+    /// by integer primary keys using an <see cref="IDbConnection"/>. Only the properties selected by the
+    /// <paramref name="propertySettersFactory"/> are updated, and the update is constrained by the specified
+    /// <paramref name="whereClause"/>. The updated values are configured through
+    /// <paramref name="propertySettersFactory"/>
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update</typeparam>
+    /// <param name="connection">A connection to the database</param>
+    /// <param name="keys">The array of integer primary keys identifying the entities to update</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
+    /// </param>
+    /// <param name="whereClause">
+    /// A SQL WHERE clause defining which entities to update (without the WHERE keyword)
+    /// </param>
+    /// <param name="commandParams">
+    /// An object containing parameters for the SQL command. It is advisable to use
+    /// <see cref="Dapper.DynamicParameters"/> here
+    /// </param>
+    /// <returns>The total number of affected rows</returns>
+    public static Task<int> BulkPartialUpdateAsync<TEntity>(
+        this IDbConnection connection,
+        int[] keys,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
+        string whereClause,
+        object commandParams = null!)
+        => BulkPartialUpdateAsync<TEntity, int>(connection, keys, propertySettersFactory, whereClause, commandParams);
+    
+    /// <summary>
+    /// Asynchronously and partially updates one or multiple entities of type <typeparamref name="TEntity"/> identified
+    /// by integer primary keys using an <see cref="IDbTransaction"/>. Only the properties selected by the
+    /// <paramref name="propertySettersFactory"/> are updated, and the update is constrained by the specified
+    /// <paramref name="whereClause"/>. The updated values are configured through
+    /// <paramref name="propertySettersFactory"/>
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update</typeparam>
+    /// <param name="transaction">An open transaction in the database</param>
+    /// <param name="keys">The array of integer primary keys identifying the entities to update</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
+    /// </param>
+    /// <param name="whereClause">
+    /// A SQL WHERE clause defining which entities to update (without the WHERE keyword)
+    /// </param>
+    /// <param name="commandParams">
+    /// An object containing parameters for the SQL command. It is advisable to use
+    /// <see cref="Dapper.DynamicParameters"/> here
+    /// </param>
+    /// <returns>The total number of affected rows</returns>
+    public static Task<int> BulkPartialUpdateAsync<TEntity>(
+        this IDbTransaction transaction,
+        int[] keys,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
+        string whereClause,
+        object commandParams = null!)
+        => BulkPartialUpdateAsync<TEntity, int>(transaction, keys, propertySettersFactory, whereClause, commandParams);
+    
+    /// <summary>
+    /// Asynchronously and partially updates one or multiple entities of type <typeparamref name="TEntity"/> identified
+    /// by keys of type <typeparamref name="TKey"/> using an <see cref="IDbConnection"/>. Only the properties selected
+    /// by the <paramref name="propertySettersFactory"/> are updated, and the update is constrained by the specified
+    /// <paramref name="whereClause"/>. The updated values are configured through
+    /// <paramref name="propertySettersFactory"/>.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update</typeparam>
+    /// <typeparam name="TKey">The type of the primary key</typeparam>
+    /// <param name="connection">A connection to the database</param>
+    /// <param name="keys">The array of primary key values identifying the entities to update</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
+    /// </param>
+    /// <param name="whereClause">
+    /// A SQL WHERE clause defining which entities to update (without the WHERE keyword)
+    /// </param>
+    /// <param name="commandParams">
+    /// An object containing parameters for the SQL command. It is advisable to use
+    /// <see cref="Dapper.DynamicParameters"/> here
+    /// </param>
+    /// <returns>The total number of affected rows</returns>
+    public static Task<int> BulkPartialUpdateAsync<TEntity, TKey>(
+        this IDbConnection connection,
+        TKey[] keys,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
+        string whereClause,
+        object commandParams = null!)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        DynamicParameters initialParams = new();
+        initialParams.AddDynamicParams(commandParams);
+        
+        CommandComponents components = GenerateUpdateSql(
+            keys,
+            Cache.ResolveCommandBuilderData(typeof(TEntity)),
+            partials: partials,
+            whereClause: whereClause,
+            initialParams: initialParams);
+        
+        return connection.ExecuteAsync(components.Command, components.Parameters);
+    }
+    
+    /// <summary>
+    /// Asynchronously and partially updates one or multiple entities of type <typeparamref name="TEntity"/> identified
+    /// by keys of type <typeparamref name="TKey"/> using an <see cref="IDbTransaction"/>. Only the properties selected
+    /// by the <paramref name="propertySettersFactory"/> are updated, and the update is constrained by the specified
+    /// <paramref name="whereClause"/>. The updated values are configured through
+    /// <paramref name="propertySettersFactory"/>.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entities to update</typeparam>
+    /// <typeparam name="TKey">The type of the primary key</typeparam>
+    /// <param name="transaction">An open transaction in the database</param>
+    /// <param name="keys">The array of primary key values identifying the entities to update</param>
+    /// <param name="propertySettersFactory">
+    /// A factory function that selects which properties to update by configuring
+    /// a <see cref="PropertySetters&lt;TEntity&gt;"/> instance
+    /// </param>
+    /// <param name="whereClause">
+    /// A SQL WHERE clause defining which entities to update (without the WHERE keyword)
+    /// </param>
+    /// <param name="commandParams">
+    /// An object containing parameters for the SQL command. It is advisable to use
+    /// <see cref="Dapper.DynamicParameters"/> here
+    /// </param>
+    /// <returns>The total number of affected rows</returns>
+    public static Task<int> BulkPartialUpdateAsync<TEntity, TKey>(
+        this IDbTransaction transaction,
+        TKey[] keys,
+        Func<PropertySetters<TEntity>, PropertySetters<TEntity>> propertySettersFactory,
+        string whereClause,
+        object commandParams = null!)
+    {
+        CommandBuilderData builderData = Cache.ResolveCommandBuilderData(typeof(TEntity));
+        PartialUpdateComponents partials = propertySettersFactory(new())
+            .GetPartialUpdateComponents(builderData);
+        
+        DynamicParameters initialParams = new();
+        initialParams.AddDynamicParams(commandParams);
+        
+        CommandComponents components = GenerateUpdateSql(
+            keys,
+            Cache.ResolveCommandBuilderData(typeof(TEntity)),
+            partials: partials,
+            whereClause: whereClause,
+            initialParams: initialParams);
+        
+        return transaction.ExecuteAsync(components.Command, components.Parameters);
+    }
+    
     #endregion
     private static CommandComponents GenerateUpdateSql<TValue>(
         TValue[] values,

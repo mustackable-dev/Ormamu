@@ -603,7 +603,7 @@ public class ReadTests(DbFixture fixture)
         IEnumerable<Goblin> goblins = connection.Get<Goblin>(queryKeys);
             
         //Assert
-        Assert.True(goblins.Count() == 2);;
+        Assert.True(goblins.Count() == 2);
         Assert.DoesNotContain(goblins.Select(x => x.Id), y =>!queryKeys.Contains(y));
     }
     
@@ -637,7 +637,7 @@ public class ReadTests(DbFixture fixture)
         IEnumerable<Goblin> goblins = await connection.GetAsync<Goblin>(queryKeys);
             
         //Assert
-        Assert.True(goblins.Count() == 2);;
+        Assert.True(goblins.Count() == 2);
         Assert.DoesNotContain(goblins.Select(x => x.Id), y =>!queryKeys.Contains(y));
     }
     
@@ -671,7 +671,7 @@ public class ReadTests(DbFixture fixture)
         IEnumerable<Goblin> goblins = connection.Get<Goblin, int>(queryKeys);
             
         //Assert
-        Assert.True(goblins.Count() == 2);;
+        Assert.True(goblins.Count() == 2);
         Assert.DoesNotContain(goblins.Select(x => x.Id), y =>!queryKeys.Contains(y));
     }
     
@@ -705,7 +705,7 @@ public class ReadTests(DbFixture fixture)
         IEnumerable<Goblin> goblins = await connection.GetAsync<Goblin, int>(queryKeys);
             
         //Assert
-        Assert.True(goblins.Count() == 2);;
+        Assert.True(goblins.Count() == 2);
         Assert.DoesNotContain(goblins.Select(x => x.Id), y =>!queryKeys.Contains(y));
     }
     
@@ -758,7 +758,8 @@ public class ReadTests(DbFixture fixture)
         connection.BulkInsert(thronglets);
         //Act
         IEnumerable<Thronglet> throngletsQuery = connection.Get<Thronglet, ThrongletKey>(queryKeys);
-        //Assert;
+        
+        //Assert
         Assert.True(throngletsQuery.Count() == 2);
         Assert.DoesNotContain(throngletsQuery.Select(x => new ThrongletKey(x.Id, x.Name)), y =>!queryKeys.Contains(y));
     }
