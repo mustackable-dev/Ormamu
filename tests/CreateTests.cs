@@ -8,6 +8,8 @@ namespace OrmamuTests;
 
 public class CreateTests(DbFixture fixture)
 {
+    private readonly string _nameColumn = fixture.DbProvider.Options.NameConverter("Name");
+    
     [Fact]
     public void Insert_WithConnection_ShouldFindEntry()
     {
@@ -133,21 +135,20 @@ public class CreateTests(DbFixture fixture)
         
         Random random = new Random();
         Dwarf[] dwarves = new Dwarf[dwarvesSampleSize];
-
-        for (int i = 0; i < dwarvesSampleSize; i++)
+        string uniqueName = Guid.NewGuid().ToString();
+        
+        Array.Fill(dwarves, new()
         {
-            dwarves[i] = new()
-            {
-                Name = "Buratino",
-                Height = random.Next(0, 120),
-                IsActive = true,
-                Strength = 50
-            };
-        }
+            Name = uniqueName,
+            Height = random.Next(0, 120),
+            IsActive = true,
+            Strength = 50
+        });
         
         //Act
         int insertedCount = connection.BulkInsert(dwarves);
-        IEnumerable<Dwarf> databaseDwarves = connection.Get<Dwarf>();
+        IEnumerable<Dwarf> databaseDwarves = connection.Get<Dwarf>(
+            whereClause: $"{_nameColumn}='{uniqueName}'");
         
         //Assert
         Assert.True(insertedCount == dwarvesSampleSize);
@@ -233,24 +234,23 @@ public class CreateTests(DbFixture fixture)
         using IDbTransaction transaction = connection.BeginTransaction();
         
         int dwarvesSampleSize = 300;
+        string uniqueName = Guid.NewGuid().ToString();
         
         Random random = new Random();
         Dwarf[] dwarves = new Dwarf[dwarvesSampleSize];
-
-        for (int i = 0; i < dwarvesSampleSize; i++)
+        
+        Array.Fill(dwarves, new()
         {
-            dwarves[i] = new()
-            {
-                Name = "Buratino",
-                Height = random.Next(0, 120),
-                IsActive = true,
-                Strength = 50
-            };
-        }
+            Name = uniqueName,
+            Height = random.Next(0, 120),
+            IsActive = true,
+            Strength = 50
+        });
         
         //Act
         int insertedCount = await transaction.BulkInsertAsync(dwarves);
-        IEnumerable<Dwarf> databaseDwarves = await transaction.GetAsync<Dwarf>();
+        IEnumerable<Dwarf> databaseDwarves = await transaction.GetAsync<Dwarf>(
+            whereClause: $"{_nameColumn}='{uniqueName}'");
         transaction.Commit();
         
         //Assert

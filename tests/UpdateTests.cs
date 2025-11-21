@@ -147,7 +147,7 @@ public class UpdateTests(DbFixture fixture)
         };
         
         using IDbConnection connection = fixture.DbProvider.GetConnection();
-        int height = 999;
+        int height = 9995;
         string title = "Guliver";
 
         Gnome[] gnomes = [
@@ -871,7 +871,7 @@ public class UpdateTests(DbFixture fixture)
 
         Dwarf dwarf = new()
         {
-            Name = "Havord",
+            Name = "Havord1",
             Height = 120,
             IsActive = true,
             Strength = 50
@@ -883,14 +883,14 @@ public class UpdateTests(DbFixture fixture)
             key: dwarfId,
             x => x
                     .SetProperty(y=>y.Name, "The Mule")
-                    .SetProperty(y=>y.Height, 140)
+                    .SetProperty(y=>y.Height, 139)
         );
         Dwarf? dwarfFromDb = connection.Get<Dwarf>(dwarfId);
         
         //Assert
         Assert.True(dwarfFromDb is not null);
         Assert.True(updatedRecords == 1);
-        Assert.True(dwarfFromDb is { Name: "The Mule", Height: 140 });
+        Assert.True(dwarfFromDb is { Name: "The Mule", Height: 139 });
     }
     
     [Fact]
@@ -1752,7 +1752,7 @@ public class UpdateTests(DbFixture fixture)
 
         Thronglet thronglet = new()
         {
-            Name = "Havord",
+            Name = "Butterichard",
             Personality = Personality.Aloof
         };
         
@@ -1768,7 +1768,7 @@ public class UpdateTests(DbFixture fixture)
         //Assert
         Assert.True(throngletFromDb is not null);
         Assert.True(updatedRecords == 1);
-        Assert.True(throngletFromDb is { Personality: Personality.Assertive, Name: "Havord" });
+        Assert.True(throngletFromDb is { Personality: Personality.Assertive, Name: "Butterichard" });
     }
     
     [Fact]
