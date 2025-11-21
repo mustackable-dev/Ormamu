@@ -457,81 +457,101 @@ public static class ReadCommands
 
         if (keys.Length>0)
         {
-        
-            bool hasCompositeKey = data.KeyProperties.Length>1;
-
-            if (hasCompositeKey && data.KeyProperties.Any(x => x.CompositeKeyGetter is null))
-            {
-                throw new CommandBuilderException(CommandBuilderExceptionType.CompositeKeyTypeNotRegistered, typeof(TKey).Name);
-            }
-            
-            commandBuilder.Append(" WHERE ");
-            if (!hasCompositeKey)
-            {
-                commandBuilder.AppendWithWrapper(data.KeyProperties[0].DbName, propertyWrapper);
-                commandBuilder.Append(" IN (");
-
-                for (int i = 0; i < keys.Length; i++)
-                {
-                    string key = string.Concat("@", data.KeyProperties[0].AssemblyName, i);
-                    commandBuilder.AppendWithSeparator(key, ',', i==0);
-                    values.Add(key, keys[i]);
-                
-                }
-
-                commandBuilder.Append(')');
-            }
-            else
-            {
-                for (int i = 0; i < keys.Length; i++)
-                {
-                    commandBuilder.AppendWithSeparator("(", " OR ", i == 0);
-                    for (int j = 0; j < data.KeyProperties.Length; j++)
-                    {
-                        PropertyMapping property = data.KeyProperties[j];
-                        string key = string.Concat("@", property.AssemblyName, i);
-                        commandBuilder.AppendEquality(property, false, propertyWrapper, i);
-                        values.Add(key, property.CompositeKeyGetter!(keys[i]!));
-
-                        if (j < data.KeyProperties.Length - 1)
-                        {
-                            commandBuilder.Append(" AND ");
-                        }
-                    }
-                    commandBuilder.Append(')');
-                }
-            }
+            AttachKeysWhereClause(commandBuilder, data, keys, propertyWrapper, ref values);
         }
         else
         {
-
-            if (whereClause is not null)
-            {
-                commandBuilder.Append(" WHERE ").Append(whereClause);
-            }
-
-            if (orderByClause is not null)
-            {
-                commandBuilder.Append(" ORDER BY ").Append(orderByClause);
-            }
-
-            if (pageSize is not null && pageNumber is not null)
-            {
-                switch (data.Options.Dialect)
-                {
-                    case SqlDialect.SqlServer:
-                        commandBuilder
-                            .Append(" OFFSET ").Append(pageSize * (pageNumber - 1))
-                            .Append(" ROWS FETCH NEXT ").Append(pageSize).Append(" ROWS ONLY");
-                        break;
-                    default:
-                        commandBuilder.Append(" LIMIT ").Append(pageSize).Append(" OFFSET ").Append(pageSize * (pageNumber - 1));
-                        break;
-                }
-                
-            }
+            AttachCustomClauses(commandBuilder, data.Options.Dialect, whereClause, orderByClause, pageSize, pageNumber);
         }
 
         return new(commandBuilder.ToString(), values);
+    }
+
+    private static void AttachKeysWhereClause<TKey>(
+        StringBuilder commandBuilder,
+        CommandBuilderData data,
+        TKey[] keys,
+        char propertyWrapper,
+        ref DynamicParameters values)
+    {
+        bool hasCompositeKey = data.KeyProperties.Length>1;
+
+        if (hasCompositeKey && data.KeyProperties.Any(x => x.CompositeKeyGetter is null))
+        {
+            throw new CommandBuilderException(CommandBuilderExceptionType.CompositeKeyTypeNotRegistered, typeof(TKey).Name);
+        }
+            
+        commandBuilder.Append(" WHERE ");
+        if (!hasCompositeKey)
+        {
+            commandBuilder.AppendWithWrapper(data.KeyProperties[0].DbName, propertyWrapper);
+            commandBuilder.Append(" IN (");
+
+            for (int i = 0; i < keys.Length; i++)
+            {
+                string key = string.Concat("@", data.KeyProperties[0].AssemblyName, i);
+                commandBuilder.AppendWithSeparator(key, ',', i==0);
+                values.Add(key, keys[i]);
+                
+            }
+
+            commandBuilder.Append(')');
+        }
+        else
+        {
+            for (int i = 0; i < keys.Length; i++)
+            {
+                commandBuilder.AppendWithSeparator("(", " OR ", i == 0);
+                for (int j = 0; j < data.KeyProperties.Length; j++)
+                {
+                    PropertyMapping property = data.KeyProperties[j];
+                    string key = string.Concat("@", property.AssemblyName, i);
+                    commandBuilder.AppendEquality(property, false, propertyWrapper, i);
+                    values.Add(key, property.CompositeKeyGetter!(keys[i]!));
+
+                    if (j < data.KeyProperties.Length - 1)
+                    {
+                        commandBuilder.Append(" AND ");
+                    }
+                }
+                commandBuilder.Append(')');
+            }
+        }
+    }
+
+    private static void AttachCustomClauses(
+        StringBuilder commandBuilder,
+        SqlDialect dialect,
+        string? whereClause = null,
+        string? orderByClause = null,
+        int? pageSize = null,
+        int? pageNumber = null)
+    {
+
+        if (whereClause is not null)
+        {
+            commandBuilder.Append(" WHERE ").Append(whereClause);
+        }
+
+        if (orderByClause is not null)
+        {
+            commandBuilder.Append(" ORDER BY ").Append(orderByClause);
+        }
+
+        if (pageSize is not null && pageNumber is not null)
+        {
+            switch (dialect)
+            {
+                case SqlDialect.SqlServer:
+                    commandBuilder
+                        .Append(" OFFSET ").Append(pageSize * (pageNumber - 1))
+                        .Append(" ROWS FETCH NEXT ").Append(pageSize).Append(" ROWS ONLY");
+                    break;
+                default:
+                    commandBuilder.Append(" LIMIT ").Append(pageSize).Append(" OFFSET ").Append(pageSize * (pageNumber - 1));
+                    break;
+            }
+                
+        }
     }
 }

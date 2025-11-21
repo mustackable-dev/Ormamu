@@ -246,165 +246,60 @@ public static class CreateCommands
             .Append(data.ColumnsString)
             .Append(")");
         
-        switch (data.Options.Dialect)
+        if(data.Options.Dialect != SqlDialect.SqlServer)
         {
-            case SqlDialect.PostgreSql:
-                builder
-                    .Append(" VALUES ")
-                    .Append(valuesBuilder);
-                
-                if (returning)
-                {
-                    builder.Append(" RETURNING ");
-                    if (data.KeyProperties.Length == 1)
-                    {
-                        builder.Append(string.Concat('"', data.KeyProperties[0].DbName, '"'));
-                    }
-                    else
-                    {
-                        for (int i = 0; i < data.KeyProperties.Length; i++)
-                        {
-                            builder.Append(string.Concat('"', data.KeyProperties[i].DbName, '"'));
-                            if (i < data.KeyProperties.Length - 1)
-                            {
-                                builder.Append(",");
-                            }
-                        }
-                    }
-                }
-                break;
-            
-            case SqlDialect.SqlServer:
-                if (returning)
-                {
-                    builder.Append(" OUTPUT ");
-                    
-                    if (data.KeyProperties.Length == 1)
-                    {
-                        builder.Append("INSERTED.").Append(data.KeyProperties[0].DbName);
-                    }
-                    else
-                    {
-                        for (int i = 0; i < data.KeyProperties.Length; i++)
-                        {
-                            builder.Append("INSERTED.").Append(data.KeyProperties[i].DbName);
-                            if (i < data.KeyProperties.Length - 1)
-                            {
-                                builder.Append(",");
-                            }
-                        }
-                    }
-                }
+            builder
+                .Append(" VALUES ")
+                .Append(valuesBuilder);
+        }
 
-                builder.Append(" VALUES ").Append(valuesBuilder);
-                break;
+        if (returning)
+        {
+            builder.Append(data.Options.Dialect switch
+            {
+                SqlDialect.PostgreSql => " RETURNING ",
+                SqlDialect.SqlServer => " OUTPUT ",
+                SqlDialect.MySql or SqlDialect.MariaDb or SqlDialect.Sqlite => ";SELECT ",
+                _ => ""
+            });
             
-            case SqlDialect.MySql:
-            case SqlDialect.MariaDb:
-                builder
-                    .Append(" VALUES ")
-                    .Append(valuesBuilder);
-                
-                if (returning)
+            for (int i = 0; i < data.KeyProperties.Length; i++)
+            {
+                switch(data.Options.Dialect)
                 {
-                    builder.Append(";SELECT ");
-                    if (data.KeyProperties.Length == 1)
-                    {
-                        if (data.KeyProperties[0].IsDbGenerated)
+                    case SqlDialect.PostgreSql:
+                        builder.Append('"').Append(data.KeyProperties[i].DbName).Append('"');
+                        break;
+                    case SqlDialect.SqlServer:
+                        builder.Append("INSERTED.").Append(data.KeyProperties[i].DbName);
+                        break;
+                    case SqlDialect.MySql or SqlDialect.MariaDb or SqlDialect.Sqlite:
+                        if (data.KeyProperties[i].IsDbGenerated)
                         {
-                            builder.Append("LAST_INSERT_ID()");
+                            builder.Append(data.Options.Dialect == SqlDialect.Sqlite ?
+                                "LAST_INSERT_ROWID()":
+                                "LAST_INSERT_ID()");
                         }
                         else
                         {
-                            builder
-                                .Append('@')
-                                .Append(data.KeyProperties[0].AssemblyName)
-                                //Added this line since switching to common insert SQL statement builder
-                                .Append(0);
+                            builder.Append("@").Append(data.KeyProperties[i].AssemblyName).Append(0);
                         }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < data.KeyProperties.Length; i++)
-                        {
-                            if (data.KeyProperties[i].IsDbGenerated)
-                            {
-                                builder.Append("LAST_INSERT_ID()");
-                            }
-                            else
-                            {
-                                builder
-                                    .Append("@")
-                                    .Append(data.KeyProperties[i].AssemblyName)
-                                    //Added this line since switching to common insert SQL statement builder
-                                    .Append(0);
-                            }
-                            
-                            builder
-                                .Append(" as ")
-                                .Append(data.KeyProperties[i].DbName);
-                            
-                            if (i < data.KeyProperties.Length - 1)
-                            {
-                                builder.Append(",");
-                            }
-                        }
-                    }
+                        builder.Append(" as ").Append(data.KeyProperties[i].AssemblyName);
+                        break;
                 }
-                break;
-            
-            case SqlDialect.Sqlite:
-                builder
-                    .Append(" VALUES ")
-                    .Append(valuesBuilder);
                 
-                if (returning)
+                if (i < data.KeyProperties.Length - 1)
                 {
-                    builder.Append(";SELECT ");
-                    if (data.KeyProperties.Length == 1)
-                    {
-                        if (data.KeyProperties[0].IsDbGenerated)
-                        {
-                            builder.Append("LAST_INSERT_ROWID()");
-                        }
-                        else
-                        {
-                            builder
-                                .Append('@')
-                                .Append(data.KeyProperties[0].AssemblyName)
-                                //Added this line since switching to common insert SQL statement builder
-                                .Append(0);
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < data.KeyProperties.Length; i++)
-                        {
-                            if (data.KeyProperties[i].IsDbGenerated)
-                            {
-                                builder.Append("LAST_INSERT_ROWID()");
-                            }
-                            else
-                            {
-                                builder
-                                    .Append("@")
-                                    .Append(data.KeyProperties[i].AssemblyName)
-                                    //Added this line since switching to common insert SQL statement builder
-                                    .Append(0);
-                            }
-                            
-                            builder
-                                .Append(" as ")
-                                .Append(data.KeyProperties[i].DbName);
-                            
-                            if (i < data.KeyProperties.Length - 1)
-                            {
-                                builder.Append(",");
-                            }
-                        }
-                    }
+                    builder.Append(",");
                 }
-                break;
+            }
+        }
+        
+        if(data.Options.Dialect == SqlDialect.SqlServer)
+        {
+            builder
+                .Append(" VALUES ")
+                .Append(valuesBuilder);
         }
                     
         return builder.ToString();

@@ -12,24 +12,22 @@ public static class NameConverters
     /// </summary>
     public static string ToSnakeCase(string input)
     {
-        if (string.IsNullOrEmpty(input))
-            return input;
-
-        StringBuilder builder = new();
+        StringBuilder sb = new();
         for (int i = 0; i < input.Length; i++)
         {
-            var c = input[i];
-            if (char.IsUpper(c))
+            if (char.IsUpper(input[i]))
             {
-                if (i > 0) builder.Append('_');
-                builder.Append(char.ToLowerInvariant(c));
+                if(i>0)
+                    sb.Append('_');
+                
+                sb.Append(char.ToLowerInvariant(input[i]));
+                continue;
             }
-            else
-            {
-                builder.Append(c);
-            }
+            sb.Append(input[i]);
+            
         }
-        return builder.ToString();
+        
+        return sb.ToString();
     }
     
     /// <summary>
@@ -37,24 +35,22 @@ public static class NameConverters
     /// </summary>
     public static string ToKebabCase(string input)
     {
-        if (string.IsNullOrEmpty(input))
-            return input;
-
-        StringBuilder builder = new();
+        StringBuilder sb = new();
         for (int i = 0; i < input.Length; i++)
         {
-            var c = input[i];
-            if (char.IsUpper(c))
+            if (char.IsUpper(input[i]))
             {
-                if (i > 0) builder.Append('-');
-                builder.Append(char.ToLowerInvariant(c));
+                if(i>0)
+                    sb.Append('-');
+                
+                sb.Append(char.ToLowerInvariant(input[i]));
+                continue;
             }
-            else
-            {
-                builder.Append(c);
-            }
+            sb.Append(input[i]);
+            
         }
-        return builder.ToString();
+        
+        return sb.ToString();
     }
     
     /// <summary>

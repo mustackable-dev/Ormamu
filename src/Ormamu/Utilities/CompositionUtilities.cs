@@ -6,39 +6,6 @@ namespace Ormamu;
 internal static class CompositionUtilities
 {
     internal const string ParameterPrefix = "__orm_";
-    internal static StringBuilder AppendProperties(
-        this StringBuilder sb,
-        PropertyMapping[] properties,
-        AppendType type,
-        char propertyWrapper = '\0',
-        bool skipKey = false)
-    {
-        bool firstSeparatorSkip = true;
-        foreach (PropertyMapping property in properties)
-        {
-            if (property.IsDbGenerated || (property.IsKey && skipKey)) continue;
-
-            switch (type)
-            {
-                case AppendType.Assembly:
-                    sb.AppendWithSeparator('@', skipSeparator: firstSeparatorSkip);
-                    sb.Append(property.AssemblyName);
-                    break;
-
-                case AppendType.Equality:
-                    sb.AppendWithSeparatorAndWrapper(property.DbName, propertyWrapper, ',', firstSeparatorSkip);
-                    sb.Append("=@");
-                    sb.Append(property.AssemblyName);
-                    break;
-
-                default:
-                    sb.AppendWithSeparatorAndWrapper(property.DbName, propertyWrapper, ',', firstSeparatorSkip);
-                    break;
-            }
-            if(firstSeparatorSkip) firstSeparatorSkip = false;
-        }
-        return sb;
-    }
 
     internal static StringBuilder AppendWithSeparator(
         this StringBuilder primary,

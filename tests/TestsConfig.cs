@@ -4,9 +4,9 @@ using Ormamu;
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 
 namespace OrmamuTests;
-public static class FixtureConfig
+public static class TestsConfig
 {
-    public const SqlDialect DbVariant = SqlDialect.Sqlite;
+    public const SqlDialect DbVariant = SqlDialect.SqlServer;
     public const string SchemaName = "Tests";
     public const string SecondarySchemaName = "MulticonfigTests";
     public const string ReadTestsTableName = "Goblins";
