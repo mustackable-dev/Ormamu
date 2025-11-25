@@ -153,7 +153,13 @@ public class PostgreSqlDbProvider: IDbProvider
           "strength" float4 NOT NULL,
           "height" int2 NOT NULL,
           "is_active" bool NOT NULL,
-          "hobbit_ancestry" bool NULL,
+          "hobbit_ancestry" bool
+            GENERATED ALWAYS AS (
+                CASE
+                    WHEN strength < 50 THEN TRUE
+                    WHEN strength = 50 THEN NULL
+                    WHEN strength > 50 THEN FALSE
+                END) STORED,
           CONSTRAINT "PK_{2}" PRIMARY KEY ("id")
         );
         CREATE TABLE "{0}"."{3}" (

@@ -12,6 +12,7 @@ public class UpdateTests(DbFixture fixture)
     private readonly string _heightColumn = fixture.DbProvider.Options.NameConverter("Height");
     private readonly string _idColumn = fixture.DbProvider.Options.NameConverter("Id");
     private readonly string _nameColumn = fixture.DbProvider.Options.NameConverter("Name");
+    private readonly string _strengthColumn = fixture.DbProvider.Options.NameConverter("Strength");
     
     [Fact]
     public void Update_WithConnection_ShouldHaveChangedValue()
@@ -2133,26 +2134,27 @@ public class UpdateTests(DbFixture fixture)
         //Arrange
         
         using IDbConnection connection = fixture.DbProvider.GetConnection();
-        DateTime newDateOfBirth = new DateTime(2001, 1, 1);
+        float newStrength = 10;
         
-        Pixie pixie = new()
+        Dwarf dwarf = new()
         {
-            MagicPower = 10,
-            DateOfBirth = new DateTime(2000, 1, 1)
+            Name = "Carrotheodore",
+            Strength = 10,
+            HobbitAncestry = true
         };
-        int pixieId = await connection.InsertAsync(pixie);
+        int dwarfId = await connection.InsertAsync(dwarf);
         
         //Act
-        pixie.Id = pixieId;
-        pixie.DateOfBirth = newDateOfBirth;
+        dwarf.Id = dwarfId;
+        dwarf.Strength = newStrength;
         
-        int updatedRecords = await connection.UpdateAsync(pixie);
-        Pixie? pixieFromDb = await connection.GetAsync<Pixie>(pixieId);
+        int updatedRecords = await connection.UpdateAsync(dwarf);
+        Dwarf? dwarfFromDb = await connection.GetAsync<Dwarf>(dwarfId);
         
         //Assert
-        Assert.True(pixieFromDb is not null);
+        Assert.True(dwarfFromDb is not null);
         Assert.True(updatedRecords == 1);
-        Assert.True(pixieFromDb.DateOfBirth == newDateOfBirth);
+        Assert.True(dwarfFromDb.Strength == newStrength);
     }
     
     [Fact]
@@ -2161,26 +2163,138 @@ public class UpdateTests(DbFixture fixture)
         //Arrange
         
         using IDbConnection connection = fixture.DbProvider.GetConnection();
-        DateTime newDateOfBirth = new DateTime(2001, 1, 1);
+        float newStrength = 36;
         
-        Pixie pixie = new()
+        Dwarf dwarf = new()
         {
-            MagicPower = 10,
-            DateOfBirth = new DateTime(2000, 1, 1)
+            Name = "Carroterry",
+            Strength = 15,
+            IsActive = true
         };
-        int pixieId = await connection.InsertAsync(pixie);
+        int dwarfId = await connection.InsertAsync(dwarf);
         
         //Act
-        pixie.Id = pixieId;
-        pixie.Ignored = "nope";
-        pixie.DateOfBirth = newDateOfBirth;
+        dwarf.Id = dwarfId;
+        dwarf.Strength = newStrength;
+        dwarf.IsActive = false;
         
-        int updatedRecords = await connection.PartialUpdateAsync(pixie, x=>x.CopyProperty(y=>y.DateOfBirth));
-        Pixie? pixieFromDb = await connection.GetAsync<Pixie>(pixieId);
+        int updatedRecords = await connection.PartialUpdateAsync(dwarf, x=>x.CopyProperty(y=>y.Strength));
+        Dwarf? dwarfFromDb = await connection.GetAsync<Dwarf>(dwarfId);
         
         //Assert
-        Assert.True(pixieFromDb is not null);
+        Assert.True(dwarfFromDb is not null);
         Assert.True(updatedRecords == 1);
-        Assert.True(pixieFromDb.DateOfBirth == newDateOfBirth && pixieFromDb.Ignored != "nope");
+        Assert.True(dwarfFromDb.Strength == newStrength && dwarfFromDb.IsActive);
+    }
+
+    [Fact]
+    public void BulkUpdate_WithConnectionWithAutoincrementingKey_ShouldHaveChangedValues()
+    {
+        //Arrange
+        string wrapper = fixture.DbProvider.Options.Dialect switch
+        {
+            SqlDialect.PostgreSql => "\"",
+            SqlDialect.MySql or SqlDialect.MariaDb => "`",
+            _ => ""
+        };
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        float strength = 533;
+        string title = "Guliver";
+
+        Dwarf[] dwarves = [
+            new()
+            {
+                Name = "Tubulin",
+                IsActive = true,
+                Strength = 986
+            },
+            new()
+            {
+                Name = "Tubu1lin",
+                IsActive = true,
+                Strength = strength
+            },
+            new()
+            {
+                Name = "Tubu1lin",
+                IsActive = true,
+                Strength = strength
+            }
+        ];
+        
+        foreach (Dwarf dwarf in dwarves)
+        {
+            dwarf.Id=connection.Insert(dwarf);
+            if(dwarf.Strength == strength)
+                dwarf.Name = title;
+        }
+        
+        //Act
+        int updatedRecords = connection.BulkUpdate(dwarves);
+        IEnumerable<Dwarf> dwarvesFromDb = connection.Get<Dwarf>(
+            $"{wrapper}{_strengthColumn}{wrapper} = @strength",
+            commandParams: new { strength});
+        
+        //Assert
+        Assert.True(updatedRecords == 3);
+        Assert.True(dwarvesFromDb.Count() == 2);
+        Assert.True(dwarvesFromDb.All(x=>x.Name == title));
+    }
+
+    [Fact]
+    public void BulkPartialUpdate_WithConnectionWithAutoincrementingKey_ShouldHaveChangedValues()
+    {
+        //Arrange
+        string wrapper = fixture.DbProvider.Options.Dialect switch
+        {
+            SqlDialect.PostgreSql => "\"",
+            SqlDialect.MySql or SqlDialect.MariaDb => "`",
+            _ => ""
+        };
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        float strength = 534;
+        string title = "Guliver";
+
+        Dwarf[] dwarves = [
+            new()
+            {
+                Name = "Tubulin",
+                IsActive = true,
+                Strength = 988
+            },
+            new()
+            {
+                Name = "Tubu1lin",
+                IsActive = true,
+                Strength = strength
+            },
+            new()
+            {
+                Name = "Tubu1lin",
+                IsActive = true,
+                Strength = strength
+            }
+        ];
+        
+        foreach (Dwarf dwarf in dwarves)
+        {
+            dwarf.Id=connection.Insert(dwarf);
+            dwarf.IsActive = false;
+            if(dwarf.Strength == strength)
+                dwarf.Name = title;
+        }
+        
+        //Act
+        int updatedRecords = connection.BulkPartialUpdate(dwarves, x=>x.CopyProperty(y=>y.Name));
+        IEnumerable<Dwarf> dwarvesFromDb = connection.Get<Dwarf>(
+            $"{wrapper}{_strengthColumn}{wrapper} = @strength",
+            commandParams: new { strength});
+        
+        //Assert
+        Assert.True(updatedRecords == 3);
+        Assert.True(dwarvesFromDb.Count() == 2);
+        Assert.True(dwarvesFromDb.All(x=>x.Name == title));
     }
 }

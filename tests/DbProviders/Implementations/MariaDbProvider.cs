@@ -140,7 +140,13 @@ public class MariaDbProvider: IDbProvider
           `STRENGTH` FLOAT NOT NULL,
           `HEIGHT` SMALLINT NOT NULL,
           `ISACTIVE` BOOLEAN NOT NULL,
-          `HOBBITANCESTRY` BOOLEAN,
+          `HOBBITANCESTRY` BOOLEAN
+            GENERATED ALWAYS AS (
+                CASE
+                    WHEN `STRENGTH` < 50 THEN TRUE
+                    WHEN `STRENGTH` = 50 THEN NULL
+                    WHEN `STRENGTH` > 50 THEN FALSE
+                END) PERSISTENT,
           PRIMARY KEY (`ID`)
         );
         

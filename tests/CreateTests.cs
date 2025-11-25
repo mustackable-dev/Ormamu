@@ -368,7 +368,7 @@ public class CreateTests(DbFixture fixture)
                 Name = "Buratino",
                 Height = random.Next(0, 120),
                 IsActive = true,
-                Strength = 50
+                Strength = 60
             };
         }
         
