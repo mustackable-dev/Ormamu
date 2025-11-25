@@ -1814,8 +1814,8 @@ public class UpdateTests(DbFixture fixture)
 
         Thronglet thronglet = new()
         {
-            Id = 1,
-            Name = "Havord",
+            Id = 2,
+            Name = "Gavord",
             Personality = Personality.Aloof
         };
         
@@ -1834,7 +1834,7 @@ public class UpdateTests(DbFixture fixture)
         //Assert
         Assert.True(throngletFromDb is not null);
         Assert.True(updatedRecords == 1);
-        Assert.True(throngletFromDb is { Personality: Personality.Assertive, Name: "Havord" });
+        Assert.True(throngletFromDb is { Personality: Personality.Assertive, Name: "Gavord" });
     }
 
     [Fact]
@@ -2126,5 +2126,61 @@ public class UpdateTests(DbFixture fixture)
         //Assert
         Assert.True(updatedRecords == 3);
         Assert.True(updatedGnomes.All(x=>x.Height == 7999));
+    }
+    [Fact]
+    public async Task UpdateAsync_WithConnectionWithAutoincrementingKey_ShouldHaveChangedValue()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        DateTime newDateOfBirth = new DateTime(2001, 1, 1);
+        
+        Pixie pixie = new()
+        {
+            MagicPower = 10,
+            DateOfBirth = new DateTime(2000, 1, 1)
+        };
+        int pixieId = await connection.InsertAsync(pixie);
+        
+        //Act
+        pixie.Id = pixieId;
+        pixie.DateOfBirth = newDateOfBirth;
+        
+        int updatedRecords = await connection.UpdateAsync(pixie);
+        Pixie? pixieFromDb = await connection.GetAsync<Pixie>(pixieId);
+        
+        //Assert
+        Assert.True(pixieFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(pixieFromDb.DateOfBirth == newDateOfBirth);
+    }
+    
+    [Fact]
+    public async Task PartialUpdateAsync_WithConnectionWithEntityWithAutoincrementingKey_ShouldHaveChangedValue()
+    {
+        //Arrange
+        
+        using IDbConnection connection = fixture.DbProvider.GetConnection();
+        DateTime newDateOfBirth = new DateTime(2001, 1, 1);
+        
+        Pixie pixie = new()
+        {
+            MagicPower = 10,
+            DateOfBirth = new DateTime(2000, 1, 1)
+        };
+        int pixieId = await connection.InsertAsync(pixie);
+        
+        //Act
+        pixie.Id = pixieId;
+        pixie.Ignored = "nope";
+        pixie.DateOfBirth = newDateOfBirth;
+        
+        int updatedRecords = await connection.PartialUpdateAsync(pixie, x=>x.CopyProperty(y=>y.DateOfBirth));
+        Pixie? pixieFromDb = await connection.GetAsync<Pixie>(pixieId);
+        
+        //Assert
+        Assert.True(pixieFromDb is not null);
+        Assert.True(updatedRecords == 1);
+        Assert.True(pixieFromDb.DateOfBirth == newDateOfBirth && pixieFromDb.Ignored != "nope");
     }
 }
