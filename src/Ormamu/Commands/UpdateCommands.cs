@@ -1508,7 +1508,7 @@ public static class UpdateCommands
         {
             string key = string.Concat("@", CompositionUtilities.ParameterPrefix, property.AssemblyName, index);
             
-            if(!property.IsDbGenerated) parameters.Add(key, property.Getter(entity!));
+            parameters.Add(key, property.Getter(entity!));
 
             if (!property.IsKey)
             {
@@ -1546,10 +1546,7 @@ public static class UpdateCommands
             }
             else
             {
-                if (!update.Property.IsDbGenerated)
-                {
-                    parameters.Add(key, update.Value);
-                }
+                parameters.Add(key, update.Value);
             }
 
             if (!update.Property.IsKey)
