@@ -2,7 +2,7 @@ namespace Ormamu;
 
 /// <summary>
 /// These are the SQL dialects supported by Ormamu.
-/// </returns>
+/// </summary>
 public enum SqlDialect
 {
     /// <summary>
