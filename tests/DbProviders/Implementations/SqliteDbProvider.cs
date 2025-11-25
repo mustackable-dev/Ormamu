@@ -111,6 +111,13 @@ public class SqliteDbProvider: IDbProvider
           Height INTEGER NOT NULL,
           IsActive INTEGER NOT NULL,
           HobbitAncestry INTEGER
+            GENERATED ALWAYS AS (
+                CASE
+                    WHEN Strength < 50 THEN 1
+                    WHEN Strength = 50 THEN NULL
+                    WHEN Strength > 50 THEN 0
+                END
+            ) STORED
         );
         
         CREATE TABLE {2} (

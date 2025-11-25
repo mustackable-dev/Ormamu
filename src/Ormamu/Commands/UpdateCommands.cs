@@ -1508,14 +1508,14 @@ public static class UpdateCommands
         {
             string key = string.Concat("@", CompositionUtilities.ParameterPrefix, property.AssemblyName, index);
             
-            parameters.Add(key, property.Getter(entity!));
+            if(!property.IsDbGenerated || property.IsKey)
+                parameters.Add(key, property.Getter(entity!));
 
-            if (!property.IsKey)
-            {
-                sb.AppendWithSeparatorAndWrapper(property.DbName, propertyWrapper, ',', skipFirst);
-                sb.Append("=").Append(key);
-                skipFirst = false;
-            }
+            if (property is not { IsKey: false, IsDbGenerated: false }) continue;
+            
+            sb.AppendWithSeparatorAndWrapper(property.DbName, propertyWrapper, ',', skipFirst);
+            sb.Append('=').Append(key);
+            skipFirst = false;
         }
 
         if (initialLength == sb.Length)
@@ -1546,15 +1546,15 @@ public static class UpdateCommands
             }
             else
             {
-                parameters.Add(key, update.Value);
+                if(!update.Property.IsDbGenerated || update.Property.IsKey)
+                    parameters.Add(key, update.Value);
             }
 
-            if (!update.Property.IsKey)
-            {
-                sb.AppendWithSeparatorAndWrapper(update.Property.DbName, propertyWrapper, ',', skipFirst);
-                sb.Append("=").Append(key);
-                skipFirst = false;
-            }
+            if (update.Property is not { IsKey: false, IsDbGenerated: false }) continue;
+            
+            sb.AppendWithSeparatorAndWrapper(update.Property.DbName, propertyWrapper, ',', skipFirst);
+            sb.Append("=").Append(key);
+            skipFirst = false;
         }
 
         if (initialLength == sb.Length)

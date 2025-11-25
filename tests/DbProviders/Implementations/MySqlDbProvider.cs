@@ -140,7 +140,13 @@ public class MySqlDbProvider: IDbProvider
           `strength` FLOAT NOT NULL,
           `height` SMALLINT NOT NULL,
           `isactive` BOOLEAN NOT NULL,
-          `hobbitancestry` BOOLEAN,
+          `hobbitancestry` BOOLEAN
+            GENERATED ALWAYS AS (
+                CASE
+                    WHEN strength < 50 THEN TRUE
+                    WHEN strength = 50 THEN NULL
+                    WHEN strength > 50 THEN FALSE
+                END) STORED,
           PRIMARY KEY (`id`)
         );
         

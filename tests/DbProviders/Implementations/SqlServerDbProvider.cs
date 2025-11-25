@@ -213,7 +213,13 @@ public class SqlServerDbProvider: IDbProvider
           Strength real NOT NULL,
           Height smallint NOT NULL,
           IsActive bit NOT NULL,
-          HobbitAncestry bit NULL,
+          HobbitAncestry AS (
+            CASE
+                WHEN Strength < 50 THEN 1
+                WHEN Strength = 50 THEN NULL
+                WHEN Strength > 50 THEN 0
+            END
+          ) PERSISTED,
           CONSTRAINT PK_{2} PRIMARY KEY (Id)
         );
         CREATE TABLE {0}.{3} (
