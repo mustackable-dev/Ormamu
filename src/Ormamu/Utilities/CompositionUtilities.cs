@@ -1,42 +1,11 @@
+using System.Linq.Expressions;
 using System.Text;
 
 namespace Ormamu;
 
 internal static class CompositionUtilities
 {
-    internal static StringBuilder AppendProperties(
-        this StringBuilder sb,
-        PropertyMapping[] properties,
-        AppendType type,
-        char propertyWrapper = '\0',
-        bool skipKey = false)
-    {
-        bool firstSeparatorSkip = true;
-        foreach (PropertyMapping property in properties)
-        {
-            if (property.IsDbGenerated || (property.IsKey && skipKey)) continue;
-
-            switch (type)
-            {
-                case AppendType.Assembly:
-                    sb.AppendWithSeparator('@', skipSeparator: firstSeparatorSkip);
-                    sb.Append(property.AssemblyName);
-                    break;
-
-                case AppendType.Equality:
-                    sb.AppendWithSeparatorAndWrapper(property.DbName, propertyWrapper, ',', firstSeparatorSkip);
-                    sb.Append("=@");
-                    sb.Append(property.AssemblyName);
-                    break;
-
-                default:
-                    sb.AppendWithSeparatorAndWrapper(property.DbName, propertyWrapper, ',', firstSeparatorSkip);
-                    break;
-            }
-            if(firstSeparatorSkip) firstSeparatorSkip = false;
-        }
-        return sb;
-    }
+    internal const string ParameterPrefix = "__orm_";
 
     internal static StringBuilder AppendWithSeparator(
         this StringBuilder primary,
@@ -109,7 +78,7 @@ internal static class CompositionUtilities
     internal static void AppendEquality(
         this StringBuilder sb,
         PropertyMapping key,
-        bool paramFromAssembly = false,
+        bool attachPrefix = false,
         char propertyWrapper = '\0',
         int index = -1)
     {
@@ -121,11 +90,20 @@ internal static class CompositionUtilities
         {
             sb.Append(key.DbName);
         }
-        
-        sb.Append("=@")
-            .Append(paramFromAssembly ? key.AssemblyName : "KeyValue");
+
+        sb.Append("=@");
+        if(attachPrefix) sb.Append(ParameterPrefix);
+        sb.Append(key.AssemblyName);
         
         if(index != -1) sb.Append(index);
+    }
+    public static string ParsePropertyName(this Expression boxedLambdaExpression)
+    {
+        string rawExpression = ((LambdaExpression)boxedLambdaExpression).Body is UnaryExpression { Operand: MemberExpression propertyExpression } ? 
+            propertyExpression.ToString():
+            boxedLambdaExpression.ToString();
+        
+        return rawExpression[(rawExpression.IndexOf('.') + 1)..];
     }
 }
 

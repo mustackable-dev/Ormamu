@@ -1,6 +1,6 @@
 namespace Ormamu;
 internal sealed record CommandBuilderData(
-    OrmamuBaseOptions Options,
+    OrmamuOptions Options,
     string DbIdentifier,
     string ColumnsString,
     PropertyMapping[] KeyProperties,

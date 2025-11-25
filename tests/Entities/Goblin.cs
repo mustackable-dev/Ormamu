@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace OrmamuTests.Entities;
 
 [Table(TestsConfig.ReadTestsTableName, Schema = TestsConfig.SchemaName)]
-public class Goblin: EntityBase<int>
+public record Goblin: EntityBase<int>
 {
     public string Name { get; set; } = null!;
     public char FavouriteLetter { get; set; }

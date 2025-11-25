@@ -6,20 +6,14 @@
   * [Installation](#installation)
   * [Quick Start](#quick-start)
   * [Supported Operations](#supported-operations)
-    * [Read Operations](#read-operations)
-    * [Create Operations](#create-operations)
-    * [Update Operations](#update-operations)
-    * [Delete Operations](#delete-operations)
-    * [Utility Operations](#utility-operations)
-      * [Notes](#notes)
   * [Configuration](#configuration)
-    * [Basic Configuration](#basic-configuration)
-    * [Custom Configuration](#custom-configuration)
+    * [Default](#default)
+    * [Single Database Configuration](#single-database-configuration)
     * [Multiple Database Configurations](#multiple-database-configurations)
   * [Built-in Name Converters](#built-in-name-converters)
   * [Primary Keys](#primary-keys)
     * [Supported Types](#supported-types)
-    * [Autoincrementing](#autoincrementing)
+    * [Auto-Incrementing](#auto-incrementing)
     * [Composite Keys](#composite-keys)
   * [Excluding Properties](#excluding-properties)
   * [Specifying Custom Property Names](#specifying-custom-property-names)
@@ -36,9 +30,9 @@ Ormamu hits the sweet spot between the convenience of Entity Framework and the m
 
 - Support for MSSQL, PostgreSQL, MySQL, MariaDB, and SQLite
 - Support for multiple SQL dialects and naming conventions in the same project
-- Flexible primary key handling (custom names, types, and composite keys)
+- Flexible primary key support - supports standard `int` keys, typed keys and composite keys
 - Minimal setup via standard `DataAnnotations`
-- High-performance query generation via structure data caching (no runtime reflection)
+- High-performance query generation via structure data caching and stateless execution
 - Synchronous and asynchronous CRUD and bulk operations
 - Utility operations (count, sum, average, min, max)
 - Compatible with `IDbConnection` and `IDbTransaction`
@@ -72,9 +66,11 @@ public class Gnome
 
 Here we use the `[Table]` attribute to specify the schema and the name of the table in the database that corresponds to the Gnome entity. Then we tag the primary key property with the `[Key]` attribute.
 
-Then we need to call Ormamu.Configuration.Apply() at the start of our project to initialize the query composition engine. Like this:
+Then we call `OrmamuConfig.Apply` to initialize the query composition engine with PostgreSQL support (you do not need to explicitly call this, if you use SQL Server and direct name mapping).
 
 ```csharp
+
+using Ormamu;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,10 +84,12 @@ builder.Services
     .AddWorker()
     .AddControllers();
 
-// Uses default settings (SQL Server dialect, direct name mapping)
-Ormamu.Configuration.Apply(); 
+// You only need to add these two lines, if you are using a custom 
+// database setup (default is SQL Server with direct name mapping)
 
-var app = builder.Build();
+OrmamuOptions options = new() { Dialect = SqlDialect.PostgreSql };
+
+OrmamuConfig.Apply(options);
 ```
 
 Finally, we can do this:
@@ -111,14 +109,12 @@ int gnomeId = connection.Insert(gnome);
 //its primary key's value
 Gnome? gnomeFromDb = connection.Get<Gnome>(gnomeId);
 
+//Here we update the entity with a new name
 gnomeFromDb!.Name = "Mopey";
-
-//Here we update entity with the new name
 connection.Update(gnomeFromDb);
 
-//In order to delete the entity, you just need to 
-//pass the value of its primary key
-connection.Delete<Gnome>(gnomeId);
+//.. and finally we delete the entity
+connection.Delete(gnomeFromDb);
 
 ```
 
@@ -126,85 +122,38 @@ You can find more examples in [the tests suite](https://github.com/mustackable-d
 
 ## Supported Operations
 
-### Read Operations
+All operations provided by Ormamu have synchronous and asynchronous versions that run either on an `IDbConnection` or an `IDbTransaction`.
 
-| Operation                                     | Method (Sync / Async)                          | Contexts                          | Description                                                                                           |
-|-----------------------------------------------|------------------------------------------------|-----------------------------------|-------------------------------------------------------------------------------------------------------|
-| Get by `int` key                              | `Get<T>(int)` / `GetAsync<T>(int)`            | `IDbConnection`, `IDbTransaction` | Retrieves an entity by integer key.                                                                   |
-| Get by custom or composite key                | `Get<TKey, T>(TKey)` / `GetAsync<TKey, T>(TKey)` | `IDbConnection`, `IDbTransaction` | Retrieves an entity by any key type (supports composite keys).                                        |
-| Bulk fetch on key value array with pagination | `Get<T>(...)` / `GetAsync<T>(...)`            | `IDbConnection`, `IDbTransaction` | Retrieves a list of entities based on an array of key values with optional `ORDER BY` and pagination. |
-| Bulk fetch with custom filters and pagination | `Get<T>(...)` / `GetAsync<T>(...)`            | `IDbConnection`, `IDbTransaction` | Retrieves a list of entities with optional `WHERE`, `ORDER BY` and pagination.                        |
+Additionally, Ormamu fully supports typed and composite primary keys for entities, while also providing shorthand overrides for the most common case of using `int` primary keys.
 
----
-
-### Create Operations
-
-| Operation                         | Method (Sync / Async)                               | Contexts                          | Description                                                                  |
-|-----------------------------------|------------------------------------------------------|-----------------------------------|------------------------------------------------------------------------------|
-| Insert by `int` key               | `Insert<T>(T entity)` / `InsertAsync<T>(T entity)`  | `IDbConnection`, `IDbTransaction` | Inserts an entity with `int` key and returns the generated key.             |
-| Insert by custom or composite key | `Insert<TKey, T>(T entity)` / `InsertAsync<TKey, T>(T entity)` | `IDbConnection`, `IDbTransaction` | Inserts an entity and returns a custom key (supports composite).    |
-| Bulk insert (array)               | `BulkInsert<T>(T[] entities)` / `BulkInsertAsync<T>(T[] entities)` | `IDbConnection`, `IDbTransaction` | Inserts multiple entities in batches (default batch size: 100).             |
-
----
-
-### Update Operations
-
-| Operation                    | Method (Sync / Async)                                                   | Contexts                          | Description                                                                                     |
-|------------------------------|------------------------------------------------------------------------|-----------------------------------|-------------------------------------------------------------------------------------------------|
-| Update single entity          | `Update<T>(T entity)` / `UpdateAsync<T>(T entity)`                     | `IDbConnection`, `IDbTransaction` | Updates a single entity and returns the number of affected rows (typically 1).                  |
-| Bulk update (array)           | `BulkUpdate<T>(T[] entities, int batchSize = 100)` / `BulkUpdateAsync<T>(T[] entities, int batchSize = 100)` | `IDbConnection`, `IDbTransaction` | Updates multiple entities in batches (default batch size: 100) and returns total affected rows.|
-
----
-
-### Delete Operations
-
-| Operation                         | Method (Sync / Async)                                               | Contexts                          | Description                                                                                    |
-|-----------------------------------|--------------------------------------------------------------------|-----------------------------------|------------------------------------------------------------------------------------------------|
-| Delete by `int` key               | `Delete<TValue>(int key)` / `DeleteAsync<TValue>(int key)`         | `IDbConnection`, `IDbTransaction` | Deletes a single entity by `int` key, returns number of affected rows (typically 1).           |
-| Delete by custom or composite key | `Delete<TKey, TValue>(TKey key)` / `DeleteAsync<TKey, TValue>(TKey key)` | `IDbConnection`, `IDbTransaction` | Deletes a single entity by a custom key (also supports composite keys), returns affected rows. |
-| Bulk delete by `int` keys         | `BulkDelete<TValue>(int[] keys, int batchSize = 100)` / `BulkDeleteAsync<TValue>(int[] keys, int batchSize = 100)` | `IDbConnection`, `IDbTransaction` | Deletes multiple entities by array of `int` keys in batches, returns total deleted count.      |
-| Bulk delete by custom keys        | `BulkDelete<TKey, TValue>(TKey[] keys, int batchSize = 100)` / `BulkDeleteAsync<TKey, TValue>(TKey[] keys, int batchSize = 100)` | `IDbConnection`, `IDbTransaction` | Deletes multiple entities by array of custom keys in batches, returns total deleted count.     |
-
----
-
-### Utility Operations
-
-| Operation                    | Method (Sync / Async)                                                   | Contexts                          | Description                                                                                     |
-|------------------------------|------------------------------------------------------------------------|-----------------------------------|-------------------------------------------------------------------------------------------------|
-| Count entities               | `Count<TEntity, TValue>(...)` / `CountAsync<TEntity, TValue>(...)`     | `IDbConnection`, `IDbTransaction` | Counts the number of entities optionally filtered by a WHERE clause, returns numeric count.     |
-| Sum property values          | `Sum<TEntity, TValue>(...)` / `SumAsync<TEntity, TValue>(...)`         | `IDbConnection`, `IDbTransaction` | Calculates the sum of a specified property optionally filtered by a WHERE clause.               |
-| Average property values      | `Average<TEntity, TValue>(...)` / `AverageAsync<TEntity, TValue>(...)` | `IDbConnection`, `IDbTransaction` | Calculates the average of a specified property optionally filtered by a WHERE clause.           |
-| Minimum property values      | `Min<TEntity, TValue>(...)` / `MinAsync<TEntity, TValue>(...)`         | `IDbConnection`, `IDbTransaction` | Gets the minimum value of a specified property optionally filtered by a WHERE clause.           |
-| Maximum property values      | `Max<TEntity, TValue>(...)` / `MaxAsync<TEntity, TValue>(...)`         | `IDbConnection`, `IDbTransaction` | Gets the maximum value of a specified property optionally filtered by a WHERE clause.           |
-
-#### Notes
-
-Each of the Utility operations (except for `Count`) requires an Expression parameter. This parameter specifies the target entity property on which the operation will be performed.
-
+- Single and bulk inserts are supported
+- Single and bulk reads are supported, with optional filtering, ordering and pagination
+- Single and bulk full updates are supported, as well as partial updates. Partial updates use a syntax similar to [ExecuteUpdate](https://learn.microsoft.com/en-us/ef/core/saving/execute-insert-update-delete), and can either set concrete properties' values from runtime or copy property values from an entity instance
+- Single and bulk deletes are supported via key value, entity instance or custom `WHERE` clause
+- Count, Sum, Average, Min and Max utility commands are supported
 ---
 
 ## Configuration
 
-Ormamu offers flexible configuration options to suit different project needs, including support for multiple databases with varying SQL dialects and naming conventions.
+Ormamu provides a flexible configuration system designed to support multiple databases, SQL dialects, and naming conventions — allowing you to tailor its behavior to your application’s data model.
 
-### Basic Configuration
+Ormamu can be configured via the `OrmamuConfig.Apply` method.
 
-You can configure Ormamu globally using default settings. By default, it uses the **SQL Server** dialect and assumes no custom mapping between entity property names and database column names.
+### Default
 
-```csharp
-Ormamu.Configuration.Apply();
-```
+If `OrmamuConfig.Apply` is not explicitly called, Ormamu will lazily apply a default configuration (SQL Server dialect, no custom name mapping) the first time any database operation is executed. This default configuration is initialized only once.
 
-This applies the configuration to all entities in your application.
+Configuration can be safely reapplied at any time using `OrmamuConfig.Apply` — if a configuration already exists, it will be replaced with the new one.
 
-### Custom Configuration
+This allows recovery from accidental default initialization or dynamic reconfiguration in testing environments.
 
-To customize the behavior, create an instance of `OrmamuOptions` where you can specify:
+### Single Database Configuration
 
-- **Dialect** — The SQL dialect for your database (e.g., SQL Server, MySQL, PostgreSQL).
+You can pass an instance of `OrmamuOptions` to the `OrmamuConfig.Apply` to specify the following parameters:
+
+- **Dialect** — The SQL dialect of your database (e.g., SQL Server, MySQL, PostgreSQL).
 - **NameConverter** — A function to convert entity property names to database column names (e.g., snake_case, kebab-case).
 - **PropertyBindingFlags** — Reflection flags for selecting entity properties (default is `Public | Instance`).
-- **ConfigId** — An optional identifier to differentiate configurations when working with multiple databases.
 
 **Example:**
 
@@ -215,37 +164,38 @@ OrmamuOptions options = new ()
     NameConverter = NameConverters.ToSnakeCase
 };
 
-Ormamu.Configuration.Apply(options);
+OrmamuConfig.Apply(options);
 ```
 
 ### Multiple Database Configurations
 
-If your project connects to multiple databases with different naming conventions or dialects, you can configure multiple `OrmamuOptions` instances and assign each entity a configuration ID using the `[ConfigId]` attribute.
+If your project connects to multiple databases with different naming conventions or dialects, you can configure multiple `OrmamuOptions` instances and assign each entity definition a configuration ID using the `[OrmamuConfigId]` attribute.
 
 ```csharp
-OrmamuOptions[] configs = new[]
+Dictionary<object, OrmamuOptions> configs = new()
 {
-    new OrmamuOptions
     {
-        ConfigId = "MainDb",
-        Dialect = SqlDialect.SqlServer,
-        NameConverter = NameConverters.ToUpperCase
+        "MainDb", new OrmamuOptions {
+            Dialect = SqlDialect.SqlServer,
+            NameConverter = NameConverters.ToUpperCase
+        }
     },
-    new OrmamuOptions
     {
-        ConfigId = "AnalyticsDb",
-        Dialect = SqlDialect.PostgreSql,
-        NameConverter = NameConverters.ToSnakeCase
+        "AnalyticsDb", new OrmamuOptions
+        {
+            Dialect = SqlDialect.PostgreSql,
+            NameConverter = NameConverters.ToSnakeCase
+        }
     }
 };
 
-Ormamu.Configuration.Apply(configs);
+OrmamuConfig.Apply(configs);
 ```
 
-Then mark your entity classes with the corresponding configuration ID:
+Then mark your entity classes with the corresponding configuration ID attributes:
 
 ```csharp
-[ConfigId("MainDb")]
+[OrmamuConfigId("MainDb")]
 [Table("Users", Schema = "app")]
 public class User
 {
@@ -254,7 +204,7 @@ public class User
     public string UserName { get; set; }
 }
 
-[ConfigId("AnalyticsDb")]
+[OrmamuConfigId("AnalyticsDb")]
 [Table("Events", Schema = "diagnostics")]
 public class EventLog
 {
@@ -263,6 +213,9 @@ public class EventLog
     public string EventName { get; set; }
 }
 ```
+**IMPORTANT!**
+
+Only `ValueType` (such as `int`, `bool`, `double`, `char`, `enum`, etc.) and `string` objects can be used as configuration IDs.
 
 ## Built-in Name Converters
 
@@ -273,25 +226,25 @@ Ormamu provides common name converters for convenience:
 - `NameConverters.ToUpperCase` — Converts `PropertyName` to `PROPERTYNAME`
 - `NameConverters.ToLowerCase` — Converts `PropertyName` to `propertyname`
 
-You can also bring your own custom converter by providing a ```Func<string, string>``` delegate in your OrmamuOptions.
+You can also bring your own custom converter by providing a ```Func<string, string>``` delegate in your `OrmamuOptions`.
 
 ## Primary Keys
 
 ### Supported Types
 
-You can use any ValueType or string as a primary key for your entity model, as long as it maps properly to your database.
+You can use any `ValueType` or `string` as a primary key for your entity model, as long as it maps properly to your database.
 
-Since the most common practice is to use an autoincrementing int or long primary key, Ormamu comes in with shorthand methods specifically for this case.
+Since the most common practice is to use auto-incrementing `int` primary keys, Ormamu offers shorthand methods specifically for this case.
 
 However, you are free to choose whatever key type suits your needs.
 
 All `IDbConnection` and `IDbTransaction` extension methods in Ormamu offer overloads that allow you to specify your primary key type.
 
-### Autoincrementing
+### Auto-Incrementing
 
-By default, Ormamu assumes that a property marked with the `[Key]` attribute is autoincrementing (and therefore omits this property from insert statements).
+By default, Ormamu assumes that a property marked with the `[Key]` attribute is auto-incrementing (and therefore omits this property from insert statements).
 
-If your key is not autoincrementing, use the `[DatabaseGenerated(DatabaseGeneratedOption.None)]` attribute like this:
+If your key is not auto-incrementing, use the `[DatabaseGenerated(DatabaseGeneratedOption.None)]` attribute like this:
 
 ```csharp
     [Key]
@@ -299,13 +252,13 @@ If your key is not autoincrementing, use the `[DatabaseGenerated(DatabaseGenerat
     public Guid GuidKey { get; set; }
 ```
 
-Then you will need to supply a value for the key during Create/Insert operations.
+Then you will need to supply a value for the key during `Insert` operations.
 
 ### Composite Keys
 
 Ormamu supports composite keys for entities. You just need to decorate all the components of your composite key with the `[Key]` attribute (just like you would normally do for traditional primary keys).
 
-For each entity that uses a composite key, it is generally a good idea to define a dedicated type (class, record, or struct) that represents the structure of the composite key. _**Note: This is mandatory, if you plan to use `Get` or `BulkDelete` with an array of composite key entries.**_
+For each entity that uses a composite key, it is strongly recommended to define a dedicated type (class, record, or struct) that represents the structure of the composite key. _**Note: This is mandatory, if you plan to use `Get`, `BulkDelete`, `BulkUpdate` or `BulkPartialUpdate` operations with an array of composite key instances.**_
 
 This type should have properties whose names map one-to-one with the entity property names that comprise the composite key.
 
@@ -352,20 +305,20 @@ Thronglet thronglet =
 
 //After the insert operation completes, Ormamu returns
 //an instance of the composite key type which you can reuse
-ThrongletKey insertedKey = await transaction.InsertAsync<ThrongletKey, Thronglet>(thronglet);
+ThrongletKey insertedKey = await transaction.InsertAsync<Thronglet, ThrongletKey>(thronglet);
 
 //Here we can generate a new instance of the ThrongletKey
 //to do some querying.
 ThrongletKey key = new(Id: 17, Name: "Lemonadesther");
-Thronglet? thronglet2 = await transaction.GetAsync<ThrongletKey, Thronglet>(key);
+Thronglet? thronglet2 = await transaction.GetAsync<Thronglet, ThrongletKey>(key);
 
 //Or we can just use the 'insertedKey' value from our insert operation
 
-Thronglet? thronglet3 = await transaction.GetAsync<ThrongletKey, Thronglet>(insertedKey);
+Thronglet? thronglet3 = await transaction.GetAsync<Thronglet, ThrongletKey>(insertedKey);
 
 transaction.Commit();
 ```
-Ormamu also supports composite keys, where one component is an autoincrementing value. As mentioned in [Autoincrementing](#autoincrementing), if an entity property is marked with the `[Key]` property, Ormamu will assume it is autoincrementing, unless you tag it with `[DatabaseGenerated(DatabaseGeneratedOption.None)]` property as well.
+Ormamu also supports composite keys, where one component is an auto-incrementing value. As mentioned in [Auto-incrementing](#auto-incrementing), if an entity property is marked with the `[Key]` property, Ormamu will assume it is auto-incrementing, unless you tag it with `[DatabaseGenerated(DatabaseGeneratedOption.None)]` property as well.
 
 ## Excluding Properties
 
@@ -399,7 +352,7 @@ public class Imp
 }
 ```
 
-A property name specified via the `[Column]` attribute will take precedence over the value generated by the NameConverter you specified in your `OrmamuOptions`.
+A property name specified via the `[Column]` attribute will take precedence over the value generated by the NameConverter specified in `OrmamuOptions`.
 
 ## License
 

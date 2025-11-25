@@ -4,8 +4,8 @@ using Ormamu;
 
 namespace OrmamuTests.Entities;
 
-[ConfigId(TestsConfig.MulticonfigTestsTableName)]
-[Table(TestsConfig.MulticonfigTestsTableName, Schema = TestsConfig.SecondarySchemaName)]
+[OrmamuConfigId(TestsConfig.MultiConfigTestsTableName)]
+[Table(TestsConfig.MultiConfigTestsTableName, Schema = TestsConfig.SecondarySchemaName)]
 public class Imp
 {
     [Key]

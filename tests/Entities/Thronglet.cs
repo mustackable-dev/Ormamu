@@ -8,7 +8,7 @@ public record struct ThrongletKey(int Id, string Name);
 
 [CompositeKey(typeof(ThrongletKey))]
 [Table(TestsConfig.CompositeKeyTestsTableName, Schema = TestsConfig.SchemaName)]
-[ConfigId(TestsConfig.DbVariant)]
+[OrmamuConfigId(TestsConfig.DbVariant)]
 public class Thronglet
 {
     [Key]

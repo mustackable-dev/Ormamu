@@ -15,6 +15,17 @@ public class CacheBuilderException: Exception
         {
             CacheBuilderExceptionType.CompositeKeyMissingProperty, "The composite key type \"{0}\" registered for " +
                                                                        "\"{1}\" is missing the key property \"{2}\""
+        },
+        {
+            CacheBuilderExceptionType.InvalidConfigIdType, "The provided value \"{0}\" of type \"{1}\", used in a " +
+                                                           "OrmamuConfigId attribute is not a value type, you can only use " +
+                                                           "value types for config ids"
+        },
+        {
+            CacheBuilderExceptionType.ConfigNotFound, "Failed to find a configuration with id \"{0}\", which was " +
+                                                       "specified for entity \"{1}\". Please make sure you have " +
+                                                       "added a configuration with this id in your " +
+                                                       "Ormamu.Configuration.Apply method"
         }
     };
     

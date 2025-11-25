@@ -4,39 +4,25 @@ namespace Ormamu;
 
 /// <summary>
 /// Defines a configuration to be used during query generation with Ormamu. If you use multiple databases with
-/// different naming conventions, use the <see cref="ConfigId"/> attribute to specify which configuration
+/// different naming conventions, use <see cref="OrmamuConfigIdAttribute"/> to specify which configuration
 /// should be applied to a given entity.
 /// </summary>
-public record OrmamuOptions: OrmamuBaseOptions
-{
-    /// <summary>
-    /// An identifier for your <see cref="OrmamuOptions"/> configuration. Entities marked with a
-    /// <see cref="ConfigIdAttribute"/> that has a matching ConfigId, will use this configuration.
-    /// </summary>
-    public object? ConfigId { get; set; }
-    
-    /// <summary>
-    /// Determines the property binding flags used for extracting properties from entities.
-    /// </summary>
-    public BindingFlags PropertyBindingFlags { get; set; } = BindingFlags.Public | BindingFlags.Instance;
-}
-
-
-/// <summary>
-/// This is the base definition for <see cref="OrmamuOptions"/>.
-/// </summary>
-public record OrmamuBaseOptions
+public record OrmamuOptions
 {
     
     /// <summary>
-    /// The <see cref="SqlDialect"/> to use for generating queries.
+    /// The <see cref="SqlDialect"/> to use for generating queries
     /// </summary>
-    public SqlDialect Dialect { get; set; }
+    public SqlDialect Dialect { get; init; }
     
     /// <summary>
     /// Here you can define a custom name converter function that will be used to map entity property names
     /// to database column names. For your convenience, we populated the <see cref="NameConverters"/> class
-    /// with some popular conversions like snake case and kebab case.
+    /// with some popular conversions like snake case and kebab case
     /// </summary>
-    public Func<string, string> NameConverter { get; set; } = x => x;
+    public Func<string, string> NameConverter { get; init; } = x => x;
+    /// <summary>
+    /// Determines the property binding flags used for extracting properties from entities
+    /// </summary>
+    public BindingFlags PropertyBindingFlags { get; init; } = BindingFlags.Public | BindingFlags.Instance;
 }

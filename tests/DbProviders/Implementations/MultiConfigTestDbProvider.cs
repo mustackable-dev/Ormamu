@@ -5,17 +5,8 @@ using Npgsql;
 
 namespace OrmamuTests.DbProviders.Implementations;
 
-public class MulticonfigTestDbProvider: IDbProvider
+public class MultiConfigTestDbProvider: IDbProvider
 {
-    public MulticonfigTestDbProvider()
-    {
-        Options = TestsConfig.MulticonfigOptions;
-        
-        SchemaName = TestsConfig.SecondarySchemaName;
-        
-        MulticonfigTestsTableName = TestsConfig.MulticonfigTestsTableName;
-    }
-    
     private const string ConnectionString =
         "User ID=postgres;Password=Test123!;Host=localhost;Port=5433;Database=OrmamuTests;" +
         "Pooling=true;Connection Lifetime=0;";
@@ -23,10 +14,10 @@ public class MulticonfigTestDbProvider: IDbProvider
     public IDbConnection GetConnection()
         => new NpgsqlConnection(ConnectionString);
 
-    public OrmamuOptions Options { get; }
-    
-    private string SchemaName { get; }
-    private string MulticonfigTestsTableName { get; }
+    public OrmamuOptions Options { get; } = TestsConfig.DbOptions[TestsConfig.MultiConfigTestsTableName];
+
+    private string SchemaName => TestsConfig.SecondarySchemaName;
+    private string MultiConfigTestsTableName => TestsConfig.MultiConfigTestsTableName;
 
     public void DeployTestData()
     {
@@ -38,7 +29,7 @@ public class MulticonfigTestDbProvider: IDbProvider
         connection.Open();
         using NpgsqlCommand command = new(
             $"""
-             TRUNCATE TABLE "{SchemaName}"."{MulticonfigTestsTableName}";
+             TRUNCATE TABLE "{SchemaName}"."{MultiConfigTestsTableName}";
              """, connection);
         command.ExecuteNonQuery();
     }
@@ -51,7 +42,7 @@ public class MulticonfigTestDbProvider: IDbProvider
         object[] scriptPayload =
         [
             SchemaName,
-            MulticonfigTestsTableName,
+            MultiConfigTestsTableName,
             TestsConfig.CustomColumnName
         ];
         

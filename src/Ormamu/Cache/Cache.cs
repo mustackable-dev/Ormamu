@@ -11,9 +11,10 @@ namespace Ormamu;
 
 internal static class Cache
 {
-    private static FrozenDictionary<Type, CommandBuilderData> BuilderDataCache { get; set; } = null!;
+    private static readonly object ConfigLock = new();
+    private static FrozenDictionary<Type, CommandBuilderData>? BuilderDataCache { get; set; }
 
-    internal static void GenerateCache(OrmamuOptions[] buildOptions)
+    internal static void GenerateCache(Dictionary<object, OrmamuOptions> buildOptions)
     {
         Dictionary<Type, CommandBuilderData> cache = new();
         foreach (var type in AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes()))
@@ -21,56 +22,24 @@ internal static class Cache
             TableAttribute? tableAttribute = type.GetCustomAttribute<TableAttribute>();
             if(tableAttribute is null) continue;
             
-            ConfigIdAttribute? configAttribute = type.GetCustomAttribute<ConfigIdAttribute>();
-            OrmamuOptions options =
-                (configAttribute is null ?
-                    null :
-                    buildOptions.FirstOrDefault(x => Equals(x.ConfigId, configAttribute.ConfigId))) ?? buildOptions[0];
+            OrmamuConfigIdAttribute? configAttribute = type.GetCustomAttribute<OrmamuConfigIdAttribute>();
+            OrmamuOptions options = buildOptions.First().Value;
+            if (configAttribute is not null && !buildOptions.TryGetValue(configAttribute.ConfigId, out options!))
+            {
+                throw new CacheBuilderException(CacheBuilderExceptionType.ConfigNotFound, configAttribute.ConfigId, type.Name);
+            }
             
             List<PropertyMapping> properties = new();
             List<PropertyMapping> keyProperties = new();
-            
             Dictionary<string, string> customPropertyNameDictionary = new();
-            foreach (var property in type.GetProperties(options.PropertyBindingFlags))
-            {
-                PropertyData? data = GetPropertyData(property);
-                
-                if (data is null) continue;
-                if(data.HasCustomName) customPropertyNameDictionary.Add(data.AssemblyName, data.Name);
-                
-                PropertyMapping mapping = new(
-                    data.HasCustomName ? data.Name : options.NameConverter(data.Name),
-                    data.AssemblyName,
-                    data.IsKey,
-                    data.IsDbGenerated,
-                    GenerateGetter(type, property));
-                
-                if (data.IsKey) keyProperties.Add(mapping);
-                properties.Add(mapping);
-            }
+            
+            ExtractProperties(properties, keyProperties, customPropertyNameDictionary, type, options);
             
             CompositeKeyAttribute? compositeKeyAttribute = type.GetCustomAttribute<CompositeKeyAttribute>();
             
             if (compositeKeyAttribute is not null)
             {
-                PropertyInfo[] compositeKeyProperties = compositeKeyAttribute.KeyType.GetProperties(options.PropertyBindingFlags);
-                keyProperties = keyProperties.Select(x =>
-                {
-                    PropertyInfo? property = compositeKeyProperties.FirstOrDefault(y => x.AssemblyName == y.Name);
-                    if (property is null)
-                        throw new CacheBuilderException(
-                            CacheBuilderExceptionType.CompositeKeyMissingProperty,
-                            compositeKeyAttribute.KeyType.Name,
-                            type.Name,
-                            x.AssemblyName);
-                    return x with
-                    {
-                        CompositeKeyGetter = GenerateGetter(
-                            compositeKeyAttribute.KeyType,
-                            property
-                        )
-                    };
-                }).ToList();
+                keyProperties = ConvertToCompositeKeyProperties(compositeKeyAttribute, keyProperties, options, type);
             }
             
             if (keyProperties.Count == 0) continue;
@@ -89,7 +58,7 @@ internal static class Cache
                 type,
                 new(
                     options,
-                    tableAttribute.GetDbObjectIdentifier(options),
+                    tableAttribute.GetDbObjectIdentifier(options.Dialect, paddingSymbol),
                     columnsString,
                     keyProperties.ToArray(),
                     properties.ToArray()
@@ -115,20 +84,65 @@ internal static class Cache
         BuilderDataCache = cache.ToFrozenDictionary();
     }
 
-    private static string GetDbObjectIdentifier(this TableAttribute attribute, OrmamuOptions options)
+    private static void ExtractProperties(
+        List<PropertyMapping> properties,
+        List<PropertyMapping> keyProperties,
+        Dictionary<string, string> customPropertyNameDictionary,
+        Type type,
+        OrmamuOptions options)
     {
-            
-        string paddingSymbol = options.Dialect switch
+        foreach (PropertyInfo property in type.GetProperties(options.PropertyBindingFlags))
         {
-            SqlDialect.PostgreSql => "\"",
-            SqlDialect.MySql or SqlDialect.MariaDb => "`",
-            _=> ""
-        };
+            PropertyData? data = GetPropertyData(property);
+                
+            if (data is null) continue;
+            if(data.HasCustomName) customPropertyNameDictionary.Add(data.AssemblyName, data.Name);
+                
+            PropertyMapping mapping = new(
+                data.HasCustomName ? data.Name : options.NameConverter(data.Name),
+                data.AssemblyName,
+                data.IsKey,
+                data.IsDbGenerated,
+                GenerateGetter(type, property));
+                
+            if (data.IsKey) keyProperties.Add(mapping);
+            properties.Add(mapping);
+        }
+    }
+
+    private static List<PropertyMapping> ConvertToCompositeKeyProperties(
+        CompositeKeyAttribute compositeKeyAttribute,
+        List<PropertyMapping> keyProperties,
+        OrmamuOptions options,
+        Type type)
+    {
+        PropertyInfo[] compositeKeyProperties = compositeKeyAttribute.KeyType.GetProperties(options.PropertyBindingFlags);
+        return keyProperties.Select(x =>
+        {
+            PropertyInfo? property = compositeKeyProperties.FirstOrDefault(y => x.AssemblyName == y.Name);
+            if (property is null)
+                throw new CacheBuilderException(
+                    CacheBuilderExceptionType.CompositeKeyMissingProperty,
+                    compositeKeyAttribute.KeyType.Name,
+                    type.Name,
+                    x.AssemblyName);
+            return x with
+            {
+                CompositeKeyGetter = GenerateGetter(
+                    compositeKeyAttribute.KeyType,
+                    property
+                )
+            };
+        }).ToList();
+    }
+
+    private static string GetDbObjectIdentifier(this TableAttribute attribute, SqlDialect dialect, string paddingSymbol)
+    {
         
         StringBuilder sb = new(paddingSymbol);
         if (
             attribute.Schema is not null &&
-            !Array.Exists([SqlDialect.MySql, SqlDialect.MariaDb, SqlDialect.Sqlite], x=>x==options.Dialect))
+            !Array.Exists([SqlDialect.MySql, SqlDialect.MariaDb, SqlDialect.Sqlite], x=>x==dialect))
         {
             sb
                 .Append(attribute.Schema)
@@ -177,7 +191,16 @@ internal static class Cache
 
     internal static CommandBuilderData ResolveCommandBuilderData(Type identifier)
     {
-        if (BuilderDataCache.TryGetValue(identifier, out CommandBuilderData? entry))
+        if (BuilderDataCache is null)
+        {
+            lock(ConfigLock)
+            {
+                if(BuilderDataCache is null)
+                    OrmamuConfig.Apply();
+            }
+        }
+        
+        if (BuilderDataCache!.TryGetValue(identifier, out CommandBuilderData? entry))
         {
             return entry;
         }

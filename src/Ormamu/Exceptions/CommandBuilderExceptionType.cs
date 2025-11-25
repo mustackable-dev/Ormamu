@@ -13,4 +13,8 @@ public enum CommandBuilderExceptionType
     /// A composite key type has not been registered for an entity
     /// </summary>
     CompositeKeyTypeNotRegistered,
+    /// <summary>
+    /// The update payload is invalid
+    /// </summary>
+    InvalidUpdatePayload
 }

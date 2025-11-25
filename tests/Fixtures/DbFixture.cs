@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Dapper;
 using Ormamu;
 using OrmamuTests.Fixtures;
@@ -13,7 +11,6 @@ public sealed class DbFixture: IDisposable
 {
     public IDbProvider DbProvider { get; }
     public IDbProvider MulticonfigDbProvider { get; }
-    public JsonSerializerOptions SerializerOptions { get; }
     public DbFixture()
     {
         PostgreSqlDbProvider postgreSqlProvider = new();
@@ -21,7 +18,7 @@ public sealed class DbFixture: IDisposable
         MySqlDbProvider mySqlProvider = new();
         MariaDbProvider mariaDbProvider = new();
         SqliteDbProvider sqliteDbProvider = new();
-        MulticonfigTestDbProvider multiconfigProvider = new();
+        MultiConfigTestDbProvider multiConfigProvider = new();
         
         switch (TestsConfig.DbVariant)
         {
@@ -43,17 +40,13 @@ public sealed class DbFixture: IDisposable
                 break;
         }
         
-        Configuration.Apply([..TestsConfig.DbOptions.Values.ToArray(), TestsConfig.MulticonfigOptions]);
+        OrmamuConfig.Apply(TestsConfig.DbOptions);
         
         DbProvider.DeploySchema();
         DbProvider.DeployTestData();
         
-        MulticonfigDbProvider = multiconfigProvider;
+        MulticonfigDbProvider = multiConfigProvider;
         MulticonfigDbProvider.DeploySchema();
-        
-        SerializerOptions = new JsonSerializerOptions();
-        SerializerOptions.Converters.Add(new  JsonStringEnumConverter());
-        SerializerOptions.PropertyNameCaseInsensitive = true;
     }
 
     public void Dispose()

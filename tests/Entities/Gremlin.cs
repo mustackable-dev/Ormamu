@@ -7,8 +7,8 @@ namespace OrmamuTests.Entities;
 public record struct GremlinKey(int Id, string Name);
 
 [CompositeKey(typeof(GremlinKey))]
-[Table(TestsConfig.AutoincrementingCompositeKeyTestsTableName, Schema = TestsConfig.SchemaName)]
-[ConfigId(TestsConfig.DbVariant)]
+[Table(TestsConfig.AutoIncrementingCompositeKeyTestsTableName, Schema = TestsConfig.SchemaName)]
+[OrmamuConfigId(TestsConfig.DbVariant)]
 public class Gremlin
 {
     [Key]

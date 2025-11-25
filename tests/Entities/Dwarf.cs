@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace OrmamuTests.Entities;
 
 [Table(TestsConfig.CreateTestsTableName, Schema = TestsConfig.SchemaName)]
-public class Dwarf: EntityBase<int>
+public record Dwarf: EntityBase<int>
 {
     public string Name { get; set; } = null!;
     public float Strength { get; set; }

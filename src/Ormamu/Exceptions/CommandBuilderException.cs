@@ -21,6 +21,10 @@ public class CommandBuilderException: Exception
             CommandBuilderExceptionType.CompositeKeyTypeNotRegistered, "The composite key type \"{0}\" used for this " +
                                                                       "operation was not registered with the " +
                                                                       "[CompositeKey] attribute for this entity"
+        },
+        {
+            CommandBuilderExceptionType.InvalidUpdatePayload, "The update payload is invalid or empty. Primary keys " +
+                                                              "(or single components of primary keys) cannot be updated"
         }
     };
     
