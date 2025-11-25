@@ -13,7 +13,7 @@
   * [Built-in Name Converters](#built-in-name-converters)
   * [Primary Keys](#primary-keys)
     * [Supported Types](#supported-types)
-    * [Autoincrementing](#autoincrementing)
+    * [Auto-Incrementing](#auto-incrementing)
     * [Composite Keys](#composite-keys)
   * [Excluding Properties](#excluding-properties)
   * [Specifying Custom Property Names](#specifying-custom-property-names)
@@ -30,9 +30,9 @@ Ormamu hits the sweet spot between the convenience of Entity Framework and the m
 
 - Support for MSSQL, PostgreSQL, MySQL, MariaDB, and SQLite
 - Support for multiple SQL dialects and naming conventions in the same project
-- Flexible primary key handling (custom names, types, and composite keys)
-- Minimal setup via standard `DataAnnotations`
-- High-performance query generation via structure data caching (no runtime reflection)
+- Flexible primary key support - supports standard `int` keys, typed keys and composite keys
+- Minimal setup via standard `DataAnnotations` and stateless execution
+- High-performance query generation via structure data caching
 - Synchronous and asynchronous CRUD and bulk operations
 - Utility operations (count, sum, average, min, max)
 - Compatible with `IDbConnection` and `IDbTransaction`
@@ -66,7 +66,7 @@ public class Gnome
 
 Here we use the `[Table]` attribute to specify the schema and the name of the table in the database that corresponds to the Gnome entity. Then we tag the primary key property with the `[Key]` attribute.
 
-Then we need to call OrmamuConfig.Apply() at the start of our project to initialize the query composition engine. Like this:
+Then we call `OrmamuConfig.Apply` to initialize the query composition engine with PostgreSQL support (you do not need to explicitly call this, if you use SQL Server and direct name mapping).
 
 ```csharp
 
@@ -84,8 +84,8 @@ builder.Services
     .AddWorker()
     .AddControllers();
 
-// You only need to add this line, if you are not using the 
-// default settings (SQL Server dialect, direct name mapping)
+// You only need to add these two lines, if you are using a custom 
+// database setup (default is SQL Server with direct name mapping)
 
 OrmamuOptions options = new() { Dialect = SqlDialect.PostgreSql };
 
@@ -109,7 +109,7 @@ int gnomeId = connection.Insert(gnome);
 //its primary key's value
 Gnome? gnomeFromDb = connection.Get<Gnome>(gnomeId);
 
-//Here we update entity with a new name
+//Here we update the entity with a new name
 gnomeFromDb!.Name = "Mopey";
 connection.Update(gnomeFromDb);
 
@@ -124,12 +124,12 @@ You can find more examples in [the tests suite](https://github.com/mustackable-d
 
 All operations provided by Ormamu have synchronous and asynchronous versions that run either on an `IDbConnection` or an `IDbTransaction`.
 
-Additionally, Ormamu fully supports typed and composite primary keys for entities, while also providing shorthand overrides for the most common case of using `int` primary keys.d
+Additionally, Ormamu fully supports typed and composite primary keys for entities, while also providing shorthand overrides for the most common case of using `int` primary keys.
 
 - Single and bulk inserts are supported
 - Single and bulk reads are supported, with optional filtering, ordering and pagination
 - Single and bulk full updates are supported, as well as partial updates. Partial updates use a syntax similar to [ExecuteUpdate](https://learn.microsoft.com/en-us/ef/core/saving/execute-insert-update-delete), and can either set concrete properties' values from runtime or copy property values from an entity instance
-- Single and bulk deletes are supported via key value or entity instance
+- Single and bulk deletes are supported via key value, entity instance or custom `WHERE` clause
 - Count, Sum, Average, Min and Max utility commands are supported
 ---
 
@@ -215,7 +215,7 @@ public class EventLog
 ```
 **IMPORTANT!**
 
-Only ValueType (such as `int`, `bool`, `double`, `char`, `enum`, etc.) and `string` objects can be used as configuration IDs.
+Only `ValueType` (such as `int`, `bool`, `double`, `char`, `enum`, etc.) and `string` objects can be used as configuration IDs.
 
 ## Built-in Name Converters
 
@@ -226,25 +226,25 @@ Ormamu provides common name converters for convenience:
 - `NameConverters.ToUpperCase` — Converts `PropertyName` to `PROPERTYNAME`
 - `NameConverters.ToLowerCase` — Converts `PropertyName` to `propertyname`
 
-You can also bring your own custom converter by providing a ```Func<string, string>``` delegate in your OrmamuOptions.
+You can also bring your own custom converter by providing a ```Func<string, string>``` delegate in your `OrmamuOptions`.
 
 ## Primary Keys
 
 ### Supported Types
 
-You can use any ValueType or string as a primary key for your entity model, as long as it maps properly to your database.
+You can use any `ValueType` or `string` as a primary key for your entity model, as long as it maps properly to your database.
 
-Since the most common practice is to use an autoincrementing `int` primary key, Ormamu comes in with shorthand methods specifically for this case.
+Since the most common practice is to use auto-incrementing `int` primary keys, Ormamu offers shorthand methods specifically for this case.
 
 However, you are free to choose whatever key type suits your needs.
 
 All `IDbConnection` and `IDbTransaction` extension methods in Ormamu offer overloads that allow you to specify your primary key type.
 
-### Autoincrementing
+### Auto-Incrementing
 
-By default, Ormamu assumes that a property marked with the `[Key]` attribute is autoincrementing (and therefore omits this property from insert statements).
+By default, Ormamu assumes that a property marked with the `[Key]` attribute is auto-incrementing (and therefore omits this property from insert statements).
 
-If your key is not autoincrementing, use the `[DatabaseGenerated(DatabaseGeneratedOption.None)]` attribute like this:
+If your key is not auto-incrementing, use the `[DatabaseGenerated(DatabaseGeneratedOption.None)]` attribute like this:
 
 ```csharp
     [Key]
@@ -258,7 +258,7 @@ Then you will need to supply a value for the key during Create/Insert operations
 
 Ormamu supports composite keys for entities. You just need to decorate all the components of your composite key with the `[Key]` attribute (just like you would normally do for traditional primary keys).
 
-For each entity that uses a composite key, it is generally a good idea to define a dedicated type (class, record, or struct) that represents the structure of the composite key. _**Note: This is mandatory, if you plan to use `Get` or `BulkDelete` with an array of composite key entries.**_
+For each entity that uses a composite key, it is strongly recommended to define a dedicated type (class, record, or struct) that represents the structure of the composite key. _**Note: This is mandatory, if you plan to use `Get`, `BulkDelete`, `BulkUpdate` or `BulkPartialUpdate` operations with an array of composite key instances.**_
 
 This type should have properties whose names map one-to-one with the entity property names that comprise the composite key.
 
@@ -318,7 +318,7 @@ Thronglet? thronglet3 = await transaction.GetAsync<Thronglet, ThrongletKey>(inse
 
 transaction.Commit();
 ```
-Ormamu also supports composite keys, where one component is an autoincrementing value. As mentioned in [Autoincrementing](#autoincrementing), if an entity property is marked with the `[Key]` property, Ormamu will assume it is autoincrementing, unless you tag it with `[DatabaseGenerated(DatabaseGeneratedOption.None)]` property as well.
+Ormamu also supports composite keys, where one component is an auto-incrementing value. As mentioned in [Auto-incrementing](#auto-incrementing), if an entity property is marked with the `[Key]` property, Ormamu will assume it is auto-incrementing, unless you tag it with `[DatabaseGenerated(DatabaseGeneratedOption.None)]` property as well.
 
 ## Excluding Properties
 
