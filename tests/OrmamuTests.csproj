@@ -15,6 +15,7 @@
         <PackageReference Include="dbup-postgresql" Version="6.0.3" />
         <PackageReference Include="dbup-sqlserver" Version="6.0.0" />
         <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
+        <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.22" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
         <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.0.6" />
         <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.11" />
@@ -39,12 +40,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\src\Ormamu\Ormamu.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="Microsoft.Data.Sqlite">
-        <HintPath>..\..\..\..\.nuget\packages\microsoft.data.sqlite.core\9.0.0\lib\net8.0\Microsoft.Data.Sqlite.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
 
