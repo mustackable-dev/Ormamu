@@ -103,6 +103,7 @@ internal static class Cache
                 data.AssemblyName,
                 data.IsKey,
                 data.IsDbGenerated,
+                data.Type,
                 GenerateGetter(type, property));
                 
             if (data.IsKey) keyProperties.Add(mapping);
@@ -181,9 +182,9 @@ internal static class Cache
             ColumnAttribute? columnAttribute = property.GetCustomAttribute<ColumnAttribute>();
             if (columnAttribute is not null && !string.IsNullOrEmpty(columnAttribute.Name))
             {
-                return new(columnAttribute.Name, property.Name, isKey, isDbGenerated, true);
+                return new(columnAttribute.Name, property.Name, isKey, isDbGenerated, property.PropertyType, true);
             }
-            return new(property.Name, property.Name, isKey, isDbGenerated);
+            return new(property.Name, property.Name, isKey, isDbGenerated, property.PropertyType);
         }
 
         return null;
@@ -223,5 +224,6 @@ internal static class Cache
         string AssemblyName,
         bool IsKey,
         bool IsDbGenerated,
+        Type Type,
         bool HasCustomName = false);
 }
