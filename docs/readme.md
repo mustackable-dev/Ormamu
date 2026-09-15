@@ -131,7 +131,8 @@ Additionally, Ormamu fully supports typed and composite primary keys for entitie
 - Single and bulk full updates are supported, as well as partial updates. Partial updates use a syntax similar to [ExecuteUpdate](https://learn.microsoft.com/en-us/ef/core/saving/execute-insert-update-delete), and can either set concrete properties' values from runtime or copy property values from an entity instance
 - Single and bulk deletes are supported via key value, entity instance or custom `WHERE` clause
 - Count, Sum, Average, Min and Max utility commands are supported
----
+
+As of version 1.0.2, single and bulk upserts are experimentally supported for all database, except *SQL Server*. Upserts to *SQLite* for entities with composite keys with an autoincrementing component are also not supported, all other upserts are supported.
 
 ## Configuration
 

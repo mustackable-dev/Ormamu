@@ -1,5 +1,4 @@
 using System.Data;
-using System.Text.Json;
 using Ormamu;
 using OrmamuTests.Entities;
 using OrmamuTests.Fixtures;
@@ -34,7 +33,7 @@ public class CreateTests(DbFixture fixture)
         Assert.True(dwarf2 is not null);
         Assert.True(dwarfId > 0);
         dwarf2.Id = 0;
-        Assert.True(JsonSerializer.Serialize(dwarf2) == JsonSerializer.Serialize(dwarf));
+        Assert.True(dwarf2 == dwarf);
     }
     
     [Fact]
@@ -64,7 +63,7 @@ public class CreateTests(DbFixture fixture)
         Assert.True(dwarf2 is not null);
         Assert.True(dwarfId > 0);
         dwarf2.Id = 0;
-        Assert.True(JsonSerializer.Serialize(dwarf2) == JsonSerializer.Serialize(dwarf));
+        Assert.True(dwarf2 == dwarf);
     }
     
     [Fact]
@@ -91,7 +90,7 @@ public class CreateTests(DbFixture fixture)
         Assert.True(dwarf2 is not null);
         Assert.True(dwarfId > 0);
         dwarf2.Id = 0;
-        Assert.True(JsonSerializer.Serialize(dwarf2) == JsonSerializer.Serialize(dwarf));
+        Assert.True(dwarf2 == dwarf);
     }
     
     [Fact]
@@ -121,7 +120,7 @@ public class CreateTests(DbFixture fixture)
         Assert.True(dwarf2 is not null);
         Assert.True(dwarfId > 0);
         dwarf2.Id = 0;
-        Assert.True(JsonSerializer.Serialize(dwarf2) == JsonSerializer.Serialize(dwarf));
+        Assert.True(dwarf2 == dwarf);
     }
     
     [Fact]
@@ -439,7 +438,7 @@ public class CreateTests(DbFixture fixture)
     }
     
     [Fact]
-    public void BulkInsert_WithConnectionOnMulticonfig_ShouldFindEntry()
+    public void BulkInsert_WithConnectionOnMulticonfig__ShouldUpsertCorrectCount()
     {
         //Arrange
         
@@ -493,7 +492,7 @@ public class CreateTests(DbFixture fixture)
         //Assert
         Assert.True(insertedKey == key);
         Assert.NotNull(thronglet2);
-        Assert.True(JsonSerializer.Serialize(thronglet2) == JsonSerializer.Serialize(thronglet));
+        Assert.True(thronglet2 == thronglet);
     }
     
     [Fact]
@@ -519,7 +518,7 @@ public class CreateTests(DbFixture fixture)
         //Assert
         Assert.True(insertedKey == key);
         Assert.NotNull(thronglet2);
-        Assert.True(JsonSerializer.Serialize(thronglet2) == JsonSerializer.Serialize(thronglet));
+        Assert.True(thronglet2 == thronglet);
     }
     
     [Fact]
@@ -542,7 +541,7 @@ public class CreateTests(DbFixture fixture)
         //Assert
         Assert.True(insertedKey == key);
         Assert.NotNull(thronglet2);
-        Assert.True(JsonSerializer.Serialize(thronglet2) == JsonSerializer.Serialize(thronglet));
+        Assert.True(thronglet2 == thronglet);
     }
     
     [Fact]
@@ -569,11 +568,11 @@ public class CreateTests(DbFixture fixture)
         //Assert
         Assert.True(insertedKey == key);
         Assert.NotNull(thronglet2);
-        Assert.True(JsonSerializer.Serialize(thronglet2) == JsonSerializer.Serialize(thronglet));
+        Assert.True(thronglet2 == thronglet);
     }
     
     [Fact]
-    public void Insert_WithConnectionWithCompositeKeyWithAutoincrementingComponent_ShouldFindEntry()
+    public void Insert_WithConnection_WithCompositeKey_WithAutoincrementingComponent_ShouldNotForceId()
     {
         //Arrange
         using IDbConnection connection = fixture.DbProvider.GetConnection();
@@ -592,7 +591,7 @@ public class CreateTests(DbFixture fixture)
     }
     
     [Fact]
-    public void Insert_WithTransactionWithCompositeKeyWithAutoincrementingComponent_ShouldFindEntry()
+    public void Insert_WithTransaction_WithCompositeKey_WithAutoincrementingComponent_ShouldNotForceId()
     {
         //Arrange
         using IDbConnection connection = fixture.DbProvider.GetConnection();

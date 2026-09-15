@@ -106,9 +106,3 @@ internal static class CompositionUtilities
         return rawExpression[(rawExpression.IndexOf('.') + 1)..];
     }
 }
-
-internal enum AppendType {
-    Db,
-    Assembly,
-    Equality
-}

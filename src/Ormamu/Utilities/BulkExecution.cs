@@ -10,7 +10,8 @@ internal static class BulkExecution
         this IDbConnection connection,
         Func<TValue[], int, int, CommandComponents> commandFactory,
         TValue[] values,
-        int batchSize = 100)
+        int batchSize = 100,
+        bool limitProcessedEntries = false)
     {
         int processedEntries = 0;
         
@@ -20,7 +21,9 @@ internal static class BulkExecution
             int currentBatchSize = Math.Min(batchSize, remaining);
             CommandComponents components = commandFactory(values, processedEntries, processedEntries + currentBatchSize);
             
-            processedEntries += connection.Execute(components.Command, components.Parameters);
+            processedEntries += limitProcessedEntries ? 
+                Math.Min(connection.Execute(components.Command, components.Parameters), currentBatchSize) :
+                connection.Execute(components.Command, components.Parameters);
             
             remaining -= currentBatchSize;
         }
@@ -32,7 +35,8 @@ internal static class BulkExecution
         this IDbTransaction transaction,
         Func<TValue[], int, int, CommandComponents> commandFactory,
         TValue[] values,
-        int batchSize = 100)
+        int batchSize = 100,
+        bool limitProcessedEntries = false)
     {
         int processedEntries = 0;
         
@@ -42,7 +46,9 @@ internal static class BulkExecution
             int currentBatchSize = Math.Min(batchSize, remaining);
             CommandComponents components = commandFactory(values, processedEntries, processedEntries + currentBatchSize);
             
-            processedEntries += transaction.Execute(components.Command, components.Parameters);
+            processedEntries += limitProcessedEntries ? 
+                Math.Min(transaction.Execute(components.Command, components.Parameters), currentBatchSize) :
+                transaction.Execute(components.Command, components.Parameters);
             
             remaining -= currentBatchSize;
         }
@@ -54,7 +60,8 @@ internal static class BulkExecution
         this IDbConnection connection,
         Func<TValue[], int, int, CommandComponents> commandFactory,
         TValue[] values,
-        int batchSize = 100)
+        int batchSize = 100,
+        bool limitProcessedEntries = false)
     {
         int processedEntries = 0;
         
@@ -64,7 +71,9 @@ internal static class BulkExecution
             int currentBatchSize = Math.Min(batchSize, remaining);
             CommandComponents components = commandFactory(values, processedEntries, processedEntries + currentBatchSize);
             
-            processedEntries += await connection.ExecuteAsync(components.Command, components.Parameters);
+            processedEntries += limitProcessedEntries ? 
+                Math.Min(await connection.ExecuteAsync(components.Command, components.Parameters), currentBatchSize) :
+                await connection.ExecuteAsync(components.Command, components.Parameters);
             
             remaining -= currentBatchSize;
         }
@@ -76,7 +85,8 @@ internal static class BulkExecution
         this IDbTransaction transaction,
         Func<TValues[], int, int, CommandComponents> commandFactory,
         TValues[] values,
-        int batchSize = 100)
+        int batchSize = 100,
+        bool limitProcessedEntries = false)
     {
         int processedEntries = 0;
         
@@ -86,7 +96,9 @@ internal static class BulkExecution
             int currentBatchSize = Math.Min(batchSize, remaining);
             CommandComponents components = commandFactory(values, processedEntries, processedEntries + currentBatchSize);
             
-            processedEntries += await transaction.ExecuteAsync(components.Command, components.Parameters);
+            processedEntries += limitProcessedEntries ? 
+                Math.Min(await transaction.ExecuteAsync(components.Command, components.Parameters), currentBatchSize) :
+                await transaction.ExecuteAsync(components.Command, components.Parameters);
             
             remaining -= currentBatchSize;
         }

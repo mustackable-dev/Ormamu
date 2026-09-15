@@ -9,7 +9,7 @@ public record struct ThrongletKey(int Id, string Name);
 [CompositeKey(typeof(ThrongletKey))]
 [Table(TestsConfig.CompositeKeyTestsTableName, Schema = TestsConfig.SchemaName)]
 [OrmamuConfigId(TestsConfig.DbVariant)]
-public class Thronglet
+public record Thronglet
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
