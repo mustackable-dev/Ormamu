@@ -132,7 +132,7 @@ Additionally, Ormamu fully supports typed and composite primary keys for entitie
 - Single and bulk deletes are supported via key value, entity instance or custom `WHERE` clause
 - Count, Sum, Average, Min and Max utility commands are supported
 
-As of version 1.0.2, single and bulk upserts are experimentally supported for all database, except *SQL Server*. Upserts to *SQLite* for entities with composite keys with an autoincrementing component are also not supported, all other upserts are supported.
+As of version 1.0.2, single and bulk upserts are experimentally supported for all databases, except *SQL Server*. Upserts to *SQLite* for entities with composite keys with an autoincrementing component are also not supported, all other upserts are supported.
 
 ## Configuration
 
